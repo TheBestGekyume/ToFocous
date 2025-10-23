@@ -1,5 +1,6 @@
 import "./App.css";
 import { Statistics } from "./components/Statistics";
+import { Tasks } from "./components/Tasks";
 
 function App() {
     return (
@@ -11,6 +12,8 @@ function App() {
                 To<span className="text-purple-600">Focous</span>
             </h1>
             <Statistics />
+
+            <Tasks/>
         </div>
     );
 }
