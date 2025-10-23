@@ -26,7 +26,7 @@ export const Statistics = () => {
             <div className="@container">
                 <div className="flex justify-center gap-5 p-5">
                     <Card title={"Total"} color={"zinc"} number={3} />
-                    <Card title={"Pendentes"} color={"orange"} number={3} />
+                    <Card title={"Pendentes"} color={"amber"} number={3} />
                     <Card title={"Concluídas"} color={"green"} number={3} />
                 </div>
             </div>
