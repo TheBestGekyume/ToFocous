@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+body {
+    min-height: 100vh;
+    max-height: 100%;
+    background-color: #666;
+    color: #fff;
+}
