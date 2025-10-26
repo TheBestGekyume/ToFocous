@@ -24,7 +24,7 @@ export const Filter = ({ tasks, setTasks }: FilterProps) => {
                 <button
                     onClick={() => {
                         const filtered = tasks.filter(
-                            (t) => t.status !== "concluded"
+                            (task) => task.status !== "concluded"
                         );
                         setTasks(filtered);
                     }}

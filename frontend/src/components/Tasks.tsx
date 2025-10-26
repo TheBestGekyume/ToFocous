@@ -9,11 +9,12 @@ export const Tasks = () => {
         const stored = localStorage.getItem("tasks");
         if (!stored) return [];
         try {
-            return JSON.parse(stored).map((t: TTask) => ({
-                ...t,
-                date: new Date(t.date),
+            return JSON.parse(stored).map((task: TTask) => ({
+                ...task,
+                date: new Date(task.date),
             }));
         } catch {
+            console.error("Não foi possível recuperar as tarefas do armazenamento local!")
             return [];
         }
     });
@@ -28,14 +29,20 @@ export const Tasks = () => {
                 className="flex flex-col mx-auto w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl
         border border-zinc-700 rounded-xl p-5 gap-8"
             >
-                <Form setTasks={setTasks} />
+                <Form setTasks={setTasks} isCreating={true} />
+
+                <hr className="text-zinc-700" />
 
                 <Filter tasks={tasks} setTasks={setTasks} />
 
                 <div className="flex flex-col gap-3">
                     {tasks.length > 0 ? (
-                        tasks.map((task, index) => (
-                            <Task key={index} task={task} />
+                        tasks.map((task) => (
+                            <Task
+                                key={task.id}
+                                task={task}
+                                setTasks={setTasks}
+                            />
                         ))
                     ) : (
                         <p className="text-zinc-500 text-center italic">
