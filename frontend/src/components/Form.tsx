@@ -14,7 +14,7 @@ export const Form = ({
     taskToEdit,
     onClose,
 }: FormProps) => {
-    const { formData, handleChange, handleSubmit } = useTaskForm({
+    const { formData, handleChange, handleSubmit, handleDelete } = useTaskForm({
         initialTask: taskToEdit,
         isCreating,
         setTasks,
@@ -112,6 +112,16 @@ export const Form = ({
             >
                 {isCreating ? "+ Adicionar" : "Salvar alterações"}
             </button>
+
+            {!isCreating && (
+                <button
+                    type="button"
+                    onClick={handleDelete}
+                    className="px-4 py-2 h-[40px] rounded-md duration-150 text-white font-semibold bg-red-600 hover:bg-red-700"
+                >
+                    Deletar
+                </button>
+            )}
         </form>
     );
 };

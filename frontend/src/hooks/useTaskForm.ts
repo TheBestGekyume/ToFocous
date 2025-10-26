@@ -39,5 +39,14 @@ export const useTaskForm = ({ initialTask, isCreating, setTasks, onClose }: UseT
     }
   };
 
-  return { formData, handleChange, handleSubmit, setFormData };
+  const handleDelete = () => {
+    const confirmDeletion = confirm("Deseja excluir a tarefa?");
+    if (confirmDeletion) {
+      if (!initialTask) return;
+      setTasks(prev => prev.filter(t => t.id !== initialTask.id));
+      onClose?.();
+    }
+  };
+
+  return { formData, handleChange, handleSubmit, handleDelete, setFormData };
 };
