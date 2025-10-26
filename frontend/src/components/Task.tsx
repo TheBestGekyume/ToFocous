@@ -87,12 +87,28 @@ export const Task = ({ task, setTasks }: TaskProps) => {
             >
                 <div>
                     <div className="flex gap-3 items-center">
-                        <h3 className="font-semibold text-white">{title}</h3>
+                        <h3
+                            className={`font-semibold text-white ${
+                                status === "concluded"
+                                    ? "line-through text-zinc-400"
+                                    : ""
+                            }`}
+                        >
+                            {title}
+                        </h3>
+
+                    {status !== "concluded" && (
+
                         <p className="text-sm text-zinc-400 bg-zinc-950 px-2 rounded-sm">
                             {new Date(date).toLocaleDateString("pt-BR")}
                         </p>
+                    )}
                     </div>
-                    <p className={`text-xs mt-1 ${timeColor}`}>{timeMessage}</p>
+                    {status !== "concluded" && (
+                        <p className={`text-xs mt-1 ${timeColor}`}>
+                            {timeMessage}
+                        </p>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-5">

@@ -85,6 +85,7 @@ export const Form = ({
                     placeholder="Adicionar nova tarefa..."
                     value={formData.title}
                     onChange={handleChange}
+                    required
                 />
             </fieldset>
 
@@ -101,6 +102,7 @@ export const Form = ({
                     name="priority"
                     value={formData.priority}
                     onChange={handleChange}
+                    required
                 >
                     <option value="low">Baixa</option>
                     <option value="medium">Média</option>
@@ -119,6 +121,7 @@ export const Form = ({
                     className="rounded-md bg-zinc-700 p-2 text-white h-[40px]"
                     value={new Date(formData.date).toISOString().split("T")[0]}
                     onChange={handleChange}
+                    required
                 />
             </fieldset>
 
@@ -136,6 +139,7 @@ export const Form = ({
                         className="rounded-md bg-zinc-700 p-2 text-white h-[40px]"
                         value={formData.status}
                         onChange={handleChange}
+                        required
                     >
                         <option value="not_started">Não iniciada</option>
                         <option value="in_progress">Em andamento</option>
