@@ -11,9 +11,9 @@ const TasksContext = createContext<TasksContextType | undefined>(undefined);
 export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   const [tasks, setTasks] = useState<TTask[]>(() => {
     try {
-      const saved = localStorage.getItem("tasks");
-      if (!saved) return [];
-      return JSON.parse(saved).map((task: TTask) => ({
+      const storagedTasks = localStorage.getItem("tasks");
+      if (!storagedTasks) return [];
+      return JSON.parse(storagedTasks).map((task: TTask) => ({
         ...task,
         date: new Date(task.date),
       }));
