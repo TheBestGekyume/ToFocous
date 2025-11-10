@@ -27,7 +27,6 @@ export const Task = ({ task, setTasks }: TaskProps) => {
           rounded-lg bg-zinc-800 hover:bg-zinc-900 duration-150`}
             >
                 <div>
-                    {/* Título e data */}
                     <div className="flex gap-4 lg:gap-4 flex-col lg:flex-row items-baseline">
                         <h3
                             className={`font-semibold text-white lg:max-w-8/10 ${
@@ -36,7 +35,9 @@ export const Task = ({ task, setTasks }: TaskProps) => {
                                     : ""
                             }`}
                         >
-                            {title}
+                            {title.length > 55
+                                ? `${title.substring(0, 55)}...`
+                                : title}
                         </h3>
 
                         {status !== "concluded" && (
