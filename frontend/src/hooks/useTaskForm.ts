@@ -10,14 +10,16 @@ type UseTaskFormProps = {
 
 export const useTaskForm = ({ initialTask, isCreating, setTasks, onClose }: UseTaskFormProps) => {
   const [formData, setFormData] = useState<TTask>(
-    initialTask || { id: "", title: "", date: new Date(), priority: "low", status: "not_started" }
+    initialTask || { id: "", title: "", date: new Date(), priority: "low", status: "not_started", description: "" }
   );
 
   useEffect(() => {
     if (!isCreating && initialTask) setFormData(initialTask);
   }, [isCreating, initialTask]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -30,7 +32,7 @@ export const useTaskForm = ({ initialTask, isCreating, setTasks, onClose }: UseT
 
     if (isCreating) {
       setTasks(prev => [{ ...formData, id: crypto.randomUUID() }, ...prev]);
-      setFormData({ id: "", title: "", date: new Date(), priority: "low", status: "not_started" });
+      setFormData({ id: "", title: "", date: new Date(), priority: "low", status: "not_started", description: "" });
     } else {
       setTasks(prev =>
         prev.map(t => (t.id === initialTask?.id ? { ...formData, id: t.id } : t))
