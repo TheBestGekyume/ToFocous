@@ -74,7 +74,7 @@ export const Form = ({
                     id="date"
                     name="date"
                     type="date"
-                    value={new Date(formData.date).toISOString().split("T")[0]}
+                    value={formData.date.toISOString().split("T")[0]}
                     onChange={handleChange}
                     className="rounded-md bg-zinc-700 p-2 text-white h-[40px]"
                     required
