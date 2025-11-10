@@ -30,7 +30,7 @@ export const Task = ({ task, setTasks }: TaskProps) => {
                     {/* Título e data */}
                     <div className="flex gap-4 lg:gap-4 flex-col lg:flex-row items-baseline">
                         <h3
-                            className={`font-semibold text-white lg:max-w-7/10 ${
+                            className={`font-semibold text-white lg:max-w-8/10 ${
                                 status === "concluded"
                                     ? "line-through text-zinc-400"
                                     : ""
