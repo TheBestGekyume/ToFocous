@@ -136,7 +136,7 @@ export const Form = ({
             <button
                 type="submit"
                 className={`px-6 py-2 h-[40px] rounded-md duration-150 text-white font-semibold 
-          bg-green-700 hover:bg-green-800  ${isCreating ? "mx-auto" : ""}
+          bg-green-700 hover:bg-green-800 cursor-pointer ${isCreating ? "mx-auto" : ""}
         }`}
             >
                 {isCreating ? "+ Adicionar" : "Salvar alterações"}
@@ -146,7 +146,7 @@ export const Form = ({
                 <button
                     type="button"
                     onClick={handleDelete}
-                    className="px-6 py-2 h-[40px] rounded-md duration-150 text-white font-semibold bg-red-600 hover:bg-red-700"
+                    className="px-6 py-2 h-[40px] rounded-md duration-150 text-white font-semibold bg-red-600 hover:bg-red-700 cursor-pointer"
                 >
                     Deletar
                 </button>
