@@ -1,9 +1,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { TTask } from "../types/TTask";
 
+type SortType = "date" | "priority" | "status" | "";
+
 type TasksContextType = {
   tasks: TTask[];
   setTasks: React.Dispatch<React.SetStateAction<TTask[]>>;
+  sortTasks: (type: SortType, isAscending?: boolean) => void;
+  resetSort: () => void;
+  sortConfig: { type: SortType; isAscending: boolean };
 };
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
@@ -23,12 +28,77 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     }
   });
 
+  const [originalTasks, setOriginalTasks] = useState<TTask[] | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ type: SortType; isAscending: boolean }>({
+    type: "",
+    isAscending: true,
+  });
+
+  const priorityOrder: Record<"high" | "medium" | "low", number> = {
+    high: 1,
+    medium: 2,
+    low: 3,
+  };
+
+  const statusOrder: Record<"not_started" | "in_progress" | "concluded", number> = {
+    not_started: 1,
+    in_progress: 2,
+    concluded: 3,
+  };
+
+  const sortTasks = (type: SortType, isAscending = true) => {
+    if (!type) return;
+
+    if (!originalTasks) setOriginalTasks(tasks);
+
+    const sorted = [...tasks].sort((a, b) => {
+      switch (type) {
+        case "date":
+          return isAscending
+            ? new Date(a.date).getTime() - new Date(b.date).getTime()
+            : new Date(b.date).getTime() - new Date(a.date).getTime();
+
+        case "priority":
+          return isAscending
+            ? priorityOrder[a.priority] - priorityOrder[b.priority]
+            : priorityOrder[b.priority] - priorityOrder[a.priority];
+
+        case "status":
+          return isAscending
+            ? statusOrder[a.status] - statusOrder[b.status]
+            : statusOrder[b.status] - statusOrder[a.status];
+
+        default:
+          return 0;
+      }
+    });
+
+    setTasks(sorted);
+    setSortConfig({ type, isAscending });
+  };
+
+  const resetSort = () => {
+    if (originalTasks) {
+      setTasks(originalTasks);
+      setOriginalTasks(null);
+    }
+    setSortConfig({ type: "", isAscending: true });
+  };
+
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
   return (
-    <TasksContext.Provider value={{ tasks, setTasks }}>
+    <TasksContext.Provider
+      value={{
+        tasks,
+        setTasks,
+        sortTasks,
+        resetSort,
+        sortConfig,
+      }}
+    >
       {children}
     </TasksContext.Provider>
   );
