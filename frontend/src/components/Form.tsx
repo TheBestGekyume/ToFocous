@@ -24,7 +24,9 @@ export const Form = ({
     return (
         <form
             onSubmit={handleSubmit}
-            className="flex flex-wrap items-end gap-4 justify-start md:justify-between"
+            className={`flex flex-wrap ${
+                isCreating ? "items-start" : "items-end"
+            } gap-4 justify-start md:justify-between`}
         >
             <fieldset className="flex flex-col flex-1 min-w-[250px]">
                 <label
@@ -40,12 +42,17 @@ export const Form = ({
                     placeholder="Adicionar nova tarefa..."
                     value={formData.title}
                     onChange={handleChange}
+                    autoComplete="off"
                     className="rounded-md bg-zinc-700 p-2 text-white h-[40px]"
                     required
                 />
             </fieldset>
 
-            <fieldset className="flex flex-col w-[140px]">
+            <fieldset
+                className={`flex flex-col ${
+                    isCreating ? "" : ""
+                } min-w-[160px]`}
+            >
                 <label
                     htmlFor="priority"
                     className="font-semibold mb-1 text-white"
@@ -66,7 +73,11 @@ export const Form = ({
                 </select>
             </fieldset>
 
-            <fieldset className="flex flex-col w-[160px]">
+            <fieldset
+                className={`flex flex-col ${
+                    isCreating ? "" : ""
+                } min-w-[160px]`}
+            >
                 <label htmlFor="date" className="font-semibold mb-1 text-white">
                     Data de conclusão
                 </label>
@@ -82,7 +93,7 @@ export const Form = ({
             </fieldset>
 
             {!isCreating && (
-                <fieldset className="flex flex-col w-[160px]">
+                <fieldset className="flex flex-col flex-1 min-w-[160px]">
                     <label
                         htmlFor="status"
                         className="font-semibold mb-1 text-white"
@@ -104,10 +115,28 @@ export const Form = ({
                 </fieldset>
             )}
 
+            <fieldset className="flex flex-col basis-full min-w-[160px]">
+                <label
+                    htmlFor="description"
+                    className="font-semibold mb-1 text-white"
+                >
+                    Descrição
+                </label>
+                <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Detalhes sobre a tarefa..."
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={1}
+                    className="rounded-md bg-zinc-700 p-2 text-white min-h-[60px]"
+                />
+            </fieldset>
+
             <button
                 type="submit"
-                className={`px-4 py-2 h-[40px] rounded-md duration-150 text-white font-semibold 
-          bg-green-700 hover:bg-green-800
+                className={`px-6 py-2 h-[40px] rounded-md duration-150 text-white font-semibold 
+          bg-green-700 hover:bg-green-800  ${isCreating ? "mx-auto" : ""}
         }`}
             >
                 {isCreating ? "+ Adicionar" : "Salvar alterações"}
@@ -117,7 +146,7 @@ export const Form = ({
                 <button
                     type="button"
                     onClick={handleDelete}
-                    className="px-4 py-2 h-[40px] rounded-md duration-150 text-white font-semibold bg-red-600 hover:bg-red-700"
+                    className="px-6 py-2 h-[40px] rounded-md duration-150 text-white font-semibold bg-red-600 hover:bg-red-700"
                 >
                     Deletar
                 </button>

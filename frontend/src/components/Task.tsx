@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Modal } from "./Modal";
 import { Form } from "./Form";
 import type { TTask } from "../types/TTask";
-import { Pencil } from "lucide-react";
 import { priorityMap, statusMap, getTimeMessage } from "../utils/taskUtils";
 
 type TaskProps = {
@@ -16,27 +15,26 @@ export const Task = ({ task, setTasks }: TaskProps) => {
 
     const currentPriority = priorityMap[priority];
     const currentStatus = statusMap[status];
-    const { msg: timeMessage, color: timeColor } = getTimeMessage(
-        new Date(date)
-    );
+    const { msg: timeMessage, color: timeColor } = getTimeMessage(new Date(date));
 
     return (
         <>
             <div
+                onClick={() => setIsModalOpen(true)}
                 className={`flex justify-between items-center p-3 border-2 ${currentPriority.border}
-          rounded-lg bg-zinc-800 hover:bg-zinc-900 duration-150`}
+                    rounded-lg bg-zinc-800 hover:bg-zinc-900 duration-150 cursor-pointer`}
             >
                 <div>
-                    <div className="flex gap-4 lg:gap-4 flex-col lg:flex-row items-baseline">
+                    <div className="flex gap-4 flex-col lg:flex-row items-baseline">
                         <h3
-                            className={`font-semibold text-white lg:max-w-8/10 ${
+                            className={`font-semibold text-white ${
                                 status === "concluded"
                                     ? "line-through text-zinc-400"
                                     : ""
                             }`}
                         >
-                            {title.length > 55
-                                ? `${title.substring(0, 55)}...`
+                            {title.length > 60
+                                ? `${title.substring(0, 60)}...`
                                 : title}
                         </h3>
 
@@ -56,34 +54,22 @@ export const Task = ({ task, setTasks }: TaskProps) => {
                     )}
                 </div>
 
-                <div className="flex items-center gap-5">
-                    <div className="flex flex-col items-end justify-end text-sm">
-                        <span
-                            className={`font-semibold p-1 text-nowrap ${currentPriority.color}`}
-                        >
-                            Prioridade: {currentPriority.label}
-                        </span>
-                        <div
-                            className={`flex items-center gap-1 ${currentStatus.bg} rounded-sm p-1`}
-                        >
-                            {currentStatus.icon}
-                            <span
-                                className={`text-nowrap ${currentStatus.color}`}
-                            >
-                                {currentStatus.label}
-                            </span>
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="p-1 rounded-full cursor-pointer
-              bg-yellow-500 hover:bg-yellow-300
-              border-2 border-transparent hover:border-white
-              duration-300"
+                <div className="flex flex-col items-end justify-end text-sm">
+                    <span
+                        className={`font-semibold p-1 text-nowrap ${currentPriority.color}`}
                     >
-                        <Pencil className="size-4" />
-                    </button>
+                        Prioridade: {currentPriority.label}
+                    </span>
+                    <div
+                        className={`flex items-center gap-1 ${currentStatus.bg} rounded-sm p-1`}
+                    >
+                        {currentStatus.icon}
+                        <span
+                            className={`text-nowrap ${currentStatus.color}`}
+                        >
+                            {currentStatus.label}
+                        </span>
+                    </div>
                 </div>
             </div>
 
