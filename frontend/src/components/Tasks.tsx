@@ -1,6 +1,6 @@
 import { Form } from "./Form";
 import { Task } from "./Task";
-import { Filter } from "./Filter";
+import { SortTasks } from "./SortTasks";
 import { useTasks } from "../contexts/TasksContext";
 
 export const Tasks = () => {
@@ -13,7 +13,7 @@ export const Tasks = () => {
 
                 <hr className="text-zinc-700" />
 
-                <Filter tasks={tasks} setTasks={setTasks} />
+                <SortTasks />
 
                 <div className="flex flex-col gap-3">
                     {tasks.length > 0 ? (
