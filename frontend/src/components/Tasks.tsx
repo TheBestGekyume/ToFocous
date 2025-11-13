@@ -12,7 +12,7 @@ export const Tasks = () => {
 
     return (
         <section id="tasks" className="p-5 sm:p-8 md:p-10 md:pt-0">
-            <div className="flex flex-col mx-auto w-full max-w-4xl border border-zinc-700 rounded-xl p-5 gap-8">
+            <div className="flex flex-col bg-background-header/40 mx-auto w-full max-w-4xl border border-zinc-500 rounded-xl p-5 gap-8">
                 <Form setTasks={setTasks} isCreating={true} />
 
                 <hr className="text-zinc-700" />

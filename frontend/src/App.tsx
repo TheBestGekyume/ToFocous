@@ -6,7 +6,7 @@ import { TasksProvider } from "./contexts/TasksContext";
 
 function App() {
     return (
-        <div id="app" className="d-flex bg-slate-900 min-h-full">
+        <div id="app" className="d-flex bg-background-task-section min-h-full">
             <TasksProvider>
                 <Header />
                 <Statistics />
