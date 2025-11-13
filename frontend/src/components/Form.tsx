@@ -31,7 +31,7 @@ export const Form = ({
             <fieldset className="flex flex-col flex-1 min-w-[250px]">
                 <label
                     htmlFor="title"
-                    className="font-semibold mb-1 text-white"
+                    className="font-semibold mb-1"
                 >
                     Título
                 </label>
@@ -43,7 +43,7 @@ export const Form = ({
                     value={formData.title}
                     onChange={handleChange}
                     autoComplete="off"
-                    className="rounded-md bg-zinc-700 p-2 text-white h-[40px]"
+                    className="rounded-md bg-zinc-700 p-2 h-10"
                     required
                 />
             </fieldset>
@@ -51,11 +51,11 @@ export const Form = ({
             <fieldset
                 className={`flex flex-col ${
                     isCreating ? "" : ""
-                } min-w-[160px]`}
+                } min-w-40`}
             >
                 <label
                     htmlFor="priority"
-                    className="font-semibold mb-1 text-white"
+                    className="font-semibold mb-1"
                 >
                     Prioridade
                 </label>
@@ -64,7 +64,7 @@ export const Form = ({
                     name="priority"
                     value={formData.priority}
                     onChange={handleChange}
-                    className="rounded-md bg-zinc-700 p-2 text-white h-[40px]"
+                    className="rounded-md bg-zinc-700 p-2 h-10"
                     required
                 >
                     <option value="low">Baixa</option>
@@ -76,9 +76,9 @@ export const Form = ({
             <fieldset
                 className={`flex flex-col ${
                     isCreating ? "" : ""
-                } min-w-[160px]`}
+                } min-w-40`}
             >
-                <label htmlFor="date" className="font-semibold mb-1 text-white">
+                <label htmlFor="date" className="font-semibold mb-1">
                     Data de conclusão
                 </label>
                 <input
@@ -87,16 +87,16 @@ export const Form = ({
                     type="date"
                     value={formData.date.toISOString().split("T")[0]}
                     onChange={handleChange}
-                    className="rounded-md bg-zinc-700 p-2 text-white h-[40px]"
+                    className="rounded-md bg-zinc-700 p-2 h-10"
                     required
                 />
             </fieldset>
 
             {!isCreating && (
-                <fieldset className="flex flex-col flex-1 min-w-[160px]">
+                <fieldset className="flex flex-col flex-1 min-w-40">
                     <label
                         htmlFor="status"
-                        className="font-semibold mb-1 text-white"
+                        className="font-semibold mb-1"
                     >
                         Status
                     </label>
@@ -105,7 +105,7 @@ export const Form = ({
                         name="status"
                         value={formData.status}
                         onChange={handleChange}
-                        className="rounded-md bg-zinc-700 p-2 text-white h-[40px]"
+                        className="rounded-md bg-zinc-700 p-2 h-10"
                         required
                     >
                         <option value="not_started">Não iniciada</option>
@@ -115,10 +115,10 @@ export const Form = ({
                 </fieldset>
             )}
 
-            <fieldset className="flex flex-col basis-full min-w-[160px]">
+            <fieldset className="flex flex-col basis-full min-w-40">
                 <label
                     htmlFor="description"
-                    className="font-semibold mb-1 text-white"
+                    className="font-semibold mb-1"
                 >
                     Descrição
                 </label>
@@ -129,13 +129,13 @@ export const Form = ({
                     value={formData.description}
                     onChange={handleChange}
                     rows={1}
-                    className="rounded-md bg-zinc-700 p-2 text-white min-h-[60px]"
+                    className="rounded-md bg-zinc-700 p-2 min-h-[60px]"
                 />
             </fieldset>
 
             <button
                 type="submit"
-                className={`px-6 py-2 h-[40px] rounded-md duration-150 text-white font-semibold 
+                className={`px-6 py-2 h-10 rounded-md duration-150 font-semibold 
           bg-green-700 hover:bg-green-800 cursor-pointer ${isCreating ? "mx-auto" : ""}
         }`}
             >
@@ -146,7 +146,7 @@ export const Form = ({
                 <button
                     type="button"
                     onClick={handleDelete}
-                    className="px-6 py-2 h-[40px] rounded-md duration-150 text-white font-semibold bg-red-600 hover:bg-red-700 cursor-pointer"
+                    className="px-6 py-2 h-10 rounded-md duration-150 font-semibold bg-red-600 hover:bg-red-700 cursor-pointer"
                 >
                     Deletar
                 </button>
