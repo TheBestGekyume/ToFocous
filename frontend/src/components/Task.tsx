@@ -28,14 +28,10 @@ export const Task = ({ task, setTasks }: TaskProps) => {
                     <div className="flex gap-4 flex-col lg:flex-row items-baseline">
                         <h3
                             className={`font-semibold ${
-                                status === "concluded"
-                                    ? "line-through text-zinc-400"
-                                    : ""
+                                status === "concluded" ? "line-through text-zinc-400" : ""
                             }`}
                         >
-                            {title.length > 60
-                                ? `${title.substring(0, 60)}...`
-                                : title}
+                            {title.length > 60 ? `${title.substring(0, 60)}...` : title}
                         </h3>
 
                         {status !== "concluded" && (
@@ -48,25 +44,17 @@ export const Task = ({ task, setTasks }: TaskProps) => {
                     </div>
 
                     {status !== "concluded" && (
-                        <p className={`text-xs mt-4 ${timeColor}`}>
-                            {timeMessage}
-                        </p>
+                        <p className={`text-xs mt-4 ${timeColor}`}>{timeMessage}</p>
                     )}
                 </div>
 
                 <div className="flex flex-col items-end justify-end text-sm">
-                    <span
-                        className={`font-semibold p-1 text-nowrap ${currentPriority.color}`}
-                    >
+                    <span className={`font-semibold p-1 text-nowrap ${currentPriority.color}`}>
                         Prioridade: {currentPriority.label}
                     </span>
-                    <div
-                        className={`flex items-center gap-1 ${currentStatus.bg} rounded-sm p-1`}
-                    >
+                    <div className={`flex items-center gap-1 ${currentStatus.bg} rounded-sm p-1`}>
                         {currentStatus.icon}
-                        <span
-                            className={`text-nowrap ${currentStatus.color}`}
-                        >
+                        <span className={`text-nowrap ${currentStatus.color}`}>
                             {currentStatus.label}
                         </span>
                     </div>

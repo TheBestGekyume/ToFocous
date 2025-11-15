@@ -4,8 +4,6 @@ import type { JSX } from "react";
 
 export const Statistics = () => {
     const { tasks } = useTasks();
-    console.log("Statistics renderizou", tasks.length);
-
     const total = tasks.length;
     const concluded = tasks.filter((t) => t.status === "concluded").length;
     const pending = tasks.filter((t) => t.status !== "concluded").length;
