@@ -18,7 +18,6 @@
     --color-accent: #a020f0;
 }
 
-
 @theme {
     --color-text: var(--color-text);
     --color-background-header: var(--color-background-header);
@@ -26,7 +25,6 @@
     --color-primary: var(--color-primary);
     --color-secondary: var(--color-secondary);
     --color-accent: var(--color-accent);
-
 }
 
 body {

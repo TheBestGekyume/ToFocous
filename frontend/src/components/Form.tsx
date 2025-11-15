@@ -8,12 +8,7 @@ type FormProps = {
     onClose?: () => void;
 };
 
-export const Form = ({
-    setTasks,
-    isCreating,
-    taskToEdit,
-    onClose,
-}: FormProps) => {
+export const Form = ({ setTasks, isCreating, taskToEdit, onClose }: FormProps) => {
     const { formData, handleChange, handleSubmit, handleDelete } = useTaskForm({
         initialTask: taskToEdit,
         isCreating,
@@ -29,10 +24,7 @@ export const Form = ({
             } gap-4 justify-start md:justify-between`}
         >
             <fieldset className="flex flex-col flex-1 min-w-[250px]">
-                <label
-                    htmlFor="title"
-                    className="font-semibold mb-1"
-                >
+                <label htmlFor="title" className="font-semibold mb-1">
                     Título
                 </label>
                 <input
@@ -48,15 +40,8 @@ export const Form = ({
                 />
             </fieldset>
 
-            <fieldset
-                className={`flex flex-col ${
-                    isCreating ? "" : ""
-                } min-w-40`}
-            >
-                <label
-                    htmlFor="priority"
-                    className="font-semibold mb-1"
-                >
+            <fieldset className={`flex flex-col ${isCreating ? "" : ""} min-w-40`}>
+                <label htmlFor="priority" className="font-semibold mb-1">
                     Prioridade
                 </label>
                 <select
@@ -73,11 +58,7 @@ export const Form = ({
                 </select>
             </fieldset>
 
-            <fieldset
-                className={`flex flex-col ${
-                    isCreating ? "" : ""
-                } min-w-40`}
-            >
+            <fieldset className={`flex flex-col ${isCreating ? "" : ""} min-w-40`}>
                 <label htmlFor="date" className="font-semibold mb-1">
                     Data de conclusão
                 </label>
@@ -94,10 +75,7 @@ export const Form = ({
 
             {!isCreating && (
                 <fieldset className="flex flex-col flex-1 min-w-40">
-                    <label
-                        htmlFor="status"
-                        className="font-semibold mb-1"
-                    >
+                    <label htmlFor="status" className="font-semibold mb-1">
                         Status
                     </label>
                     <select
@@ -116,10 +94,7 @@ export const Form = ({
             )}
 
             <fieldset className="flex flex-col basis-full min-w-40">
-                <label
-                    htmlFor="description"
-                    className="font-semibold mb-1"
-                >
+                <label htmlFor="description" className="font-semibold mb-1">
                     Descrição
                 </label>
                 <textarea

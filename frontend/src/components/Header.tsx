@@ -25,9 +25,7 @@ export const Header = () => {
             id="header"
             className="bg-background-header text-text py-5 px-8 relative flex flex-col items-center"
         >
-            <div className="absolute top-5 right-8">
-                {/* <ThemeToggle /> */}
-            </div>
+            <div className="absolute top-5 right-8">{/* <ThemeToggle /> */}</div>
 
             <h1
                 className="w-fit text-4xl p-3 mb-3 bg-secondary rounded-xl
@@ -36,9 +34,7 @@ export const Header = () => {
                 To<span className="text-accent">Focous</span>
             </h1>
 
-            <h2 className="text-center text-xl font-semibold">
-                {displayedDate}
-            </h2>
+            <h2 className="text-center text-xl font-semibold">{displayedDate}</h2>
         </header>
     );
 };
