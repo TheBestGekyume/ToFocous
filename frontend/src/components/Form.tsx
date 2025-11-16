@@ -111,7 +111,7 @@ export const Form = ({ setTasks, isCreating, taskToEdit, onClose }: FormProps) =
             <button
                 type="submit"
                 className={`px-6 py-2 h-10 rounded-md duration-150 font-semibold 
-          bg-green-700 hover:bg-green-800 cursor-pointer ${isCreating ? "mx-auto" : ""}
+          bg-green-700 hover:bg-green-800 ${isCreating ? "mx-auto" : ""}
         }`}
             >
                 {isCreating ? "+ Adicionar" : "Salvar alterações"}
@@ -121,7 +121,7 @@ export const Form = ({ setTasks, isCreating, taskToEdit, onClose }: FormProps) =
                 <button
                     type="button"
                     onClick={handleDelete}
-                    className="px-6 py-2 h-10 rounded-md duration-150 font-semibold bg-red-600 hover:bg-red-700 cursor-pointer"
+                    className="px-6 py-2 h-10 rounded-md duration-150 font-semibold bg-red-600 hover:bg-red-700"
                 >
                     Deletar
                 </button>

@@ -21,7 +21,7 @@ export const Tasks = () => {
                     <SortTasks />
                     <button
                         onClick={clearCompleted}
-                        className="p-2 cursor-pointer rounded-md text-red-200 bg-red-600  hover:bg-red-900 font-semibold transition-colors"
+                        className="p-2 rounded-md text-red-200 bg-red-600  hover:bg-red-900 font-semibold transition-colors"
                     >
                         Limpar Concluídas
                     </button>
