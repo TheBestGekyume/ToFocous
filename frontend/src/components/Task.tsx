@@ -3,6 +3,7 @@ import { Modal } from "./Modal";
 import { Form } from "./Form";
 import type { TTask } from "../types/TTask";
 import { priorityMap, statusMap, getTimeMessage } from "../utils/taskUtils";
+import { useTasks } from "../contexts/TasksContext";
 
 type TaskProps = {
     task: TTask;
@@ -10,9 +11,9 @@ type TaskProps = {
 };
 
 export const Task = ({ task, setTasks }: TaskProps) => {
+    const { setSelectedTask } = useTasks();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { title, date, priority, status } = task;
-
     const currentPriority = priorityMap[priority];
     const currentStatus = statusMap[status];
     const { msg: timeMessage, color: timeColor } = getTimeMessage(new Date(date));
@@ -20,7 +21,7 @@ export const Task = ({ task, setTasks }: TaskProps) => {
     return (
         <>
             <div
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => setSelectedTask(task)}
                 className={`flex justify-between items-center p-3 border-2 ${currentPriority.border}
                     rounded-lg bg-zinc-800 hover:bg-zinc-900 duration-150 cursor-pointer`}
             >
@@ -49,10 +50,14 @@ export const Task = ({ task, setTasks }: TaskProps) => {
                 </div>
 
                 <div className="flex flex-col items-end justify-end text-sm">
-                    <span className={`font-semibold p-1 text-nowrap ${currentPriority.color}`}>
+                    <span
+                        className={`font-semibold p-1 text-nowrap ${currentPriority.color}`}
+                    >
                         Prioridade: {currentPriority.label}
                     </span>
-                    <div className={`flex items-center gap-1 ${currentStatus.bg} rounded-sm p-1`}>
+                    <div
+                        className={`flex items-center gap-1 ${currentStatus.bg} rounded-sm p-1`}
+                    >
                         {currentStatus.icon}
                         <span className={`text-nowrap ${currentStatus.color}`}>
                             {currentStatus.label}

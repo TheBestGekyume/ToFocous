@@ -4,29 +4,37 @@ import type { TTask } from "../types/TTask";
 type FormProps = {
     setTasks: React.Dispatch<React.SetStateAction<TTask[]>>;
     isCreating: boolean;
+    isCreatingSubtask?: boolean;
     taskToEdit?: TTask;
     onClose?: () => void;
+    setSelectedTask?: React.Dispatch<React.SetStateAction<TTask | null>>;
 };
 
-export const Form = ({ setTasks, isCreating, taskToEdit, onClose }: FormProps) => {
+export const Form = ({
+    setTasks,
+    isCreating,
+    isCreatingSubtask,
+    taskToEdit,
+    setSelectedTask,
+    onClose
+}: FormProps) => {
+
     const { formData, handleChange, handleSubmit, handleDelete } = useTaskForm({
         initialTask: taskToEdit,
         isCreating,
+        isCreatingSubtask,
         setTasks,
+        setSelectedTask,
         onClose,
     });
 
     return (
         <form
             onSubmit={handleSubmit}
-            className={`flex flex-wrap ${
-                isCreating ? "items-start" : "items-end"
-            } gap-4 justify-start md:justify-between`}
+            className={`flex flex-wrap ${isCreating ? "items-start" : "items-end"} gap-4`}
         >
             <fieldset className="flex flex-col flex-1 min-w-[250px]">
-                <label htmlFor="title" className="font-semibold mb-1">
-                    Título
-                </label>
+                <label htmlFor="title" className="font-semibold mb-1">Título</label>
                 <input
                     id="title"
                     name="title"
@@ -40,17 +48,13 @@ export const Form = ({ setTasks, isCreating, taskToEdit, onClose }: FormProps) =
                 />
             </fieldset>
 
-            <fieldset className={`flex flex-col ${isCreating ? "" : ""} min-w-40`}>
-                <label htmlFor="priority" className="font-semibold mb-1">
-                    Prioridade
-                </label>
+            <fieldset className="flex flex-col min-w-40">
+                <label className="font-semibold mb-1">Prioridade</label>
                 <select
-                    id="priority"
                     name="priority"
                     value={formData.priority}
                     onChange={handleChange}
                     className="rounded-md bg-zinc-700 p-2 h-10"
-                    required
                 >
                     <option value="low">Baixa</option>
                     <option value="medium">Média</option>
@@ -58,33 +62,25 @@ export const Form = ({ setTasks, isCreating, taskToEdit, onClose }: FormProps) =
                 </select>
             </fieldset>
 
-            <fieldset className={`flex flex-col ${isCreating ? "" : ""} min-w-40`}>
-                <label htmlFor="date" className="font-semibold mb-1">
-                    Data de conclusão
-                </label>
+            <fieldset className="flex flex-col min-w-40">
+                <label className="font-semibold mb-1">Data</label>
                 <input
-                    id="date"
                     name="date"
                     type="date"
-                    value={formData.date.toISOString().split("T")[0]}
+                    value={new Date(formData.date).toISOString().split("T")[0]}
                     onChange={handleChange}
                     className="rounded-md bg-zinc-700 p-2 h-10"
-                    required
                 />
             </fieldset>
 
             {!isCreating && (
                 <fieldset className="flex flex-col flex-1 min-w-40">
-                    <label htmlFor="status" className="font-semibold mb-1">
-                        Status
-                    </label>
+                    <label className="font-semibold mb-1">Status</label>
                     <select
-                        id="status"
                         name="status"
                         value={formData.status}
                         onChange={handleChange}
                         className="rounded-md bg-zinc-700 p-2 h-10"
-                        required
                     >
                         <option value="not_started">Não iniciada</option>
                         <option value="in_progress">Em andamento</option>
@@ -94,34 +90,29 @@ export const Form = ({ setTasks, isCreating, taskToEdit, onClose }: FormProps) =
             )}
 
             <fieldset className="flex flex-col basis-full min-w-40">
-                <label htmlFor="description" className="font-semibold mb-1">
-                    Descrição
-                </label>
+                <label className="font-semibold mb-1">Descrição</label>
                 <textarea
-                    id="description"
                     name="description"
-                    placeholder="Detalhes sobre a tarefa..."
                     value={formData.description}
                     onChange={handleChange}
-                    rows={1}
                     className="rounded-md bg-zinc-700 p-2 min-h-[60px]"
                 />
             </fieldset>
 
             <button
                 type="submit"
-                className={`px-6 py-2 h-10 rounded-md duration-150 font-semibold 
-          bg-green-700 hover:bg-green-800 ${isCreating ? "mx-auto" : ""}
-        }`}
+                className={`px-6 py-2 h-10 rounded-md bg-green-700 hover:bg-green-800 font-semibold ${
+                    isCreating ? "mx-auto" : ""
+                }`}
             >
                 {isCreating ? "+ Adicionar" : "Salvar alterações"}
             </button>
 
-            {!isCreating && (
+            {!isCreating && !isCreatingSubtask && (
                 <button
                     type="button"
                     onClick={handleDelete}
-                    className="px-6 py-2 h-10 rounded-md duration-150 font-semibold bg-red-600 hover:bg-red-700"
+                    className="px-6 py-2 h-10 rounded-md bg-red-600 hover:bg-red-700 font-semibold"
                 >
                     Deletar
                 </button>
