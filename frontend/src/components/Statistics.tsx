@@ -80,7 +80,7 @@ export const Statistics = () => {
             <div className="flex justify-end mb-5 ">
                 <button
                     onClick={() => setView(view === "cards" ? "chart" : "cards")}
-                    className="px-4 py-2 bg-zinc-800 text-white rounded-md hover:bg-zinc-700 cursor-pointer"
+                    className="px-4 py-2 bg-zinc-800 text-white rounded-md hover:bg-zinc-700"
                 >
                     {view === "cards" ? <ChartPie /> : <LayoutGrid />}
                 </button>
