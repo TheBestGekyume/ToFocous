@@ -11,4 +11,4 @@ export type TTask = TTaskBase & {
     subtasks: TSubTask[];
 };
 
-export type TSubTask = Omit<TTaskBase, "subtasks">;
+export type TSubTask = Omit<TTaskBase, "subtasks" | "priority">;

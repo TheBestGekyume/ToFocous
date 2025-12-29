@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import type { TTask, TSubTask } from "../types/TTask";
 
 type UseTaskFormProps = {
-    initialTask?: TTask;
+    initialTask?: TTask | TSubTask;
+    parentTask?: TTask;
     isCreating: boolean;
     isCreatingSubtask?: boolean;
     setTasks: React.Dispatch<React.SetStateAction<TTask[]>>;
@@ -10,14 +11,17 @@ type UseTaskFormProps = {
     onClose?: () => void;
 };
 
+
 export const useTaskForm = ({
     initialTask,
+    parentTask,
     isCreating,
     isCreatingSubtask = false,
     setTasks,
     setSelectedTask,
     onClose,
 }: UseTaskFormProps) => {
+
 
     const [formData, setFormData] = useState<TTask | TSubTask>({
         id: "",
@@ -30,13 +34,14 @@ export const useTaskForm = ({
 
     // Preencher campos ao editar
     useEffect(() => {
-        if (!isCreating && initialTask && !isCreatingSubtask) {
+        if (!isCreating && initialTask) {
             setFormData({
                 ...initialTask,
-                date: new Date(initialTask.date) // garante Date
+                date: new Date(initialTask.date),
             });
         }
-    }, [isCreating, isCreatingSubtask, initialTask]);
+    }, [isCreating, initialTask]);
+
 
     // Input genérico
     const handleChange = (
@@ -54,40 +59,81 @@ export const useTaskForm = ({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Criar Subtask
-        if (isCreatingSubtask && initialTask) {
+        const getSubtaskData = (): TSubTask => {
+            const data = formData as Omit<TTask, "priority">;
+
+            return {
+                ...data,
+                date: new Date(formData.date),
+            };
+        };
+
+
+
+        /* =========================
+         * EDITAR SUBTASK
+         * ========================= */
+        if (!isCreating && isCreatingSubtask && parentTask && initialTask) {
+            const updatedSubtask = {
+                ...getSubtaskData(),
+                id: initialTask.id,
+            };
+
             setTasks((prev) =>
                 prev.map((task) =>
-                    task.id === initialTask.id
+                    task.id === parentTask.id
                         ? {
-                              ...task,
-                              subtasks: [
-                                  ...(task.subtasks ?? []),
-                                  {
-                                      ...formData,
-                                      id: crypto.randomUUID(),
-                                      date: new Date(formData.date),
-                                  } as TSubTask,
-                              ],
-                          }
+                            ...task,
+                            subtasks: task.subtasks.map((st) =>
+                                st.id === initialTask.id ? updatedSubtask : st
+                            ),
+                        }
                         : task
                 )
             );
 
-            // Atualiza selectedTask no SingleView
+            setSelectedTask?.((prev) => {
+                if (!prev || prev.id !== parentTask.id) return prev;
+
+                return {
+                    ...prev,
+                    subtasks: prev.subtasks.map((st) =>
+                        st.id === initialTask.id ? updatedSubtask : st
+                    ),
+                };
+            });
+
+            onClose?.();
+            return;
+        }
+
+
+        /* =========================
+         * CRIAR SUBTASK
+         * ========================= */
+        if (isCreating && isCreatingSubtask && initialTask) {
+            const newSubtask: TSubTask = {
+                ...getSubtaskData(),
+                id: crypto.randomUUID(),
+            };
+
+            setTasks((prev) =>
+                prev.map((task) =>
+                    task.id === initialTask.id
+                        ? {
+                            ...task,
+                            subtasks: [...task.subtasks, newSubtask],
+                        }
+                        : task
+                )
+            );
+
             setSelectedTask?.((prev) =>
                 prev?.id === initialTask.id
                     ? {
-                          ...prev,
-                          subtasks: [
-                              ...(prev.subtasks ?? []),
-                              {
-                                  ...formData,
-                                  id: crypto.randomUUID(),
-                                  date: new Date(formData.date),
-                              } as TSubTask,
-                          ],
-                      }
+                        ...prev,
+                        subtasks: [...prev.subtasks, newSubtask],
+                    }
                     : prev
             );
 
@@ -95,31 +141,24 @@ export const useTaskForm = ({
             return;
         }
 
-        // Criar Task
-        if (isCreating) {
+
+        /*CRIAR TASK*/
+        if (isCreating && !isCreatingSubtask) {
             const newTask: TTask = {
                 ...(formData as TTask),
                 id: crypto.randomUUID(),
                 date: new Date(formData.date),
-                subtasks: []
+                subtasks: [],
             };
 
             setTasks((prev) => [newTask, ...prev]);
 
-            setFormData({
-                id: "",
-                title: "",
-                date: new Date(),
-                priority: "low",
-                status: "not_started",
-                description: "",
-            });
-
+            onClose?.();
             return;
         }
 
-        // Editar Task
-        if (!isCreating && initialTask) {
+        /*EDITAR TASK*/
+        if (!isCreating && initialTask && !isCreatingSubtask) {
             const updatedTask: TTask = {
                 ...(formData as TTask),
                 id: initialTask.id,
@@ -134,6 +173,7 @@ export const useTaskForm = ({
             onClose?.();
         }
     };
+
 
     const handleDelete = () => {
         if (!initialTask) return;
@@ -153,4 +193,3 @@ export const useTaskForm = ({
         setFormData
     };
 };
-    

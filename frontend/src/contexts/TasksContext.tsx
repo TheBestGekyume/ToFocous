@@ -5,94 +5,151 @@ import { sortTaskList } from "../utils/taskUtils";
 type SortType = "date" | "priority" | "status" | "";
 
 type TasksContextType = {
-    tasks: TTask[];
-    setTasks: React.Dispatch<React.SetStateAction<TTask[]>>;
-    selectedTask: TTask | null;
-    setSelectedTask: React.Dispatch<React.SetStateAction<TTask | null>>;
-    handleSortConfig: (type: SortType, isAscending?: boolean) => void;
-    resetSort: () => void;
-    sortConfig: {
-        type: SortType;
-        isAscending: boolean;
-    };
+  tasks: TTask[];
+  setTasks: React.Dispatch<React.SetStateAction<TTask[]>>;
+  selectedTask: TTask | null;
+  setSelectedTask: React.Dispatch<React.SetStateAction<TTask | null>>;
+  handleSortConfig: (type: SortType, isAscending?: boolean) => void;
+  resetSort: () => void;
+  sortConfig: {
+    type: SortType;
+    isAscending: boolean;
+  };
+  toggleSubtask: (taskId: string, subtaskId: string) => void;
+  deleteSubtask: (taskId: string, subtaskId: string) => void;
 };
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
 
 export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
-    const [tasks, setTasks] = useState<TTask[]>(() => {
-        try {
-            const storaged = localStorage.getItem("tasks");
-            if (!storaged) return [];
-            return JSON.parse(storaged).map((t: TTask) => ({
-                ...t,
-                date: new Date(t.date),
-                subtasks:
-                    t.subtasks?.map((st: TSubTask) => ({
-                        ...st,
-                        date: new Date(st.date),
-                    })) ?? [],
-            }));
-        } catch {
-            return [];
-        }
+  const [tasks, setTasks] = useState<TTask[]>(() => {
+    try {
+      const storaged = localStorage.getItem("tasks");
+      if (!storaged) return [];
+      return JSON.parse(storaged).map((t: TTask) => ({
+        ...t,
+        date: new Date(t.date),
+        subtasks:
+          t.subtasks?.map((st: TSubTask) => ({
+            ...st,
+            date: new Date(st.date),
+          })) ?? [],
+      }));
+    } catch {
+      return [];
+    }
+  });
+
+  const [selectedTask, setSelectedTask] = useState<TTask | null>(null);
+
+  const [sortConfig, setSortConfig] = useState<{
+    type: SortType;
+    isAscending: boolean;
+  }>({
+    type: "",
+    isAscending: true,
+  });
+
+  const sortedTasks = useMemo(
+    () => sortTaskList(tasks, sortConfig),
+    [tasks, sortConfig]
+  );
+
+  const handleSortConfig = (type: SortType, isAscending = true) => {
+    if (!type) return;
+    setSortConfig({
+      type,
+      isAscending,
+    });
+  };
+
+  const resetSort = () =>
+    setSortConfig({
+      type: "",
+      isAscending: true,
     });
 
-    const [selectedTask, setSelectedTask] = useState<TTask | null>(null);
+  useEffect(
+    () => localStorage.setItem("tasks", JSON.stringify(tasks)),
+    [tasks]
+  );
 
-    const [sortConfig, setSortConfig] = useState<{
-        type: SortType;
-        isAscending: boolean;
-    }>({
-        type: "",
-        isAscending: true,
+  // dentro do TasksContext
+
+  const toggleSubtask = (taskId: string, subtaskId: string) => {
+    setTasks((prev) => {
+      const newTasks = prev.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              subtasks: task.subtasks.map((st) =>
+                st.id === subtaskId
+                  ? {
+                      ...st,
+                      status:
+                        st.status === "concluded"
+                          ? ("not_started" as const)
+                          : ("concluded" as const),
+                    }
+                  : st
+              ),
+            }
+          : task
+      );
+
+      // atualiza o selectedTask também
+      if (selectedTask?.id === taskId) {
+        const updated = newTasks.find((t) => t.id === taskId);
+        setSelectedTask(updated || null);
+      }
+
+      return newTasks;
     });
+  };
 
-    const sortedTasks = useMemo(
-        () => sortTaskList(tasks, sortConfig),
-        [tasks, sortConfig]
-    );
+  const deleteSubtask = (taskId: string, subtaskId: string) => {
+    setTasks((prev) => {
+      const newTasks = prev.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              subtasks: task.subtasks.filter((st) => st.id !== subtaskId),
+            }
+          : task
+      );
 
-    const handleSortConfig = (type: SortType, isAscending = true) => {
-        if (!type) return;
-        setSortConfig({
-            type,
-            isAscending,
-        });
-    };
+      if (selectedTask?.id === taskId) {
+        const updated = newTasks.find((t) => t.id === taskId);
+        setSelectedTask(updated || null);
+      }
 
-    const resetSort = () =>
-        setSortConfig({
-            type: "",
-            isAscending: true,
-        });
+      return newTasks;
+    });
+  };
 
-    useEffect(
-        () => localStorage.setItem("tasks", JSON.stringify(tasks)),
-        [tasks]
-    );
-
-    return (
-        <TasksContext.Provider
-            value={{
-                tasks: sortedTasks,
-                setTasks,
-                selectedTask,
-                setSelectedTask,
-                handleSortConfig,
-                resetSort,
-                sortConfig,
-            }}
-        >
-            {children}
-        </TasksContext.Provider>
-    );
+  return (
+    <TasksContext.Provider
+      value={{
+        tasks: sortedTasks,
+        setTasks,
+        selectedTask,
+        setSelectedTask,
+        handleSortConfig,
+        resetSort,
+        sortConfig,
+        toggleSubtask,
+        deleteSubtask,
+      }}
+    >
+      {children}
+    </TasksContext.Provider>
+  );
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useTasks = () => {
-    const ctx = useContext(TasksContext);
-    if (!ctx)
-        throw new Error("useTasks deve ser usado dentro de um <TasksProvider>");
-    return ctx;
+  const ctx = useContext(TasksContext);
+  if (!ctx)
+    throw new Error("useTasks deve ser usado dentro de um <TasksProvider>");
+  return ctx;
 };
