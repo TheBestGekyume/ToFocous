@@ -15,7 +15,7 @@ type TasksContextType = {
     type: SortType;
     isAscending: boolean;
   };
-  toggleSubtask: (taskId: string, subtaskId: string) => void;
+  toggleSubtaskStatus: (taskId: string, subtaskId: string) => void;
   deleteSubtask: (taskId: string, subtaskId: string) => void;
 };
 
@@ -76,22 +76,22 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
 
   // dentro do TasksContext
 
-  const toggleSubtask = (taskId: string, subtaskId: string) => {
+  const toggleSubtaskStatus = (taskId: string, subtaskId: string) => {
     setTasks((prev) => {
       const newTasks = prev.map((task) =>
         task.id === taskId
           ? {
               ...task,
-              subtasks: task.subtasks.map((st) =>
-                st.id === subtaskId
+              subtasks: task.subtasks.map((subtask) =>
+                subtask.id === subtaskId
                   ? {
-                      ...st,
+                      ...subtask,
                       status:
-                        st.status === "concluded"
+                        subtask.status === "concluded"
                           ? ("not_started" as const)
                           : ("concluded" as const),
                     }
-                  : st
+                  : subtask
               ),
             }
           : task
@@ -137,7 +137,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
         handleSortConfig,
         resetSort,
         sortConfig,
-        toggleSubtask,
+        toggleSubtaskStatus,
         deleteSubtask,
       }}
     >

@@ -20,7 +20,7 @@ export const Form = ({
   setSelectedTask,
   onClose,
 }: FormProps) => {
-  const { formData, handleChange, handleSubmit, handleDelete } = useTaskForm({
+  const { formData, handleChange, handleSubmit, deleteTask } = useTaskForm({
     initialTask: taskToEdit,
     parentTask,
     isCreating,
@@ -119,7 +119,7 @@ export const Form = ({
         {!isCreating && !isCreatingSubtask && (
           <button
             type="button"
-            onClick={handleDelete}
+            onClick={deleteTask}
             className="px-6 py-2 h-10 rounded-md bg-red-600 hover:bg-red-700 font-semibold"
           >
             Deletar

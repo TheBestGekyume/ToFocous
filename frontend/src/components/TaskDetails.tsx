@@ -12,7 +12,7 @@ export const TaskDetails = () => {
   const [isCreatingSubtask, setIsCreatingSubtask] = useState(false);
   const [editingSubtask, setEditingSubtask] = useState<TSubTask | null>(null);
 
-  const { toggleSubtask, deleteSubtask } = useTasks();
+  const { toggleSubtaskStatus, deleteSubtask } = useTasks();
 
   if (!selectedTask) return null;
 
@@ -68,7 +68,9 @@ export const TaskDetails = () => {
                 className="flex items-center gap-5 p-2 bg-zinc-800 border border-zinc-600 rounded-md"
               >
                 <button
-                  onClick={() => toggleSubtask(selectedTask.id, subtask.id)}
+                  onClick={() =>
+                    toggleSubtaskStatus(selectedTask.id, subtask.id)
+                  }
                   className={`
     w-6 h-6 flex items-center justify-center rounded-md border
     transition-all duration-300 cursor-pointer
@@ -149,6 +151,8 @@ export const TaskDetails = () => {
           setEditingSubtask(null);
         }}
       >
+        <h4 className="font-bold mb-5 text-2xl text-center text-primary">Editar {editingSubtask? "Item": "Tarefa"}</h4>
+
         <Form
           isCreating={false}
           isCreatingSubtask={!!editingSubtask}
