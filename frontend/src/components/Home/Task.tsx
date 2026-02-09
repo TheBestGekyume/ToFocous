@@ -1,6 +1,6 @@
-import type { TTask } from "../types/TTask";
-import { priorityMap, statusMap, getTimeMessage } from "../utils/taskUtils";
-import { useTasks } from "../contexts/TasksContext";
+import type { TTask } from "../../types/TTask";
+import { priorityMap, statusMap, getTimeMessage } from "../../utils/taskUtils";
+import { useTasks } from "../../contexts/TasksContext";
 
 type TaskProps = {
     task: TTask;

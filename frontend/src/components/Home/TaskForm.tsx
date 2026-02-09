@@ -1,7 +1,7 @@
-import { useTaskForm } from "../hooks/useTaskForm";
-import type { TTask, TSubTask } from "../types/TTask";
+import { useTaskForm } from "../../hooks/useTaskForm";
+import type { TTask, TSubTask } from "../../types/TTask";
 
-type FormProps = {
+type TaskFormProps = {
   taskToEdit?: TTask | TSubTask;
   parentTask?: TTask;
   isCreating: boolean;
@@ -11,7 +11,7 @@ type FormProps = {
   onClose?: () => void;
 };
 
-export const Form = ({
+export const TaskForm = ({
   setTasks,
   isCreating,
   isCreatingSubtask,
@@ -19,7 +19,7 @@ export const Form = ({
   parentTask,
   setSelectedTask,
   onClose,
-}: FormProps) => {
+}: TaskFormProps) => {
   const { formData, handleChange, handleSubmit, deleteTask } = useTaskForm({
     initialTask: taskToEdit,
     parentTask,

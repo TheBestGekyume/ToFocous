@@ -1,4 +1,4 @@
-import type { ColorKey } from "../components/Card";
+import type { ColorKey } from "../components/Home/Card";
 
 export type TCard = {
     title: string;

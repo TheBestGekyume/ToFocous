@@ -1,4 +1,4 @@
-import type { TCard } from "../types/TCard";
+import type { TCard } from "../../types/TCard";
 
 const colorMap = {
     zinc: "bg-zinc-600 border-zinc-300",

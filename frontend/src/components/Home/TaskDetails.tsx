@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useTasks } from "../contexts/TasksContext";
-import { Form } from "./Form";
+import { useTasks } from "../../contexts/TasksContext";
+import { TaskForm } from "./TaskForm";
 import { Modal } from "./Modal";
-import { priorityMap, statusMap } from "../utils/taskUtils";
+import { priorityMap, statusMap } from "../../utils/taskUtils";
 import { ArrowLeft, Check, Pencil, Trash2 } from "lucide-react";
-import type { TSubTask } from "../types/TTask";
+import type { TSubTask } from "../../types/TTask";
 
 export const TaskDetails = () => {
   const { selectedTask, setSelectedTask, setTasks } = useTasks();
@@ -151,9 +151,11 @@ export const TaskDetails = () => {
           setEditingSubtask(null);
         }}
       >
-        <h4 className="font-bold mb-5 text-2xl text-center text-primary">Editar {editingSubtask? "Item": "Tarefa"}</h4>
+        <h4 className="font-bold mb-5 text-2xl text-center text-primary">
+          Editar {editingSubtask ? "Item" : "Tarefa"}
+        </h4>
 
-        <Form
+        <TaskForm
           isCreating={false}
           isCreatingSubtask={!!editingSubtask}
           taskToEdit={editingSubtask ?? selectedTask}
@@ -167,12 +169,16 @@ export const TaskDetails = () => {
         />
       </Modal>
 
-      {/* Modal de subtask */}
+      {/* Modal de criar subtask */}
       <Modal
         isOpen={isCreatingSubtask}
         onClose={() => setIsCreatingSubtask(false)}
       >
-        <Form
+        <h4 className="font-bold mb-5 text-2xl text-center text-primary">
+          Criar Item
+        </h4>
+
+        <TaskForm
           isCreating={true}
           isCreatingSubtask
           taskToEdit={selectedTask}

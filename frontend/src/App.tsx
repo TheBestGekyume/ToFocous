@@ -1,19 +1,25 @@
 import "./App.css";
-import { Header } from "./components/Header";
-import { Statistics } from "./components/Statistics";
-import { Tasks } from "./components/Tasks";
+
+import { Routes, Route } from "react-router-dom";
 import { TasksProvider } from "./contexts/TasksContext";
+import { Home } from "./pages/Home";
+import { Auth } from "./pages/Auth";
+// import { TaskDetails } from "./components/TaskDetails";
 
 function App() {
-    return (
-        <div id="app" className="d-flex bg-background-task-section min-h-full">
-            <TasksProvider>
-                <Header />
-                <Statistics />
-                <Tasks />
-            </TasksProvider>
-        </div>
-    );
+  return (
+    <div id="app" className="d-flex bg-background-task-section min-h-full">
+      <TasksProvider>
+
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/auth" element={<Auth />} />
+
+          {/* <Route path="/task/:id" element={<TaskDetails />} /> */}
+        </Routes>
+      </TasksProvider>
+    </div>
+  );
 }
 
 export default App;
