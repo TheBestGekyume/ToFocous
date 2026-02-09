@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowDownUp } from "lucide-react";
-import { useTasks } from "../contexts/TasksContext";
+import { useTasks } from "../../contexts/TasksContext";
 
 export const SortTasks = () => {
     const { handleSortConfig, resetSort, sortConfig } = useTasks();

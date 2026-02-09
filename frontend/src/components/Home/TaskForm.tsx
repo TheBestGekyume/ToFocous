@@ -1,7 +1,7 @@
-import { useTaskForm } from "../hooks/useTaskForm";
-import type { TTask, TSubTask } from "../types/TTask";
+import { useTaskForm } from "../../hooks/useTaskForm";
+import type { TTask, TSubTask } from "../../types/TTask";
 
-type FormProps = {
+type TaskFormProps = {
   taskToEdit?: TTask | TSubTask;
   parentTask?: TTask;
   isCreating: boolean;
@@ -11,7 +11,7 @@ type FormProps = {
   onClose?: () => void;
 };
 
-export const Form = ({
+export const TaskForm = ({
   setTasks,
   isCreating,
   isCreatingSubtask,
@@ -19,8 +19,8 @@ export const Form = ({
   parentTask,
   setSelectedTask,
   onClose,
-}: FormProps) => {
-  const { formData, handleChange, handleSubmit, handleDelete } = useTaskForm({
+}: TaskFormProps) => {
+  const { formData, handleChange, handleSubmit, deleteTask } = useTaskForm({
     initialTask: taskToEdit,
     parentTask,
     isCreating,
@@ -119,7 +119,7 @@ export const Form = ({
         {!isCreating && !isCreatingSubtask && (
           <button
             type="button"
-            onClick={handleDelete}
+            onClick={deleteTask}
             className="px-6 py-2 h-10 rounded-md bg-red-600 hover:bg-red-700 font-semibold"
           >
             Deletar

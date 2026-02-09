@@ -1,18 +1,14 @@
-import { useState } from "react";
-import { Modal } from "./Modal";
-import { Form } from "./Form";
-import type { TTask } from "../types/TTask";
-import { priorityMap, statusMap, getTimeMessage } from "../utils/taskUtils";
-import { useTasks } from "../contexts/TasksContext";
+import type { TTask } from "../../types/TTask";
+import { priorityMap, statusMap, getTimeMessage } from "../../utils/taskUtils";
+import { useTasks } from "../../contexts/TasksContext";
 
 type TaskProps = {
     task: TTask;
     setTasks: React.Dispatch<React.SetStateAction<TTask[]>>;
 };
 
-export const Task = ({ task, setTasks }: TaskProps) => {
+export const Task = ({ task }: TaskProps) => {
     const { setSelectedTask } = useTasks();
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const { title, date, priority, status } = task;
     const currentPriority = priorityMap[priority];
     const currentStatus = statusMap[status];
@@ -66,15 +62,6 @@ export const Task = ({ task, setTasks }: TaskProps) => {
                 </div>
             </div>
 
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                <h4 className="font-bold mb-4 text-xl">Editar Tarefa</h4>
-                <Form
-                    isCreating={false}
-                    taskToEdit={task}
-                    setTasks={setTasks}
-                    onClose={() => setIsModalOpen(false)}
-                />
-            </Modal>
         </>
     );
 };

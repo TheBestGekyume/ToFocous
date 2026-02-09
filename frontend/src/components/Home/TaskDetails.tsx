@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useTasks } from "../contexts/TasksContext";
-import { Form } from "./Form";
+import { useTasks } from "../../contexts/TasksContext";
+import { TaskForm } from "./TaskForm";
 import { Modal } from "./Modal";
-import { priorityMap, statusMap } from "../utils/taskUtils";
+import { priorityMap, statusMap } from "../../utils/taskUtils";
 import { ArrowLeft, Check, Pencil, Trash2 } from "lucide-react";
-import type { TSubTask } from "../types/TTask";
+import type { TSubTask } from "../../types/TTask";
 
 export const TaskDetails = () => {
   const { selectedTask, setSelectedTask, setTasks } = useTasks();
@@ -12,7 +12,7 @@ export const TaskDetails = () => {
   const [isCreatingSubtask, setIsCreatingSubtask] = useState(false);
   const [editingSubtask, setEditingSubtask] = useState<TSubTask | null>(null);
 
-  const { toggleSubtask, deleteSubtask } = useTasks();
+  const { toggleSubtaskStatus, deleteSubtask } = useTasks();
 
   if (!selectedTask) return null;
 
@@ -68,7 +68,9 @@ export const TaskDetails = () => {
                 className="flex items-center gap-5 p-2 bg-zinc-800 border border-zinc-600 rounded-md"
               >
                 <button
-                  onClick={() => toggleSubtask(selectedTask.id, subtask.id)}
+                  onClick={() =>
+                    toggleSubtaskStatus(selectedTask.id, subtask.id)
+                  }
                   className={`
     w-6 h-6 flex items-center justify-center rounded-md border
     transition-all duration-300 cursor-pointer
@@ -149,7 +151,11 @@ export const TaskDetails = () => {
           setEditingSubtask(null);
         }}
       >
-        <Form
+        <h4 className="font-bold mb-5 text-2xl text-center text-primary">
+          Editar {editingSubtask ? "Item" : "Tarefa"}
+        </h4>
+
+        <TaskForm
           isCreating={false}
           isCreatingSubtask={!!editingSubtask}
           taskToEdit={editingSubtask ?? selectedTask}
@@ -163,12 +169,16 @@ export const TaskDetails = () => {
         />
       </Modal>
 
-      {/* Modal de subtask */}
+      {/* Modal de criar subtask */}
       <Modal
         isOpen={isCreatingSubtask}
         onClose={() => setIsCreatingSubtask(false)}
       >
-        <Form
+        <h4 className="font-bold mb-5 text-2xl text-center text-primary">
+          Criar Item
+        </h4>
+
+        <TaskForm
           isCreating={true}
           isCreatingSubtask
           taskToEdit={selectedTask}

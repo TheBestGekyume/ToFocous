@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { TTask, TSubTask } from "../types/TTask";
 
 type UseTaskFormProps = {
@@ -11,6 +11,29 @@ type UseTaskFormProps = {
     onClose?: () => void;
 };
 
+type TaskFormData = Omit<TTask, "subtasks">;
+type SubtaskFormData = TSubTask;
+
+type FormData =
+    | { kind: "task"; data: TaskFormData }
+    | { kind: "subtask"; data: SubtaskFormData };
+
+const emptyTaskForm: TaskFormData = {
+    id: "",
+    title: "",
+    description: "",
+    date: new Date(),
+    priority: "low",
+    status: "not_started",
+};
+
+const emptySubtaskForm: SubtaskFormData = {
+    id: "",
+    title: "",
+    description: "",
+    date: new Date(),
+    status: "not_started",
+};
 
 export const useTaskForm = ({
     initialTask,
@@ -21,175 +44,194 @@ export const useTaskForm = ({
     setSelectedTask,
     onClose,
 }: UseTaskFormProps) => {
+    /* =========================
+     * STATE
+     * ========================= */
+    const [formData, setFormData] = useState<FormData>(() =>
+        isCreatingSubtask
+            ? { kind: "subtask", data: emptySubtaskForm }
+            : { kind: "task", data: emptyTaskForm }
+    );
 
-
-    const [formData, setFormData] = useState<TTask | TSubTask>({
-        id: "",
-        title: "",
-        date: new Date(),
-        priority: "low",
-        status: "not_started",
-        description: "",
-    });
-
-    // Preencher campos ao editar
+    /* =========================
+     * EFFECT
+     * ========================= */
     useEffect(() => {
         if (!isCreating && initialTask) {
-            setFormData({
-                ...initialTask,
-                date: new Date(initialTask.date),
-            });
+            if (isCreatingSubtask) {
+                setFormData({
+                    kind: "subtask",
+                    data: {
+                        ...(initialTask as TSubTask),
+                        date: new Date(initialTask.date),
+                    },
+                });
+            } else {
+                setFormData({
+                    kind: "task",
+                    data: {
+                        ...(initialTask as TaskFormData),
+                        date: new Date(initialTask.date),
+                    },
+                });
+            }
         }
-    }, [isCreating, initialTask]);
+    }, [isCreating, isCreatingSubtask, initialTask]);
 
-
-    // Input genérico
+    /* =========================
+     * HANDLERS
+     * ========================= */
     const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+        e: React.ChangeEvent<
+            HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+        >
     ) => {
         const { name, value } = e.target;
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: name === "date" ? new Date(value) : value,
-        }));
+        setFormData((prev) => {
+            if (prev.kind === "task") {
+                return {
+                    kind: "task",
+                    data: {
+                        ...prev.data,
+                        [name]: name === "date" ? new Date(value) : value,
+                    },
+                };
+            }
+
+            // subtask
+            return {
+                kind: "subtask",
+                data: {
+                    ...prev.data,
+                    [name]: name === "date" ? new Date(value) : value,
+                },
+            };
+        });
     };
 
-    // Submit
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
 
-        const getSubtaskData = (): TSubTask => {
-            const data = formData as Omit<TTask, "priority">;
+    /* =========================
+     * CRUD - TASK
+     * ========================= */
+    const createTask = () => {
+        if (formData.kind !== "task") return;
 
-            return {
-                ...data,
-                date: new Date(formData.date),
-            };
+        const newTask: TTask = {
+            ...formData.data,
+            id: crypto.randomUUID(),
+            subtasks: [],
+            date: new Date(formData.data.date),
         };
 
+        setTasks((prev) => [newTask, ...prev]);
+    };
 
+    const updateTask = () => {
+        if (formData.kind !== "task" || !initialTask) return;
 
-        /* =========================
-         * EDITAR SUBTASK
-         * ========================= */
-        if (!isCreating && isCreatingSubtask && parentTask && initialTask) {
-            const updatedSubtask = {
-                ...getSubtaskData(),
-                id: initialTask.id,
-            };
+        const updatedTask: TTask = {
+            ...formData.data,
+            id: initialTask.id,
+            subtasks: (initialTask as TTask).subtasks,
+            date: new Date(formData.data.date),
+        };
 
-            setTasks((prev) =>
-                prev.map((task) =>
-                    task.id === parentTask.id
-                        ? {
-                            ...task,
-                            subtasks: task.subtasks.map((st) =>
-                                st.id === initialTask.id ? updatedSubtask : st
-                            ),
-                        }
-                        : task
-                )
-            );
+        setTasks((prev) =>
+            prev.map((t) => (t.id === initialTask.id ? updatedTask : t))
+        );
 
-            setSelectedTask?.((prev) => {
-                if (!prev || prev.id !== parentTask.id) return prev;
+        setSelectedTask?.(updatedTask);
+    };
 
-                return {
+    const deleteTask = () => {
+        if (!initialTask) return;
+        if (!confirm("Deseja excluir a tarefa?")) return;
+
+        setTasks((prev) => prev.filter((t) => t.id !== initialTask.id));
+        setSelectedTask?.(null);
+    };
+
+    /* =========================
+     * CRUD - SUBTASK
+     * ========================= */
+    const createSubtask = () => {
+        if (formData.kind !== "subtask" || !initialTask) return;
+
+        const newSubtask: TSubTask = {
+            ...formData.data,
+            id: crypto.randomUUID(),
+            date: new Date(formData.data.date),
+        };
+
+        setTasks((prev) =>
+            prev.map((task) =>
+                task.id === initialTask.id
+                    ? { ...task, subtasks: [...task.subtasks, newSubtask] }
+                    : task
+            )
+        );
+
+        setSelectedTask?.((prev) =>
+            prev?.id === initialTask.id
+                ? { ...prev, subtasks: [...prev.subtasks, newSubtask] }
+                : prev
+        );
+    };
+
+    const updateSubtask = () => {
+        if (formData.kind !== "subtask" || !parentTask || !initialTask) return;
+
+        const updatedSubtask: TSubTask = {
+            ...formData.data,
+            id: initialTask.id,
+            date: new Date(formData.data.date),
+        };
+
+        setTasks((prev) =>
+            prev.map((task) =>
+                task.id === parentTask.id
+                    ? {
+                        ...task,
+                        subtasks: task.subtasks.map((st) =>
+                            st.id === initialTask.id ? updatedSubtask : st
+                        ),
+                    }
+                    : task
+            )
+        );
+
+        setSelectedTask?.((prev) =>
+            prev?.id === parentTask.id
+                ? {
                     ...prev,
                     subtasks: prev.subtasks.map((st) =>
                         st.id === initialTask.id ? updatedSubtask : st
                     ),
-                };
-            });
-
-            onClose?.();
-            return;
-        }
-
-
-        /* =========================
-         * CRIAR SUBTASK
-         * ========================= */
-        if (isCreating && isCreatingSubtask && initialTask) {
-            const newSubtask: TSubTask = {
-                ...getSubtaskData(),
-                id: crypto.randomUUID(),
-            };
-
-            setTasks((prev) =>
-                prev.map((task) =>
-                    task.id === initialTask.id
-                        ? {
-                            ...task,
-                            subtasks: [...task.subtasks, newSubtask],
-                        }
-                        : task
-                )
-            );
-
-            setSelectedTask?.((prev) =>
-                prev?.id === initialTask.id
-                    ? {
-                        ...prev,
-                        subtasks: [...prev.subtasks, newSubtask],
-                    }
-                    : prev
-            );
-
-            onClose?.();
-            return;
-        }
-
-
-        /*CRIAR TASK*/
-        if (isCreating && !isCreatingSubtask) {
-            const newTask: TTask = {
-                ...(formData as TTask),
-                id: crypto.randomUUID(),
-                date: new Date(formData.date),
-                subtasks: [],
-            };
-
-            setTasks((prev) => [newTask, ...prev]);
-
-            onClose?.();
-            return;
-        }
-
-        /*EDITAR TASK*/
-        if (!isCreating && initialTask && !isCreatingSubtask) {
-            const updatedTask: TTask = {
-                ...(formData as TTask),
-                id: initialTask.id,
-                date: new Date(formData.date),
-            };
-
-            setTasks((prev) =>
-                prev.map((t) => (t.id === initialTask.id ? updatedTask : t))
-            );
-
-            setSelectedTask?.(updatedTask);
-            onClose?.();
-        }
+                }
+                : prev
+        );
     };
 
+    /* =========================
+     * SUBMIT
+     * ========================= */
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
 
-    const handleDelete = () => {
-        if (!initialTask) return;
-
-        if (confirm("Deseja excluir a tarefa?")) {
-            setTasks((prev) => prev.filter((t) => t.id !== initialTask.id));
-            setSelectedTask?.(null);
-            onClose?.();
+        if (isCreatingSubtask) {
+            if (isCreating) createSubtask(); else updateSubtask();
+        } else {
+            if (isCreating) createTask(); else updateTask();
         }
+
+        onClose?.();
     };
 
     return {
-        formData,
+        formData: formData.data,
         handleChange,
         handleSubmit,
-        handleDelete,
-        setFormData
+        deleteTask,
     };
 };
