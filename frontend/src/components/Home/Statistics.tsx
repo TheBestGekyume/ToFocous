@@ -1,4 +1,4 @@
-import { useState, type JSX } from "react";
+import { useState } from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import {
@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useTasks } from "../../contexts/TasksContext";
 import { AnimatePresence, motion } from "framer-motion";
+import { Card } from "./Card";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -56,29 +57,7 @@ export const Statistics = () => {
     },
   };
 
-  const Card = ({
-    title,
-    count,
-    icon,
-    bg,
-    border,
-  }: {
-    title: string;
-    count: number;
-    icon: JSX.Element;
-    bg: string;
-    border: string;
-  }) => (
-    <div
-      className={`flex flex-1 items-center justify-between gap-5 p-3 border-2 rounded-xl ${bg} ${border}`}
-    >
-      <div>
-        <h4 className="font-semibold text-white">{title}</h4>
-        <p className="text-xl font-bold text-white">{count}</p>
-      </div>
-      {icon}
-    </div>
-  );
+  
 
   return (
     <section className="max-w-2/3 lg:max-w-1/2 mx-auto p-5 mb-5">
@@ -92,7 +71,7 @@ export const Statistics = () => {
         </button>
       </div>
 
-      {/* Cards — NÃO ALTEREI */}
+      {/* Cards */}
       <div className="bg-slate-950 p-5 border-2 border-primary rounded-lg">
         <AnimatePresence mode="wait">
           {view === "cards" ? (
@@ -108,22 +87,19 @@ export const Statistics = () => {
                 title="Total"
                 count={total}
                 icon={<ClipboardClock />}
-                bg="bg-zinc-600"
-                border="border-zinc-300"
+                colorTheme="zinc"
               />
               <Card
                 title="Pendentes"
                 count={pending}
                 icon={<NotepadText />}
-                bg="bg-amber-600"
-                border="border-amber-300"
+                colorTheme="amber"
               />
               <Card
                 title="Concluídas"
                 count={concluded}
                 icon={<ClipboardCheck />}
-                bg="bg-green-600"
-                border="border-green-300"
+                colorTheme="green"
               />
             </motion.div>
           ) : (
