@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sidebar } from "../components/Home/Sidebar";
+import { Sidebar } from "../components/_Common/Sidebar";
 import { Header } from "../components/Home/Header";
 import { Statistics } from "../components/Home/Statistics";
 import { Tasks } from "../components/Home/Tasks";
