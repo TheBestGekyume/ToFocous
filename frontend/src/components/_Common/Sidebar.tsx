@@ -1,6 +1,7 @@
 import {
   CalendarDays,
   CircleX,
+  ListTodo,
   LogOut,
   Settings,
   TextAlignJustify,
@@ -43,7 +44,7 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
 
             <button
               onClick={() => setOpen(false)}
-              className="hidden sm:flex hover:text-purple-500 duration-150"
+              className="hidden sm:flex text-zinc-500 hover:text-zinc-300 duration-150"
             >
               <CircleX />
             </button>
@@ -51,6 +52,14 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
 
           {/* MENU */}
           <nav className="flex flex-col gap-5">
+            <Link
+              to="/tarefas"
+              className="flex items-center hover:text-purple-500 duration-150"
+            >
+              <ListTodo />
+              <span className="px-3">Tarefas</span>
+            </Link>
+
             <Link
               to="/agenda"
               className="flex items-center hover:text-purple-500 duration-150"

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Sidebar } from "../components/_Common/Sidebar";
-import { Header } from "../components/Home/Header";
-import { Statistics } from "../components/Home/Statistics";
-import { Tasks } from "../components/Home/Tasks";
+import { Header } from "../components/Tasks/Header";
+import { Statistics } from "../components/Tasks/Statistics";
+import { Tasks } from "../components/Tasks/Tasks";
 
-export const Home = () => {
+export const TaskPage = () => {
   const [open, setOpen] = useState(false);
 
   return (
