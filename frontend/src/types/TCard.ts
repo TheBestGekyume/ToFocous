@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import type { ColorKey } from "../components/Home/Card";
+import type { ColorKey } from "../components/Tasks/Card";
 
 export type TCard = {
     title: string;
