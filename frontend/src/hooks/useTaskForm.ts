@@ -78,6 +78,17 @@ export const useTaskForm = ({
         }
     }, [isCreating, isCreatingSubtask, initialTask]);
 
+
+
+    /* =========================
+     * HELPER
+     * ========================= */
+
+    const getEmptyForm = (isSubtask: boolean): FormData =>
+        isSubtask
+            ? { kind: "subtask", data: emptySubtaskForm }
+            : { kind: "task", data: emptyTaskForm };
+
     /* =========================
      * HANDLERS
      * ========================= */
@@ -224,6 +235,8 @@ export const useTaskForm = ({
         } else {
             if (isCreating) createTask(); else updateTask();
         }
+
+        setFormData(getEmptyForm(isCreatingSubtask));
 
         onClose?.();
     };
