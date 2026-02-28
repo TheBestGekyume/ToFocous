@@ -7,6 +7,8 @@ backend/__pycache__/
 *.pyo
 *.pyd
 
+backend/core/__pycache__
+
 .vscode/
 .DS_Store
 Thumbs.db
