@@ -3,7 +3,7 @@ from backend.dependencies import supabase
 from backend.models import settings
 from backend.models.settings import UpdtSettings
 from backend.dependencies.auth import get_current_user
-from backend.dependencies.supabase import get_db  # isso retorna supabase com token do usuário
+from backend.dependencies.supabase import get_db 
 
 router = APIRouter(prefix="/settings", tags=["Settings"])
 
@@ -15,7 +15,9 @@ def get_settings(current_user = Depends(get_current_user),supabase = Depends(get
 
     return{
         "use_subtask_time": settings["use_subtask_time"],
-        "use_subtask_priority": settings["use_subtask_priority"]
+        "use_subtask_priority": settings["use_subtask_priority"],
+        "which_date_use_in_calendar": settings["which_date_use_in_calendar"]
+        
     }
 
 
@@ -34,7 +36,8 @@ def update_settings(data: UpdtSettings,current_user = Depends(get_current_user),
         return{
             "message" : "Alterações feitas com sucesso.",
             "use_subtask_time": response.data[0]["use_subtask_time"],
-            "use_subtask_priority": response.data[0]["use_subtask_priority"]
+            "use_subtask_priority": response.data[0]["use_subtask_priority"],
+            "which_date_use_in_calendar": response.data[0]["which_date_use_in_calendar"]
         }
 
     except Exception as e:

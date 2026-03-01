@@ -24,7 +24,9 @@ def get_subtasks(task_id: str, current_user=Depends(get_current_user), supabase=
                 "title": subtask["title"],
                 "due_time": subtask["due_time"],
                 "priority": subtask["priority"],
-                "status": subtask["status"]
+                "status": subtask["status"],
+                "due_date": subtask["due_date"],
+                "start_date": subtask["start_date"],
             }
             for subtask in response.data
         ]
@@ -65,7 +67,9 @@ def post_subtask(data: PostSubtask, task_id: str, current_user= Depends(get_curr
             "title": response.data[0]["title"],
             "due_time": response.data[0]["due_time"],
             "priority": response.data[0]["priority"],
-            "status": response.data[0]["status"]
+            "status": response.data[0]["status"],
+            "due_date": response.data[0]["due_date"],
+            "start_date": response.data[0]["start_date"],
         }
 
         return{
@@ -102,7 +106,9 @@ def patch_subtask(task_id: str,subtask_id: str,data: PatchSubtask,current_user=D
             "title": response.data[0]["title"],
             "due_time": response.data[0]["due_time"],
             "priority": response.data[0]["priority"],
-            "status": response.data[0]["status"]
+            "status": response.data[0]["status"],
+            "due_date": response.data[0]["due_date"],
+            "start_date": response.data[0]["start_date"],
         }
 
         return {

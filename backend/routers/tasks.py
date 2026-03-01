@@ -17,6 +17,7 @@ def post_task(data: PostTask, current_user = Depends(get_current_user),supabase 
             "title": response.data[0]["title"],
             "description": response.data[0]["description"],
             "due_date": response.data[0]["due_date"],
+            "start_date": response.data[0]["start_date"],
             "due_time": response.data[0]["due_time"],
             "priority": response.data[0]["priority"],
             "status": response.data[0]["status"]
@@ -42,6 +43,7 @@ def get_tasks(current_user = Depends(get_current_user),supabase = Depends(get_db
                 "title": task["title"],
                 "description": task["description"],
                 "due_date": task["due_date"],
+                "start_date": task["start_date"],
                 "due_time": task["due_time"],
                 "priority": task["priority"],
                 "status": task["status"]
@@ -78,6 +80,7 @@ def patch_task(task_id: str, data: PatchTask, current_user = Depends(get_current
             "title": response.data[0]["title"],
             "description": response.data[0]["description"],
             "due_date": response.data[0]["due_date"],
+            "start_date": response.data[0]["start_date"],
             "due_time": response.data[0]["due_time"],
             "priority": response.data[0]["priority"],
             "status": response.data[0]["status"]
