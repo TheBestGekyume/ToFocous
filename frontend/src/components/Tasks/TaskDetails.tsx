@@ -35,9 +35,7 @@ export const TaskDetails = () => {
             <h3 className="font-semibold text-xl">{selectedTask.title}</h3>
 
             <p className="text-sm text-zinc-300 bg-zinc-950 px-2 rounded-sm">
-              {new Date(selectedTask.date).toLocaleDateString("pt-BR", {
-                timeZone: "UTC",
-              })}
+              {selectedTask.due_date}
             </p>
           </div>
 
@@ -56,7 +54,7 @@ export const TaskDetails = () => {
 
       <hr className="my-3 text-accent/75" />
 
-      {selectedTask.subtasks.length > 0 && (
+      {selectedTask.subtasks && selectedTask.subtasks.length > 0 && (
         <section className="flex flex-col gap-2">
           {selectedTask.subtasks.map((subtask) => {
             const isDone = subtask.status === "concluded";
@@ -98,9 +96,7 @@ export const TaskDetails = () => {
                   </p>
 
                   <p className="text-sm text-zinc-400">
-                    {new Date(subtask.date).toLocaleDateString("pt-BR", {
-                      timeZone: "UTC",
-                    })}
+                    {subtask.due_date}
                   </p>
                 </div>
                 <div className="flex flex-col items-end justify-between gap-5">

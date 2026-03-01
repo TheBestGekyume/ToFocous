@@ -22,17 +22,26 @@ const emptyTaskForm: TaskFormData = {
     id: "",
     title: "",
     description: "",
-    date: new Date(),
+    due_date: "",
     priority: "low",
-    status: "not_started",
+    status: "unstarted",
+    user_id: "",
+    start_date: "",
+    start_time: "",
+    due_time: ""
 };
 
 const emptySubtaskForm: SubtaskFormData = {
     id: "",
     title: "",
     description: "",
-    date: new Date(),
-    status: "not_started",
+    due_date: "",
+    status: "unstarted",
+    task_id: "",
+    start_date: "",
+    start_time: "",
+    due_time: "",
+    priority: null
 };
 
 export const useTaskForm = ({
@@ -63,7 +72,6 @@ export const useTaskForm = ({
                     kind: "subtask",
                     data: {
                         ...(initialTask as TSubTask),
-                        date: new Date(initialTask.date),
                     },
                 });
             } else {
@@ -71,7 +79,6 @@ export const useTaskForm = ({
                     kind: "task",
                     data: {
                         ...(initialTask as TaskFormData),
-                        date: new Date(initialTask.date),
                     },
                 });
             }
@@ -132,7 +139,6 @@ export const useTaskForm = ({
             ...formData.data,
             id: crypto.randomUUID(),
             subtasks: [],
-            date: new Date(formData.data.date),
         };
 
         setTasks((prev) => [newTask, ...prev]);
@@ -145,7 +151,6 @@ export const useTaskForm = ({
             ...formData.data,
             id: initialTask.id,
             subtasks: (initialTask as TTask).subtasks,
-            date: new Date(formData.data.date),
         };
 
         setTasks((prev) =>
@@ -172,7 +177,6 @@ export const useTaskForm = ({
         const newSubtask: TSubTask = {
             ...formData.data,
             id: crypto.randomUUID(),
-            date: new Date(formData.data.date),
         };
 
         setTasks((prev) =>
@@ -196,7 +200,6 @@ export const useTaskForm = ({
         const updatedSubtask: TSubTask = {
             ...formData.data,
             id: initialTask.id,
-            date: new Date(formData.data.date),
         };
 
         setTasks((prev) =>

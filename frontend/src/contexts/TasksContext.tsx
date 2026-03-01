@@ -1,6 +1,7 @@
-import { createContext, useContext, useEffect, useState, useMemo } from "react";
-import type { TSubTask, TTask } from "../types/TTask";
+import { createContext, useContext, useState, useMemo, useEffect } from "react";
+import type { /*TSubTask,*/ TTask } from "../types/TTask";
 import { sortTaskList } from "../utils/taskUtils";
+import { taskService } from "../services/taskService";
 
 type SortType = "date" | "priority" | "status" | "";
 
@@ -22,23 +23,8 @@ type TasksContextType = {
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
 
 export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
-  const [tasks, setTasks] = useState<TTask[]>(() => {
-    try {
-      const storaged = localStorage.getItem("tasks");
-      if (!storaged) return [];
-      return JSON.parse(storaged).map((t: TTask) => ({
-        ...t,
-        date: new Date(t.date),
-        subtasks:
-          t.subtasks?.map((st: TSubTask) => ({
-            ...st,
-            date: new Date(st.date),
-          })) ?? [],
-      }));
-    } catch {
-      return [];
-    }
-  });
+  const [tasks, setTasks] = useState<TTask[]>([]);
+   
 
   const [selectedTask, setSelectedTask] = useState<TTask | null>(null);
 
@@ -69,10 +55,23 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       isAscending: true,
     });
 
-  useEffect(
-    () => localStorage.setItem("tasks", JSON.stringify(tasks)),
-    [tasks]
-  );
+  // useEffect(
+  //   () => localStorage.setItem("tasks", JSON.stringify(tasks)),
+  //   [tasks]
+  // );
+
+  useEffect(() => {
+  const loadTasks = async () => {
+    try {
+      const data = await taskService.getTasks();
+      setTasks(data);
+    } catch (err) {
+      console.error("Erro ao carregar tarefas", err);
+    }
+  };
+
+  loadTasks();
+}, []);
 
   // dentro do TasksContext
 
@@ -88,7 +87,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
                       ...subtask,
                       status:
                         subtask.status === "concluded"
-                          ? ("not_started" as const)
+                          ? ("unstarted" as const)
                           : ("concluded" as const),
                     }
                   : subtask

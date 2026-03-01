@@ -75,7 +75,7 @@ export const TaskForm = ({
         <input
           name="date"
           type="date"
-          value={new Date(formData.date).toISOString().split("T")[0]}
+          value={formData.due_date ?? ""}
           onChange={handleChange}
           className="rounded-md bg-zinc-700 p-2 h-10"
         />
@@ -90,8 +90,8 @@ export const TaskForm = ({
             onChange={handleChange}
             className="rounded-md bg-zinc-700 p-2 h-10"
           >
-            <option value="not_started">Não iniciada</option>
-            <option value="in_progress">Em andamento</option>
+            <option value="unstarted">Não iniciada</option>
+            <option value="inProgress">Em andamento</option>
             <option value="concluded">Concluída</option>
           </select>
         </fieldset>

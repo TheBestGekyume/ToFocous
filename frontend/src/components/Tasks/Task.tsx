@@ -9,10 +9,10 @@ type TaskProps = {
 
 export const Task = ({ task }: TaskProps) => {
     const { setSelectedTask } = useTasks();
-    const { title, date, priority, status } = task;
+    const { title, due_date, priority, status } = task;
     const currentPriority = priorityMap[priority];
     const currentStatus = statusMap[status];
-    const { msg: timeMessage, color: timeColor } = getTimeMessage(new Date(date));
+    const { msg: timeMessage, color: timeColor } = getTimeMessage(new Date(due_date));
 
     return (
         <>
@@ -33,9 +33,7 @@ export const Task = ({ task }: TaskProps) => {
 
                         {status !== "concluded" && (
                             <p className="text-sm text-zinc-400 bg-zinc-950 px-2 rounded-sm">
-                                {date.toLocaleDateString("pt-BR", {
-                                    timeZone: "UTC",
-                                })}
+                                {due_date}
                             </p>
                         )}
                     </div>

@@ -20,8 +20,8 @@ export const Statistics = () => {
   const total = tasks.length;
 
   // NOVO: contagem por status completo
-  const notStarted = tasks.filter((t) => t.status === "not_started").length;
-  const inProgress = tasks.filter((t) => t.status === "in_progress").length;
+  const notStarted = tasks.filter((t) => t.status === "unstarted").length;
+  const inProgress = tasks.filter((t) => t.status === "inProgress").length;
   const concluded = tasks.filter((t) => t.status === "concluded").length;
 
   const pending = total - concluded;
