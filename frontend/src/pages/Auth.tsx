@@ -48,13 +48,9 @@ export const Auth = () => {
           </h1>
 
           {mode === "login" ? (
-            <form className="flex flex-col gap-4">
               <LoginForm onSwitch={() => setMode("register")} />
-            </form>
           ) : (
-            <form className="flex flex-col gap-4">
               <RegisterForm onSwitch={() => setMode("login")} />
-            </form>
           )}
         </motion.div>
       </AnimatePresence>

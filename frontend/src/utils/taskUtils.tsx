@@ -3,8 +3,8 @@ import type { TTask } from "../types/TTask";
 
 export const PRIORITY_ORDER = { high: 1, medium: 2, low: 3 } as const;
 export const STATUS_ORDER = {
-    not_started: 1,
-    in_progress: 2,
+    unstarted: 1,
+    inProgress: 2,
     concluded: 3,
 } as const;
 
@@ -29,13 +29,13 @@ export const statusMap = {
         bg: "bg-green-700/50",
         icon: <CheckCircle className="text-green-200" size={18} />,
     },
-    in_progress: {
+    inProgress: {
         label: "Em andamento",
         color: "text-yellow-200",
         bg: "bg-yellow-700/50",
         icon: <Clock className="text-yellow-200" size={18} />,
     },
-    not_started: {
+    unstarted: {
         label: "Não iniciada",
         color: "text-zinc-200",
         bg: "bg-zinc-700/50",
@@ -59,8 +59,8 @@ export function sortTaskList(
         switch (sortConfig.type) {
             case "date":
                 return sortConfig.isAscending
-                    ? new Date(a.date).getTime() - new Date(b.date).getTime()
-                    : new Date(b.date).getTime() - new Date(a.date).getTime();
+                    ? new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+                    : new Date(b.due_date).getTime() - new Date(a.due_date).getTime();
 
             case "priority":
                 return sortConfig.isAscending
