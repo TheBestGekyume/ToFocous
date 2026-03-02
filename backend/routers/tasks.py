@@ -16,13 +16,8 @@ def post_task(data: PostTask, current_user = Depends(get_current_user),supabase 
         filtered_response = {
             "id": response.data[0]["id"],
             "title": response.data[0]["title"],
-            "description": response.data[0]["description"],
-            "start_time": response.data[0]["start_time"],
             "due_date": response.data[0]["due_date"],
-            "start_date": response.data[0]["start_date"],
-            "due_time": response.data[0]["due_time"],
             "priority": response.data[0]["priority"],
-            "status": response.data[0]["status"]
         }
 
         return{

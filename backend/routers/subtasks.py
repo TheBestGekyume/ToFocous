@@ -68,14 +68,9 @@ def post_subtask(data: PostSubtask, task_id: str, current_user= Depends(get_curr
 
         filtered_response = {
             "id": response.data[0]["id"],
-            "description": response.data[0]["description"],
-            "start_time": response.data[0]["start_time"],
             "title": response.data[0]["title"],
-            "due_time": response.data[0]["due_time"],
             "priority": response.data[0]["priority"],
-            "status": response.data[0]["status"],
             "due_date": response.data[0]["due_date"],
-            "start_date": response.data[0]["start_date"],
         }
 
         return{
