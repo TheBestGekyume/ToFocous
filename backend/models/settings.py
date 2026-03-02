@@ -3,9 +3,9 @@ from typing import Optional
 from enum import Enum
 
 class WhichDateUseInCalendar(str, Enum):
-    UseStartDate = "Usar Data de Início"
-    UseDueDate = "Usar Data Limite"
-    UseBoth = "Usar Ambas"
+    UseStartDate = "UseStartDate"
+    UseDueDate = "UseDueDate"
+    UseBoth = "UseBoth"
 
     
 class UpdtSettings(BaseModel):
