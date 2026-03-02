@@ -24,7 +24,7 @@ const TasksContext = createContext<TasksContextType | undefined>(undefined);
 
 export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   const [tasks, setTasks] = useState<TTask[]>([]);
-   
+  console.log("Tasks:",tasks)
 
   const [selectedTask, setSelectedTask] = useState<TTask | null>(null);
 

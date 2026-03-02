@@ -5,15 +5,15 @@ from enum import Enum
 
 
 class TaskPriority(str, Enum):
-    low = "Baixa"
-    medium = "Média"
-    high = "Alta"
+    low = "low"
+    medium = "medium"
+    high = "high"
 
 
 class TaskStatus(str, Enum):
-    unstarted = "Não iniciada"
-    inProgress = "Em andamento"
-    concluded = "Concluída"
+    unstarted = "unstarted"
+    inProgress = "inProgress"
+    concluded = "concluded"
 
 
 class PostTask(BaseModel):
