@@ -21,6 +21,7 @@ def get_subtasks(task_id: str, current_user=Depends(get_current_user), supabase=
         
         filtered_response = [
             {
+                "id": subtask["id"],
                 "title": subtask["title"],
                 "due_time": subtask["due_time"],
                 "priority": subtask["priority"],
@@ -64,6 +65,7 @@ def post_subtask(data: PostSubtask, task_id: str, current_user= Depends(get_curr
         response = supabase.table("subtasks").insert(subtask_data).execute()
 
         filtered_response = {
+            "id": response.data[0]["id"],
             "title": response.data[0]["title"],
             "due_time": response.data[0]["due_time"],
             "priority": response.data[0]["priority"],
@@ -103,6 +105,7 @@ def patch_subtask(task_id: str,subtask_id: str,data: PatchSubtask,current_user=D
         
 
         filtered_response = {
+            "id": response.data[0]["id"],
             "title": response.data[0]["title"],
             "due_time": response.data[0]["due_time"],
             "priority": response.data[0]["priority"],

@@ -14,6 +14,7 @@ def post_task(data: PostTask, current_user = Depends(get_current_user),supabase 
         response = supabase.table("tasks").insert(postdata).execute()
 
         filtered_response = {
+            "id": response.data[0]["id"],
             "title": response.data[0]["title"],
             "description": response.data[0]["description"],
             "due_date": response.data[0]["due_date"],
@@ -40,6 +41,7 @@ def get_tasks(current_user = Depends(get_current_user),supabase = Depends(get_db
 
     filtered_tasks = [
             {
+                "id": task["id"],
                 "title": task["title"],
                 "description": task["description"],
                 "due_date": task["due_date"],
