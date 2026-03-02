@@ -20,9 +20,10 @@ class PostTask(BaseModel):
     title: str
     description: Optional[str] = None
     due_date: date
-    start_date: date
+    start_date: Optional[date] = None
     due_time: Optional[time] = None
     priority: TaskPriority
+    start_time: Optional[time] = None
     status: TaskStatus = TaskStatus.unstarted
 
 
@@ -32,5 +33,6 @@ class PatchTask(BaseModel):
     due_date: Optional[date] = None
     due_time: Optional[time] = None
     start_date: Optional[date] = None
+    start_time: Optional[time] = None
     priority: Optional[TaskPriority] = None
     status: Optional[TaskStatus] = None
