@@ -1,5 +1,5 @@
 import type { TTask } from "../../types/TTask";
-import { priorityMap, statusMap, getTimeMessage } from "../../utils/taskUtils";
+import { priorityMap, statusMap, getTimeMessage, formatDateBR} from "../../utils/taskUtils";
 import { useTasks } from "../../contexts/TasksContext";
 
 type TaskProps = {
@@ -33,7 +33,7 @@ export const Task = ({ task }: TaskProps) => {
 
                         {status !== "concluded" && (
                             <p className="text-sm text-zinc-400 bg-zinc-950 px-2 rounded-sm">
-                                {due_date}
+                                {formatDateBR(due_date)}
                             </p>
                         )}
                     </div>
