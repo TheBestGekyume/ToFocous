@@ -32,7 +32,7 @@ export type TSubTask = {
     start_date: string | null;
     start_time: string | null;
 
-    due_date: string | null;
+    due_date: string;
     due_time: string | null;
 
     priority: TPriority | null;
