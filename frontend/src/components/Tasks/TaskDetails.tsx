@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTasks } from "../../contexts/TasksContext";
 import { TaskForm } from "./TaskForm";
 import { Modal } from "./Modal";
-import { priorityMap, statusMap } from "../../utils/taskUtils";
+import { priorityMap, statusMap, formatDateBR } from "../../utils/taskUtils";
 import { ArrowLeft, Check, Pencil, Trash2 } from "lucide-react";
 import type { TSubTask } from "../../types/TTask";
 
@@ -35,7 +35,7 @@ export const TaskDetails = () => {
             <h3 className="font-semibold text-xl">{selectedTask.title}</h3>
 
             <p className="text-sm text-zinc-300 bg-zinc-950 px-2 rounded-sm">
-              {selectedTask.due_date}
+              {formatDateBR(selectedTask.due_date)}
             </p>
           </div>
 
@@ -96,7 +96,7 @@ export const TaskDetails = () => {
                   </p>
 
                   <p className="text-sm text-zinc-400">
-                    {subtask.due_date}
+                    {formatDateBR(subtask.due_date)}
                   </p>
                 </div>
                 <div className="flex flex-col items-end justify-between gap-5">

@@ -1,6 +1,6 @@
 import { api } from "./api";
 
-import type { TTask, /*TSubTask*/ } from "../types/TTask";
+import type { TTask, TCreateTaskDTO, /*TSubTask*/ } from "../types/TTask";
 
 export const taskService = {
   async getTasks(): Promise<TTask[]> {
@@ -8,9 +8,9 @@ export const taskService = {
     return res.data;
   },
 
-  async createTask(data: Partial<TTask>): Promise<TTask> {
+  async createTask(data: TCreateTaskDTO): Promise<TTask> {
     const res = await api.post("/tasks", data);
-    return res.data;
+    return res.data.data;
   },
 
   async updateTask(id: string, data: Partial<TTask>): Promise<TTask> {
