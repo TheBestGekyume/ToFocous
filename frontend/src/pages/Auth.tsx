@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { LoginForm } from "../components/Auth/Login";
 import { RegisterForm } from "../components/Auth/Register";
+import { useNavigate } from "react-router-dom";
 type AuthMode = "login" | "register";
 
 const formVariants: Variants = {
@@ -28,9 +29,16 @@ const formVariants: Variants = {
   },
 };
 
-
 export const Auth = () => {
   const [mode, setMode] = useState<AuthMode>("login");
+  const access_token = localStorage.getItem("access_token");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (access_token) {
+      navigate("/tarefas", { replace: true });
+    }
+  }, [access_token, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background-body perspective-1000">
@@ -48,13 +56,12 @@ export const Auth = () => {
           </h1>
 
           {mode === "login" ? (
-              <LoginForm onSwitch={() => setMode("register")} />
+            <LoginForm onSwitch={() => setMode("register")} />
           ) : (
-              <RegisterForm onSwitch={() => setMode("login")} />
+            <RegisterForm onSwitch={() => setMode("login")} />
           )}
         </motion.div>
       </AnimatePresence>
     </div>
   );
 };
-
