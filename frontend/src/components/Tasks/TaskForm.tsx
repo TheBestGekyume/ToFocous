@@ -73,9 +73,9 @@ export const TaskForm = ({
       <fieldset className="flex flex-col min-w-40">
         <label className="font-semibold mb-1">Data</label>
         <input
-          name="date"
+          name="due_date"
           type="date"
-          value={formData.due_date ?? ""}
+          value={formData.due_date}
           onChange={handleChange}
           className="rounded-md bg-zinc-700 p-2 h-10"
         />

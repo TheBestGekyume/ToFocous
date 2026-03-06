@@ -104,3 +104,4 @@ export const formatDateBR = (dateString: string) => {
 
   return `${day}/${month}/${year}`;
 };
+

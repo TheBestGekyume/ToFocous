@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import type { TTask, TSubTask } from "../types/TTask";
+import type { TTask, TSubTask, TCreateTaskDTO } from "../types/TTask";
+import { taskService } from "../services/taskService";
 
 type UseTaskFormProps = {
     initialTask?: TTask | TSubTask;
@@ -25,7 +26,7 @@ const emptyTaskForm: TaskFormData = {
     due_date: "",
     priority: "low",
     status: "unstarted",
-    user_id: "",
+    // user_id: "",
     start_date: "",
     start_time: "",
     due_time: ""
@@ -36,12 +37,12 @@ const emptySubtaskForm: SubtaskFormData = {
     title: "",
     description: "",
     due_date: "",
+    priority: "low",
     status: "unstarted",
     task_id: "",
     start_date: "",
     start_time: "",
     due_time: "",
-    priority: null
 };
 
 export const useTaskForm = ({
@@ -96,6 +97,18 @@ export const useTaskForm = ({
             ? { kind: "subtask", data: emptySubtaskForm }
             : { kind: "task", data: emptyTaskForm };
 
+
+    const normalizeTaskPayload = (data: TaskFormData): TCreateTaskDTO => ({
+        title: data.title,
+        description: data.description || null,
+        due_date: data.due_date,
+        priority: data.priority,
+        status: data.status || null,
+        start_date: data.start_date || null,
+        start_time: data.start_time || null,
+        due_time: data.due_time || null,
+    });
+
     /* =========================
      * HANDLERS
      * ========================= */
@@ -112,7 +125,7 @@ export const useTaskForm = ({
                     kind: "task",
                     data: {
                         ...prev.data,
-                        [name]: name === "date" ? new Date(value) : value,
+                        [name]: value,
                     },
                 };
             }
@@ -122,7 +135,7 @@ export const useTaskForm = ({
                 kind: "subtask",
                 data: {
                     ...prev.data,
-                    [name]: name === "date" ? new Date(value) : value,
+                    [name]: value,
                 },
             };
         });
@@ -132,40 +145,52 @@ export const useTaskForm = ({
     /* =========================
      * CRUD - TASK
      * ========================= */
-    const createTask = () => {
+    const createTask = async () => {
         if (formData.kind !== "task") return;
 
-        const newTask: TTask = {
-            ...formData.data,
-            id: crypto.randomUUID(),
-            subtasks: [],
-        };
+        try {
+            const payload = normalizeTaskPayload(formData.data);
+            console.log(payload)
+            const createdTask = await taskService.createTask(payload);
+            console.log("Tarefa do post",createdTask)
 
-        setTasks((prev) => [newTask, ...prev]);
+            setTasks((prev) => [createdTask, ...prev]);
+        } catch (err) {
+            console.error("Erro ao criar tarefa:", err);
+        }
     };
 
-    const updateTask = () => {
+    const updateTask = async () => {
         if (formData.kind !== "task" || !initialTask) return;
 
-        const updatedTask: TTask = {
-            ...formData.data,
-            id: initialTask.id,
-            subtasks: (initialTask as TTask).subtasks,
-        };
+        try {
+            const updatedTask = await taskService.updateTask(
+                initialTask.id,
+                formData.data
+            );
 
-        setTasks((prev) =>
-            prev.map((t) => (t.id === initialTask.id ? updatedTask : t))
-        );
+            setTasks((prev) =>
+                prev.map((t) => (t.id === updatedTask.id ? updatedTask : t))
+            );
 
-        setSelectedTask?.(updatedTask);
+            setSelectedTask?.(updatedTask);
+        } catch (err) {
+            console.error("Erro ao atualizar tarefa:", err);
+        }
     };
 
-    const deleteTask = () => {
+    const deleteTask = async () => {
         if (!initialTask) return;
         if (!confirm("Deseja excluir a tarefa?")) return;
 
-        setTasks((prev) => prev.filter((t) => t.id !== initialTask.id));
-        setSelectedTask?.(null);
+        try {
+            await taskService.deleteTask(initialTask.id);
+
+            setTasks((prev) => prev.filter((t) => t.id !== initialTask.id));
+            setSelectedTask?.(null);
+        } catch (err) {
+            console.error("Erro ao deletar tarefa:", err);
+        }
     };
 
     /* =========================
@@ -230,13 +255,15 @@ export const useTaskForm = ({
     /* =========================
      * SUBMIT
      * ========================= */
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (isCreatingSubtask) {
             if (isCreating) createSubtask(); else updateSubtask();
         } else {
-            if (isCreating) createTask(); else updateTask();
+
+            if (isCreating) await createTask(); else await updateTask();
+
         }
 
         setFormData(getEmptyForm(isCreatingSubtask));
