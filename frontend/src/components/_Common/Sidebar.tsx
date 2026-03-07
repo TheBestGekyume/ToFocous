@@ -8,7 +8,7 @@ import {
   UserRound,
 } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 type SidebarProps = {
   open: boolean;
@@ -16,6 +16,15 @@ type SidebarProps = {
 };
 
 export const Sidebar = ({ open, setOpen }: SidebarProps) => {
+  const navigate = useNavigate();
+
+  const logOut = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user_id");
+    navigate("/acesso", { replace: true });
+  };
+
   return (
     <>
       <button
@@ -86,7 +95,7 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
           </nav>
 
           {/* FOOTER / LOGOUT */}
-          <button className="mt-auto flex items-center hover:text-red-500 duration-150">
+          <button onClick={logOut} className="mt-auto flex items-center hover:text-red-500 duration-150">
             <LogOut />
             <span className="px-3">Sair</span>
           </button>
