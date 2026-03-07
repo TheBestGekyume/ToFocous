@@ -13,25 +13,25 @@ function App() {
   // const token = localStorage.getItem("token");
   return (
     <div id="app" className="d-flex bg-background-task-section min-h-full">
-      <TasksProvider>
-        <Routes>
-          <Route path="/acesso" element={<Auth />} />
+      <Routes>
+        <Route path="/acesso" element={<Auth />} />
 
-          <Route
-            element={
-              <ProtectedRoute>
+        <Route
+          element={
+            <ProtectedRoute>
+              <TasksProvider>
                 <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="/" element={<Navigate to="/tarefas" replace />} />
-            <Route path="/tarefas" element={<TaskPage />} />
-            <Route path="/configuracoes" element={<Settings />} />
-            <Route path="/perfil" element={<Profile />} />
-            <Route path="/agenda" element={<Schedule />} />
-          </Route>
-        </Routes>
-      </TasksProvider>
+              </TasksProvider>
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/" element={<Navigate to="/tarefas" replace />} />
+          <Route path="/tarefas" element={<TaskPage />} />
+          <Route path="/configuracoes" element={<Settings />} />
+          <Route path="/perfil" element={<Profile />} />
+          <Route path="/agenda" element={<Schedule />} />
+        </Route>
+      </Routes>
     </div>
   );
 }

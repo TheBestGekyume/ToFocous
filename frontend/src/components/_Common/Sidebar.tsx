@@ -20,7 +20,7 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
 
   const logOut = () => {
     localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_roken");
+    localStorage.removeItem("refresh_token");
     localStorage.removeItem("user_id");
     navigate("/acesso", { replace: true });
   };
