@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from backend.models.auth import LoginData, SignUpData
+from backend.models.auth import LoginData, RefreshTokenRequest, SignUpData
 from supabase import create_client
 from backend.core.config import settings
 
@@ -17,7 +17,12 @@ def signup(data: SignUpData):
     try:
         response = supabase.auth.sign_up({
             "email": data.email,
-            "password": data.password
+            "password": data.password,
+            "options": {
+                "data": {
+                    "name": data.name
+                }
+            }
         })
         return {"message": "Usuário criado com sucesso"}
     except Exception as e:
@@ -45,3 +50,15 @@ def login(data: LoginData):
     except Exception as e:
         if "Email not confirmed" in str(e):
             raise HTTPException(status_code=400, detail="Confirme seu email antes de entrar.")
+        
+
+@router.post("/refresh")
+def refresh_session(data: RefreshTokenRequest):
+    response = supabase.auth.refresh_session({
+        "refresh_token": data.refresh_token
+    })
+
+    return {
+        "access_token": response.session.access_token,
+        "refresh_token": response.session.refresh_token
+    }

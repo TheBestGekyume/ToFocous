@@ -9,3 +9,7 @@ class LoginData(BaseModel):
 class SignUpData(BaseModel):
     email: EmailStr
     password: str
+    name: str
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
