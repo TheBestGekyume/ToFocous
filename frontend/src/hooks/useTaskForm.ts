@@ -76,6 +76,8 @@ export const useTaskForm = ({
                     },
                 });
             } else {
+                console.log("initialTask", initialTask)
+                console.log("initialTask.id", initialTask?.id)
                 setFormData({
                     kind: "task",
                     data: {
@@ -152,7 +154,7 @@ export const useTaskForm = ({
             const payload = normalizeTaskPayload(formData.data);
             console.log(payload)
             const createdTask = await taskService.createTask(payload);
-            console.log("Tarefa do post",createdTask)
+            console.log("Tarefa do post", createdTask)
 
             setTasks((prev) => [createdTask, ...prev]);
         } catch (err) {

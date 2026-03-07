@@ -1,5 +1,8 @@
 import { CheckCircle, Clock, AlertCircle } from "lucide-react";
 import type { TTask } from "../types/TTask";
+import type { TStatus, TPriority } from "../types/TTask";
+import type { JSX } from "react";
+
 
 export const PRIORITY_ORDER = { high: 1, medium: 2, low: 3 } as const;
 export const STATUS_ORDER = {
@@ -42,6 +45,30 @@ export const statusMap = {
     icon: <AlertCircle className="text-gray-200" size={18} />,
   },
 };
+
+export const statusOptions: { value: TStatus; label: string; icon: JSX.Element }[] = [
+  {
+    value: "unstarted",
+    label: "Não Iniciada",
+    icon: statusMap.unstarted.icon,
+  },
+  {
+    value: "inProgress",
+    label: "Em andamento",
+    icon: statusMap.inProgress.icon,
+  },
+  {
+    value: "concluded",
+    label: "Concluída",
+    icon: statusMap.concluded.icon,
+  },
+];
+
+export const priorityOptions: { value: TPriority; label: string }[] = [
+  { value: "low", label: "Baixa" },
+  { value: "medium", label: "Média" },
+  { value: "high", label: "Alta" },
+];
 
 /**
  * Função central de ordenação, isolada e reutilizável

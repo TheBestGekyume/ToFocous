@@ -18,6 +18,12 @@ export const TaskDetails = () => {
 
   const currentPriority = priorityMap[selectedTask.priority];
 
+  // console.log("selectedTask", selectedTask);
+  // console.log("priorityMap", priorityMap);
+  console.log("priority", selectedTask.priority);
+
+  if (!currentPriority) return null;
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col md:flex-row">
