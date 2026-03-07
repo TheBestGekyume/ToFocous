@@ -41,9 +41,25 @@ export const Task = ({ task }: TaskProps) => {
   };
 
   const handleBlur = async () => {
+    if (!localTask.title.trim() || !localTask.due_date) {
+      setLocalTask(task);
+      return;
+    }
+
     if (JSON.stringify(localTask) === JSON.stringify(task)) return;
 
     await taskService.updateTask(task.id, localTask);
+  };
+
+  const handleKeyDown = async (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      await handleBlur();
+    }
+
+    if (e.key === "Escape") {
+      setLocalTask(task);
+    }
   };
 
   const { msg: timeMessage, color: timeColor } = getTimeMessage(
@@ -73,6 +89,7 @@ export const Task = ({ task }: TaskProps) => {
               }`}
             >
               <input
+                required
                 value={
                   localTask.title.length > 60
                     ? `${localTask.title.substring(0, 60)}...`
@@ -80,6 +97,8 @@ export const Task = ({ task }: TaskProps) => {
                 }
                 onChange={(e) => handleChange("title", e.target.value)}
                 onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
+                placeholder={"Insira o Titulo"}
                 className="bg-transparent outline-none border border-transparent duration-100 focus:bg-zinc-700 focus:border-white rounded-md p-1 "
               />
             </h3>
@@ -87,10 +106,12 @@ export const Task = ({ task }: TaskProps) => {
             {localTask.status !== "concluded" && (
               <p className="text-md text-zinc-400 bg-zinc-950 px-2 py-1 rounded-sm">
                 <input
+                  required
                   type="date"
                   value={localTask.due_date}
                   onChange={(e) => handleChange("due_date", e.target.value)}
                   onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
                   className="hide-date-icon appearance-none"
                 />
               </p>
@@ -99,9 +120,11 @@ export const Task = ({ task }: TaskProps) => {
 
           <h4 className="text-zinc-400 w-full">
             <textarea
+              required
               value={localTask.description}
               onChange={(e) => handleChange("description", e.target.value)}
               onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
               className="w-full bg-transparent outline-none resize-none duration-100 focus:bg-zinc-700 focus:border-white rounded-sm"
             />
           </h4>
