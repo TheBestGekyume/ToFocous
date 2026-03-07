@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { registerUser } from "../../services/authService";
+import { signUpUser } from "../../services/authService";
 
-export const RegisterForm = ({ onSwitch }: { onSwitch: () => void }) => {
+export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +24,7 @@ export const RegisterForm = ({ onSwitch }: { onSwitch: () => void }) => {
     setLoading(true);
 
     try {
-      await registerUser({
+      await signUpUser({
         username,
         email,
         password,

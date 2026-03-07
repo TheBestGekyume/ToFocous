@@ -19,18 +19,19 @@ export async function loginUser(payload: LoginPayload) {
     "/auth/login",
     payload
   );
-
+  console.log("RESPONSE.DATA = ", response)
   return response.data;
 }
 
-//REGISTER
+//SIGNUP
 
-type RegisterPayload = {
+type SignupPayload = {
   username: string;
   email: string;
   password: string;
 };
 
-export async function registerUser(payload: RegisterPayload) {
-  await api.post("/auth/register", payload);
+export async function signUpUser(payload: SignupPayload) {
+  /* const response = */await api.post("/auth/signup", payload);
+  // return response.data;
 }

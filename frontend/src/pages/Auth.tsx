@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { LoginForm } from "../components/Auth/Login";
-import { RegisterForm } from "../components/Auth/Register";
+import { SignUpForm } from "../components/Auth/SignUp";
 import { useNavigate } from "react-router-dom";
-type AuthMode = "login" | "register";
+type AuthMode = "login" | "signUp";
 
 const formVariants: Variants = {
   initial: {
@@ -56,9 +56,9 @@ export const Auth = () => {
           </h1>
 
           {mode === "login" ? (
-            <LoginForm onSwitch={() => setMode("register")} />
+            <LoginForm onSwitch={() => setMode("signUp")} />
           ) : (
-            <RegisterForm onSwitch={() => setMode("login")} />
+            <SignUpForm onSwitch={() => setMode("login")} />
           )}
         </motion.div>
       </AnimatePresence>
