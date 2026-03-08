@@ -17,7 +17,7 @@ type TaskProps = {
   setTasks: React.Dispatch<React.SetStateAction<TTask[]>>;
 };
 
-export const Task = ({ task }: TaskProps) => {
+export const Task = ({ task, setTasks }: TaskProps) => {
   const { setSelectedTask } = useTasks();
   const [localTask, setLocalTask] = useState(task);
 
@@ -54,12 +54,22 @@ export const Task = ({ task }: TaskProps) => {
   const handleKeyDown = async (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      await handleBlur();
+      (e.currentTarget as HTMLInputElement | HTMLTextAreaElement).blur();
     }
 
     if (e.key === "Escape") {
       setLocalTask(task);
+      (e.currentTarget as HTMLInputElement | HTMLTextAreaElement).blur();
     }
+  };
+
+  const handleDeleteTask = async () => {
+    const deleteConfirm = window.confirm(
+      `Queer mesmo deletar a tarefa "${localTask.title}"`
+    );
+    if (!deleteConfirm) return;
+    await taskService.deleteTask(localTask.id);
+    setTasks((prev) => prev.filter((t) => t.id !== localTask.id));
   };
 
   const { msg: timeMessage, color: timeColor } = getTimeMessage(
@@ -120,7 +130,6 @@ export const Task = ({ task }: TaskProps) => {
 
           <h4 className="text-zinc-400 w-full">
             <textarea
-              required
               value={localTask.description}
               onChange={(e) => handleChange("description", e.target.value)}
               onBlur={handleBlur}
@@ -158,7 +167,10 @@ export const Task = ({ task }: TaskProps) => {
               onChange={changeStatus}
               buttonClass={`flex items-center gap-2 rounded-sm px-2 py-1 ${currentStatus.bg} ${currentStatus.color}`}
             />
-            <button className="bg-red-600 hover:bg-red-800 duration-150 p-2 rounded-full">
+            <button
+              onClick={() => handleDeleteTask()}
+              className="bg-red-600 hover:bg-red-800 duration-150 p-2 rounded-full"
+            >
               <Trash2 size={20} />
             </button>
           </div>
