@@ -4,46 +4,40 @@ import { TaskForm } from "../components/Tasks/TaskForm";
 import { Modal } from "../components/Tasks/Modal";
 import { priorityMap, statusMap, formatDateBR } from "../utils/taskUtils";
 import { ArrowLeft, Check, Trash2 } from "lucide-react";
-// import type { TSubTask } from "../../types/TTask";
 import { taskService } from "../services/taskService";
 import { useParams, useNavigate } from "react-router-dom";
 import { TaskItem } from "../components/Tasks/TaskItem";
 
 export const SingleTaskPage = () => {
-  const { selectedTask, setSelectedTask, setTasks } = useTasks();
+  const { setSelectedTask, setTasks, tasks } = useTasks();
   const [isCreatingSubtask, setIsCreatingSubtask] = useState(false);
+  const { toggleSubtaskStatus, deleteSubtask } = useTasks();
   const { taskId } = useParams();
   const navigate = useNavigate();
 
-  const { toggleSubtaskStatus, deleteSubtask } = useTasks();
+  const task = tasks.find((t) => t.id === taskId);
+
   useEffect(() => {
     const loadSubtasks = async () => {
-      if (
-        !selectedTask ||
-        selectedTask.id !== taskId ||
-        selectedTask.subtasks?.length
-      )
-        return;
+      if (!taskId || task?.subtasks?.length) return;
 
       try {
-        const subtasks = await taskService.getSubtasks(selectedTask.id);
+        const subtasks = await taskService.getSubtasks(taskId);
 
         setTasks((prev) =>
-          prev.map((t) => (t.id === selectedTask.id ? { ...t, subtasks } : t))
+          prev.map((t) => (t.id === taskId ? { ...t, subtasks } : t))
         );
-
-        setSelectedTask((prev) => (prev ? { ...prev, subtasks } : prev));
       } catch (err) {
         console.error("Erro ao carregar subtasks", err);
       }
     };
 
     loadSubtasks();
-  }, [selectedTask, selectedTask?.id, setSelectedTask, setTasks]);
+  }, [taskId, task, setTasks]);
 
-  if (!selectedTask) return null;
+  if (!task) return <p>Carregando...</p>;
 
-  const currentPriority = priorityMap[selectedTask.priority];
+  const currentPriority = priorityMap[task.priority];
 
   if (!currentPriority) return null;
 
@@ -62,19 +56,15 @@ export const SingleTaskPage = () => {
           </button>
 
           <section className="mx-auto w-full px-15">
-            <TaskItem
-              key={selectedTask.id}
-              task={selectedTask}
-              setTasks={setTasks}
-            />
+            <TaskItem key={task.id} task={task} setTasks={setTasks} />
           </section>
         </div>
 
         <hr className="my-3 text-accent/75" />
 
-        {selectedTask.subtasks && selectedTask.subtasks.length > 0 && (
+        {task.subtasks && task.subtasks.length > 0 && (
           <section className="flex flex-col gap-2">
-            {selectedTask.subtasks.map((subtask) => {
+            {task.subtasks.map((subtask) => {
               const isDone = subtask.status === "concluded";
               const statusInfo = statusMap[subtask.status];
 
@@ -84,9 +74,7 @@ export const SingleTaskPage = () => {
                   className="flex items-center gap-5 p-2 bg-zinc-800 border border-zinc-600 rounded-md"
                 >
                   <button
-                    onClick={() =>
-                      toggleSubtaskStatus(selectedTask.id, subtask.id)
-                    }
+                    onClick={() => toggleSubtaskStatus(task.id, subtask.id)}
                     className={`
     w-6 h-6 flex items-center justify-center rounded-md border
     transition-all duration-300 cursor-pointer
@@ -129,7 +117,7 @@ export const SingleTaskPage = () => {
                     </div>
                     <button
                       className="p-2 bg-red-600 hover:bg-red-800 rounded-full duration-300"
-                      onClick={() => deleteSubtask(selectedTask.id, subtask.id)}
+                      onClick={() => deleteSubtask(task.id, subtask.id)}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -159,7 +147,7 @@ export const SingleTaskPage = () => {
           <TaskForm
             isCreating={true}
             isCreatingSubtask
-            taskToEdit={selectedTask}
+            taskToEdit={task}
             setTasks={setTasks}
             setSelectedTask={setSelectedTask}
             onClose={() => setIsCreatingSubtask(false)}
