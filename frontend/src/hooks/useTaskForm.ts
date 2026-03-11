@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { TTask, TSubTask, TCreateTaskDTO } from "../types/TTask";
+import type { TTask, TSubTask, TCreateTaskDTO, TCreateSubtaskDTO } from "../types/TTask";
 import { taskService } from "../services/taskService";
 
 type UseTaskFormProps = {
@@ -111,6 +111,16 @@ export const useTaskForm = ({
         due_time: data.due_time || null,
     });
 
+    const normalizeSubtaskPayload = (data: TSubTask): TCreateSubtaskDTO => ({
+        title: data.title,
+        description: data.description || null,
+        due_date: data.due_date,
+        priority: data.priority,
+        start_date: data.start_date || null,
+        start_time: data.start_time || null,
+        due_time: data.due_time || null,
+    });
+
     /* =========================
      * HANDLERS
      * ========================= */
@@ -181,78 +191,94 @@ export const useTaskForm = ({
         }
     };
 
-    const deleteTask = async () => {
-        if (!initialTask) return;
-        if (!confirm("Deseja excluir a tarefa?")) return;
+    // const deleteTask = async () => {
+    //     if (!initialTask) return;
+    //     if (!confirm("Deseja excluir a tarefa?")) return;
 
-        try {
-            await taskService.deleteTask(initialTask.id);
+    //     try {
+    //         await taskService.deleteTask(initialTask.id);
 
-            setTasks((prev) => prev.filter((t) => t.id !== initialTask.id));
-            setSelectedTask?.(null);
-        } catch (err) {
-            console.error("Erro ao deletar tarefa:", err);
-        }
-    };
+    //         setTasks((prev) => prev.filter((t) => t.id !== initialTask.id));
+    //         setSelectedTask?.(null);
+    //     } catch (err) {
+    //         console.error("Erro ao deletar tarefa:", err);
+    //     }
+    // };
 
     /* =========================
      * CRUD - SUBTASK
      * ========================= */
-    const createSubtask = () => {
+    const createSubtask = async () => {
         if (formData.kind !== "subtask" || !initialTask) return;
 
-        const newSubtask: TSubTask = {
-            ...formData.data,
-            id: crypto.randomUUID(),
-        };
+        try {
+            const payload = normalizeSubtaskPayload(formData.data);
 
-        setTasks((prev) =>
-            prev.map((task) =>
-                task.id === initialTask.id
-                    ? { ...task, subtasks: [...task.subtasks, newSubtask] }
-                    : task
-            )
-        );
+            const created = await taskService.createSubtask(initialTask.id, payload);
 
-        setSelectedTask?.((prev) =>
-            prev?.id === initialTask.id
-                ? { ...prev, subtasks: [...prev.subtasks, newSubtask] }
-                : prev
-        );
+            setTasks((prev) =>
+                prev.map((task) =>
+                    task.id === initialTask.id
+                        ? { ...task, subtasks: [...task.subtasks, created] }
+                        : task
+                )
+            );
+
+            setSelectedTask?.((prev) =>
+                prev?.id === initialTask.id
+                    ? { ...prev, subtasks: [...prev.subtasks, created] }
+                    : prev
+            );
+        } catch (err) {
+            console.error("Erro ao criar subtask", err);
+        }
     };
 
-    const updateSubtask = () => {
+    const updateSubtask = async () => {
         if (formData.kind !== "subtask" || !parentTask || !initialTask) return;
 
-        const updatedSubtask: TSubTask = {
-            ...formData.data,
-            id: initialTask.id,
-        };
+        try {
+            const updated = await taskService.updateSubtask(
+                initialTask.id,
+                parentTask.id,
+                formData.data
+            );
 
-        setTasks((prev) =>
-            prev.map((task) =>
-                task.id === parentTask.id
-                    ? {
-                        ...task,
-                        subtasks: task.subtasks.map((st) =>
-                            st.id === initialTask.id ? updatedSubtask : st
-                        ),
-                    }
-                    : task
-            )
-        );
-
-        setSelectedTask?.((prev) =>
-            prev?.id === parentTask.id
-                ? {
-                    ...prev,
-                    subtasks: prev.subtasks.map((st) =>
-                        st.id === initialTask.id ? updatedSubtask : st
-                    ),
-                }
-                : prev
-        );
+            setTasks((prev) =>
+                prev.map((task) =>
+                    task.id === parentTask.id
+                        ? {
+                            ...task,
+                            subtasks: task.subtasks.map((st) =>
+                                st.id === updated.id ? updated : st
+                            ),
+                        }
+                        : task
+                )
+            );
+        } catch (err) {
+            console.error("Erro ao atualizar subtask", err);
+        }
     };
+
+    // const deleteSubtask = async (taskId: string, subtaskId: string) => {
+    //     try {
+    //         await taskService.deleteSubtask(subtaskId, taskId);
+
+    //         setTasks((prev) =>
+    //             prev.map((task) =>
+    //                 task.id === taskId
+    //                     ? {
+    //                         ...task,
+    //                         subtasks: task.subtasks.filter((st) => st.id !== subtaskId),
+    //                     }
+    //                     : task
+    //             )
+    //         );
+    //     } catch (err) {
+    //         console.error("Erro ao deletar subtask", err);
+    //     }
+    // };
 
     /* =========================
      * SUBMIT
@@ -277,6 +303,7 @@ export const useTaskForm = ({
         formData: formData.data,
         handleChange,
         handleSubmit,
-        deleteTask,
+        // deleteTask,
+        // deleteSubtask
     };
 };

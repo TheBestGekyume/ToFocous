@@ -20,7 +20,7 @@ export const TaskForm = ({
   setSelectedTask,
   onClose,
 }: TaskFormProps) => {
-  const { formData, handleChange, handleSubmit, deleteTask } = useTaskForm({
+  const { formData, handleChange, handleSubmit } = useTaskForm({
     initialTask: taskToEdit,
     parentTask,
     isCreating,
@@ -116,7 +116,7 @@ export const TaskForm = ({
           {isCreating ? "+ Adicionar" : "Salvar alterações"}
         </button>
 
-        {!isCreating && !isCreatingSubtask && (
+        {/* {!isCreating && !isCreatingSubtask && (
           <button
             type="button"
             onClick={deleteTask}
@@ -124,7 +124,7 @@ export const TaskForm = ({
           >
             Deletar
           </button>
-        )}
+        )} */}
       </div>
     </form>
   );
