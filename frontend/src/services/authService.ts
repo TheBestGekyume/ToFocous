@@ -20,6 +20,10 @@ export async function loginUser(payload: LoginPayload) {
     payload
   );
   console.log("RESPONSE.DATA = ", response)
+  localStorage.setItem("access_token", response.data.access_token);
+  localStorage.setItem("refresh_token", response.data.refresh_token);
+  localStorage.setItem("user_id", response.data.user_id);
+
   return response.data;
 }
 

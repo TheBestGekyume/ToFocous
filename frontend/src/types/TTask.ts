@@ -39,3 +39,13 @@ export type TCreateTaskDTO = {
     start_time: string | null;
     due_time: string | null;
 };
+
+export type TCreateSubtaskDTO = {
+  title: string;
+  description: string | null;
+  due_date: string;
+  priority: TPriority;
+  start_date: string | null;
+  start_time: string | null;
+  due_time: string | null;
+};

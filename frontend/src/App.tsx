@@ -7,10 +7,9 @@ import { Settings } from "./pages/Settings";
 import { AppLayout } from "./AppLayout";
 import { Profile } from "./pages/Profile";
 import { Schedule } from "./pages/Schedule";
-import ProtectedRoute from "./components/_Common/ProtectedRoute";
+import { ProtectedRoute } from "./components/_Common/ProtectedRoute";
 
 function App() {
-  // const token = localStorage.getItem("token");
   return (
     <div id="app" className="d-flex bg-background-task-section min-h-full">
       <Routes>

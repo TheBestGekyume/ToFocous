@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTasks } from "../../contexts/TasksContext";
 import { TaskForm } from "./TaskForm";
 import { Modal } from "./Modal";
 import { priorityMap, statusMap, formatDateBR } from "../../utils/taskUtils";
 import { ArrowLeft, Check, Pencil, Trash2 } from "lucide-react";
 import type { TSubTask } from "../../types/TTask";
+import { taskService } from "../../services/taskService";
 
 export const TaskDetails = () => {
   const { selectedTask, setSelectedTask, setTasks } = useTasks();
@@ -13,6 +14,24 @@ export const TaskDetails = () => {
   const [editingSubtask, setEditingSubtask] = useState<TSubTask | null>(null);
 
   const { toggleSubtaskStatus, deleteSubtask } = useTasks();
+  useEffect(() => {
+    const loadSubtasks = async () => {
+      if (!selectedTask || selectedTask.subtasks?.length) return;
+      try {
+        const subtasks = await taskService.getSubtasks(selectedTask.id);
+
+        setTasks((prev) =>
+          prev.map((t) => (t.id === selectedTask.id ? { ...t, subtasks } : t))
+        );
+
+        setSelectedTask((prev) => (prev ? { ...prev, subtasks } : prev));
+      } catch (err) {
+        console.error("Erro ao carregar subtasks", err);
+      }
+    };
+
+    loadSubtasks();
+  }, [selectedTask, selectedTask?.id, setSelectedTask, setTasks]);
 
   if (!selectedTask) return null;
 

@@ -55,11 +55,6 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       isAscending: true,
     });
 
-  // useEffect(
-  //   () => localStorage.setItem("tasks", JSON.stringify(tasks)),
-  //   [tasks]
-  // );
-
   useEffect(() => {
   const loadTasks = async () => {
     try {
