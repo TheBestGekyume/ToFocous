@@ -1,11 +1,10 @@
 import { TaskForm } from "./TaskForm";
-import { Task } from "./Task";
+import { TaskItem } from "./TaskItem";
 import { SortTasks } from "./SortTasks";
 import { useTasks } from "../../contexts/TasksContext";
-import { TaskDetails } from "./TaskDetails";
 
 export const Tasks = () => {
-  const { tasks, setTasks, selectedTask } = useTasks();
+  const { tasks, setTasks } = useTasks();
 
   const clearCompleted = () => {
     setTasks((prev) => prev.filter((task) => task.status !== "concluded"));
@@ -14,10 +13,7 @@ export const Tasks = () => {
   return (
     <section id="tasks" className="p-5 sm:p-8 md:p-10 md:pt-0">
       <div className="flex flex-col bg-background-header/40 mx-auto w-full max-w-4xl border border-zinc-500 rounded-xl p-5 gap-8">
-        {/* Se uma task está selecionada, mostra apenas ela */}
-        {selectedTask ? (
-          <TaskDetails />
-        ) : (
+        
           <>
             <TaskForm setTasks={setTasks} isCreating={true} />
 
@@ -36,7 +32,7 @@ export const Tasks = () => {
             <div className="flex flex-col gap-3">
               {tasks.length > 0 ? (
                 tasks.map((task) => (
-                  <Task key={task.id} task={task} setTasks={setTasks} />
+                  <TaskItem key={task.id} task={task} setTasks={setTasks} />
                 ))
               ) : (
                 <p className="text-zinc-500 text-center italic">
@@ -45,7 +41,7 @@ export const Tasks = () => {
               )}
             </div>
           </>
-        )}
+        
       </div>
     </section>
   );

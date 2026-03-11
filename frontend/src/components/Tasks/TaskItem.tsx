@@ -4,6 +4,7 @@ import { Eye, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { taskService } from "../../services/taskService";
 import { Dropdown } from "./Dropdown";
+import { useNavigate } from "react-router-dom";
 import {
   priorityMap,
   statusMap,
@@ -17,9 +18,10 @@ type TaskProps = {
   setTasks: React.Dispatch<React.SetStateAction<TTask[]>>;
 };
 
-export const Task = ({ task, setTasks }: TaskProps) => {
-  const { setSelectedTask } = useTasks();
+export const TaskItem = ({ task, setTasks }: TaskProps) => {
+  const { setSelectedTask, selectedTask } = useTasks();
   const [localTask, setLocalTask] = useState(task);
+  const navigate = useNavigate();
 
   const changeStatus = async (status: TTask["status"]) => {
     const updated = { ...localTask, status };
@@ -144,29 +146,39 @@ export const Task = ({ task, setTasks }: TaskProps) => {
         </div>
 
         <div className="flex flex-col items-end justify-center gap-4 text-sm">
-          <div className="flex gap-4 w-max">
-            <Dropdown
-              value={localTask.priority}
-              options={priorityOptions}
-              onChange={changePriority}
-              buttonClass={`font-bold px-2 py-1 ${currentPriority.color}`}
-              renderLabel={(value) => `Prioridade: ${priorityMap[value].label}`}
-            />
-            <button
-              onClick={() => setSelectedTask(task)}
-              className="bg-indigo-600 hover:bg-indigo-800 duration-150 p-2 rounded-full"
-            >
-              <Eye size={20} />
-            </button>
-          </div>
+          {!selectedTask && (
+            <div className="flex gap-4 w-max">
+              <Dropdown
+                value={localTask.priority}
+                options={priorityOptions}
+                onChange={changePriority}
+                buttonClass={`font-bold px-2 py-1 ${currentPriority.color}`}
+                renderLabel={(value) =>
+                  `Prioridade: ${priorityMap[value].label}`
+                }
+              />
+              <button
+                onClick={() => {
+                  setSelectedTask(task);
+                  navigate(`/tarefa/${task.id}`);
+                }}
+                className="bg-indigo-600 hover:bg-indigo-800 duration-150 p-2 rounded-full"
+              >
+                <Eye size={20} />
+              </button>
+            </div>
+          )}
 
-          <div className="flex gap-4">
+          <div
+            className={`flex ${selectedTask ? "flex-col" : "flex-row"}  items-end gap-4`}
+          >
             <Dropdown
               value={localTask.status}
               options={statusOptions}
               onChange={changeStatus}
               buttonClass={`flex items-center gap-2 rounded-sm px-2 py-1 ${currentStatus.bg} ${currentStatus.color}`}
             />
+
             <button
               onClick={() => handleDeleteTask()}
               className="bg-red-600 hover:bg-red-800 duration-150 p-2 rounded-full"
