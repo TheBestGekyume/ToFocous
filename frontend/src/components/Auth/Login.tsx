@@ -15,12 +15,7 @@ export const LoginForm = ({ onSwitch }: { onSwitch: () => void }) => {
     setLoading(true);
 
     try {
-      const data = await loginUser({ email, password });
-
-      // Salvar tokens
-      localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("refresh_token", data.refresh_token);
-      localStorage.setItem("user_id", data.user_id);
+      await loginUser({ email, password });    
       navigate("/");
       console.log("Login realizado com sucesso");
 
