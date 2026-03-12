@@ -4,36 +4,27 @@ import { TaskForm } from "../components/Tasks/TaskForm";
 import { Modal } from "../components/Tasks/Modal";
 import { priorityMap, statusMap, formatDateBR } from "../utils/taskUtils";
 import { ArrowLeft, Check, Trash2 } from "lucide-react";
-import { taskService } from "../services/taskService";
 import { useParams, useNavigate } from "react-router-dom";
 import { TaskItem } from "../components/Tasks/TaskItem";
 
 export const SingleTaskPage = () => {
-  const { setSelectedTask, setTasks, tasks } = useTasks();
+  const {
+    setSelectedTask,
+    tasks,
+    toggleSubtaskStatus,
+    deleteSubtask,
+    getSubtTasks,
+  } = useTasks();
   const [isCreatingSubtask, setIsCreatingSubtask] = useState(false);
-  const { toggleSubtaskStatus, deleteSubtask } = useTasks();
   const { taskId } = useParams();
   const navigate = useNavigate();
 
   const task = tasks.find((t) => t.id === taskId);
 
   useEffect(() => {
-    const loadSubtasks = async () => {
-      if (!taskId || task?.subtasks?.length) return;
-
-      try {
-        const subtasks = await taskService.getSubtasks(taskId);
-
-        setTasks((prev) =>
-          prev.map((t) => (t.id === taskId ? { ...t, subtasks } : t))
-        );
-      } catch (err) {
-        console.error("Erro ao carregar subtasks", err);
-      }
-    };
-
-    loadSubtasks();
-  }, [taskId, task, setTasks]);
+    if (!taskId) return;
+    getSubtTasks(taskId);
+  }, [taskId, getSubtTasks]);
 
   if (!task) return <p>Carregando...</p>;
 
@@ -56,7 +47,7 @@ export const SingleTaskPage = () => {
           </button>
 
           <section className="mx-auto w-full px-15">
-            <TaskItem key={task.id} task={task} setTasks={setTasks} />
+            <TaskItem key={task.id} task={task} />
           </section>
         </div>
 
@@ -147,9 +138,7 @@ export const SingleTaskPage = () => {
           <TaskForm
             isCreating={true}
             isCreatingSubtask
-            taskToEdit={task}
-            setTasks={setTasks}
-            setSelectedTask={setSelectedTask}
+            parentTask={task}
             onClose={() => setIsCreatingSubtask(false)}
           />
         </Modal>

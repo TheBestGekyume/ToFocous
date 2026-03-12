@@ -2,7 +2,6 @@ import type { TTask } from "../../types/TTask";
 import { useTasks } from "../../contexts/TasksContext";
 import { Eye, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { taskService } from "../../services/taskService";
 import { Dropdown } from "./Dropdown";
 import { useNavigate } from "react-router-dom";
 import {
@@ -15,24 +14,26 @@ import {
 
 type TaskProps = {
   task: TTask;
-  setTasks: React.Dispatch<React.SetStateAction<TTask[]>>;
+  // setTasks: React.Dispatch<React.SetStateAction<TTask[]>>;
 };
 
-export const TaskItem = ({ task, setTasks }: TaskProps) => {
+export const TaskItem = ({ task/*, setTasks*/ }: TaskProps) => {
   const { setSelectedTask, selectedTask } = useTasks();
   const [localTask, setLocalTask] = useState(task);
   const navigate = useNavigate();
+  const { updateTask } = useTasks();
+  const { deleteTask } = useTasks();
 
   const changeStatus = async (status: TTask["status"]) => {
     const updated = { ...localTask, status };
     setLocalTask(updated);
-    await taskService.updateTask(task.id, updated);
+    await updateTask(task.id, updated);
   };
 
   const changePriority = async (priority: TTask["priority"]) => {
     const updated = { ...localTask, priority };
     setLocalTask(updated);
-    await taskService.updateTask(task.id, updated);
+    await updateTask(task.id, updated);
   };
 
   const handleChange = <K extends keyof TTask>(field: K, value: TTask[K]) => {
@@ -50,7 +51,7 @@ export const TaskItem = ({ task, setTasks }: TaskProps) => {
 
     if (JSON.stringify(localTask) === JSON.stringify(task)) return;
 
-    await taskService.updateTask(task.id, localTask);
+    await updateTask(task.id, localTask);
   };
 
   const handleKeyDown = async (e: React.KeyboardEvent) => {
@@ -70,8 +71,9 @@ export const TaskItem = ({ task, setTasks }: TaskProps) => {
       `Queer mesmo deletar a tarefa "${localTask.title}"`
     );
     if (!deleteConfirm) return;
-    await taskService.deleteTask(localTask.id);
-    setTasks((prev) => prev.filter((t) => t.id !== localTask.id));
+    await deleteTask(localTask.id);
+
+    // setTasks((prev) => prev.filter((t) => t.id !== localTask.id));
   };
 
   const { msg: timeMessage, color: timeColor } = getTimeMessage(

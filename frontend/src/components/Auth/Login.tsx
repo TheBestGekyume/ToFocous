@@ -17,7 +17,7 @@ export const LoginForm = ({ onSwitch }: { onSwitch: () => void }) => {
     try {
       await loginUser({ email, password });    
       navigate("/");
-      console.log("Login realizado com sucesso");
+      // console.log("Login realizado com sucesso");
 
     } catch (err: unknown) {
       setError("Email ou senha inválidos");

@@ -6,18 +6,14 @@ type TaskFormProps = {
   parentTask?: TTask;
   isCreating: boolean;
   isCreatingSubtask?: boolean;
-  setTasks: React.Dispatch<React.SetStateAction<TTask[]>>;
-  setSelectedTask?: React.Dispatch<React.SetStateAction<TTask | null>>;
   onClose?: () => void;
 };
 
 export const TaskForm = ({
-  setTasks,
   isCreating,
   isCreatingSubtask,
   taskToEdit,
   parentTask,
-  setSelectedTask,
   onClose,
 }: TaskFormProps) => {
   const { formData, handleChange, handleSubmit } = useTaskForm({
@@ -25,8 +21,6 @@ export const TaskForm = ({
     parentTask,
     isCreating,
     isCreatingSubtask,
-    setTasks,
-    setSelectedTask,
     onClose,
   });
 
@@ -116,15 +110,6 @@ export const TaskForm = ({
           {isCreating ? "+ Adicionar" : "Salvar alterações"}
         </button>
 
-        {/* {!isCreating && !isCreatingSubtask && (
-          <button
-            type="button"
-            onClick={deleteTask}
-            className="px-6 py-2 h-10 rounded-md bg-red-600 hover:bg-red-700 font-semibold"
-          >
-            Deletar
-          </button>
-        )} */}
       </div>
     </form>
   );
