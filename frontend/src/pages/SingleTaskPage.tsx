@@ -6,6 +6,7 @@ import { priorityMap, statusMap, formatDateBR } from "../utils/taskUtils";
 import { ArrowLeft, Check, Trash2 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { TaskItem } from "../components/Tasks/TaskItem";
+import { LoadingOverlay } from "../components/_Common/LoadingOverlay";
 
 export const SingleTaskPage = () => {
   const {
@@ -16,6 +17,8 @@ export const SingleTaskPage = () => {
     getSubtTasks,
   } = useTasks();
   const [isCreatingSubtask, setIsCreatingSubtask] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const { taskId } = useParams();
   const navigate = useNavigate();
 
@@ -34,6 +37,8 @@ export const SingleTaskPage = () => {
 
   return (
     <section className="flex items-center flex-col w-full pt-5">
+      <LoadingOverlay show={loading} />
+
       <div className="flex flex-col w-3/4 p-5 gap-5">
         <div className="flex flex-col md:flex-row">
           <button
@@ -108,7 +113,12 @@ export const SingleTaskPage = () => {
                     </div>
                     <button
                       className="p-2 bg-red-600 hover:bg-red-800 rounded-full duration-300"
-                      onClick={() => deleteSubtask(task.id, subtask.id)}
+                      // onClick={() => deleteSubtask(task.id, subtask.id)}
+                      onClick={async () => {
+                        setLoading(true);
+                        await deleteSubtask(task.id, subtask.id);
+                        setLoading(false);
+                      }}
                     >
                       <Trash2 size={18} />
                     </button>

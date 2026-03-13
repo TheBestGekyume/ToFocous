@@ -11,18 +11,20 @@ import {
   statusOptions,
   priorityOptions,
 } from "../../utils/taskUtils";
+import { LoadingOverlay } from "../_Common/LoadingOverlay";
 
 type TaskProps = {
   task: TTask;
   // setTasks: React.Dispatch<React.SetStateAction<TTask[]>>;
 };
 
-export const TaskItem = ({ task/*, setTasks*/ }: TaskProps) => {
+export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
   const { setSelectedTask, selectedTask } = useTasks();
   const [localTask, setLocalTask] = useState(task);
   const navigate = useNavigate();
   const { updateTask } = useTasks();
   const { deleteTask } = useTasks();
+  const [loading, setLoading] = useState(false);
 
   const changeStatus = async (status: TTask["status"]) => {
     const updated = { ...localTask, status };
@@ -89,6 +91,7 @@ export const TaskItem = ({ task/*, setTasks*/ }: TaskProps) => {
 
   return (
     <>
+      <LoadingOverlay show={loading} />
       <div
         className={`flex justify-between items-center p-3 border-2
             ${currentPriority.border} rounded-lg bg-zinc-800`}
@@ -182,7 +185,11 @@ export const TaskItem = ({ task/*, setTasks*/ }: TaskProps) => {
             />
 
             <button
-              onClick={() => handleDeleteTask()}
+              onClick={async () => {
+                setLoading(true);
+                await handleDeleteTask();
+                setLoading(false);
+              }}
               className="bg-red-600 hover:bg-red-800 duration-150 p-2 rounded-full"
             >
               <Trash2 size={20} />

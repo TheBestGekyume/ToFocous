@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useTaskForm } from "../../hooks/useTaskForm";
 import type { TTask, TSubTask } from "../../types/TTask";
+import { LoadingOverlay } from "../_Common/LoadingOverlay";
 
 type TaskFormProps = {
   taskToEdit?: TTask | TSubTask;
@@ -24,93 +26,104 @@ export const TaskForm = ({
     onClose,
   });
 
+  const [loading, setLoading] = useState(false);
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={`flex flex-wrap ${
-        isCreating ? "items-start" : "items-end"
-      } gap-4`}
-    >
-      <fieldset className="flex flex-col flex-1 min-w-[250px]">
-        <label htmlFor="title" className="font-semibold mb-1">
-          Título
-        </label>
-        <input
-          id="title"
-          name="title"
-          type="text"
-          placeholder="Adicionar nova tarefa..."
-          value={formData.title}
-          onChange={handleChange}
-          autoComplete="off"
-          className="rounded-md bg-zinc-700 p-2 h-10"
-          required
-        />
-      </fieldset>
-
-      {!isCreatingSubtask && (
+    <>
+      <LoadingOverlay show={loading} />
+      <form
+        onSubmit={async (e) => {
+          setLoading(true);
+          try {
+            await handleSubmit(e);
+          } finally {
+            setLoading(false);
+          }
+        }}
+        className={`flex flex-wrap ${
+          isCreating ? "items-start" : "items-end"
+        } gap-4`}
+      >
         <fieldset className="flex flex-col flex-1 min-w-[250px]">
-          <label className="font-semibold mb-1">Prioridade</label>
-          <select
-            name="priority"
-            value={(formData as TTask).priority}
+          <label htmlFor="title" className="font-semibold mb-1">
+            Título
+          </label>
+          <input
+            id="title"
+            name="title"
+            type="text"
+            placeholder="Adicionar nova tarefa..."
+            value={formData.title}
+            onChange={handleChange}
+            autoComplete="off"
+            className="rounded-md bg-zinc-700 p-2 h-10"
+            required
+          />
+        </fieldset>
+
+        {!isCreatingSubtask && (
+          <fieldset className="flex flex-col flex-1 min-w-[250px]">
+            <label className="font-semibold mb-1">Prioridade</label>
+            <select
+              name="priority"
+              value={(formData as TTask).priority}
+              onChange={handleChange}
+              className="rounded-md bg-zinc-700 p-2 h-10"
+            >
+              <option value="low">Baixa</option>
+              <option value="medium">Média</option>
+              <option value="high">Alta</option>
+            </select>
+          </fieldset>
+        )}
+
+        <fieldset className="flex flex-col min-w-40">
+          <label className="font-semibold mb-1">Data</label>
+          <input
+            name="due_date"
+            type="date"
+            value={formData.due_date}
             onChange={handleChange}
             className="rounded-md bg-zinc-700 p-2 h-10"
-          >
-            <option value="low">Baixa</option>
-            <option value="medium">Média</option>
-            <option value="high">Alta</option>
-          </select>
+          />
         </fieldset>
-      )}
 
-      <fieldset className="flex flex-col min-w-40">
-        <label className="font-semibold mb-1">Data</label>
-        <input
-          name="due_date"
-          type="date"
-          value={formData.due_date}
-          onChange={handleChange}
-          className="rounded-md bg-zinc-700 p-2 h-10"
-        />
-      </fieldset>
+        {!isCreating && !isCreatingSubtask && (
+          <fieldset className="flex flex-col flex-1 min-w-40">
+            <label className="font-semibold mb-1">Status</label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="rounded-md bg-zinc-700 p-2 h-10"
+            >
+              <option value="unstarted">Não iniciada</option>
+              <option value="inProgress">Em andamento</option>
+              <option value="concluded">Concluída</option>
+            </select>
+          </fieldset>
+        )}
 
-      {!isCreating && !isCreatingSubtask && (
-        <fieldset className="flex flex-col flex-1 min-w-40">
-          <label className="font-semibold mb-1">Status</label>
-          <select
-            name="status"
-            value={formData.status}
+        <fieldset className="flex flex-col basis-full min-w-40">
+          <label className="font-semibold mb-1">Descrição</label>
+          <textarea
+            name="description"
+            value={formData.description}
             onChange={handleChange}
-            className="rounded-md bg-zinc-700 p-2 h-10"
-          >
-            <option value="unstarted">Não iniciada</option>
-            <option value="inProgress">Em andamento</option>
-            <option value="concluded">Concluída</option>
-          </select>
+            className="rounded-md bg-zinc-700 p-2 min-h-[60px]"
+          />
         </fieldset>
-      )}
-
-      <fieldset className="flex flex-col basis-full min-w-40">
-        <label className="font-semibold mb-1">Descrição</label>
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          className="rounded-md bg-zinc-700 p-2 min-h-[60px]"
-        />
-      </fieldset>
-      <div className=" w-full flex justify-between">
-        <button
-          type="submit"
-          className={`px-6 py-2 h-10 rounded-md bg-green-700 hover:bg-green-800 font-semibold ${
-            isCreating ? "mx-auto" : ""
-          }`}
-        >
-          {isCreating ? "+ Adicionar" : "Salvar alterações"}
-        </button>
-
-      </div>
-    </form>
+        <div className=" w-full flex justify-between">
+          <button
+            type="submit"
+            className={`px-6 py-2 h-10 rounded-md bg-green-700 hover:bg-green-800 font-semibold ${
+              isCreating ? "mx-auto" : ""
+            }`}
+          >
+            {isCreating ? "+ Adicionar" : "Salvar alterações"}
+          </button>
+        </div>
+      </form>
+    </>
   );
 };
