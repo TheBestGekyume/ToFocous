@@ -2,26 +2,17 @@ import { useEffect, useState } from "react";
 import { useTasks } from "../contexts/TasksContext";
 import { TaskForm } from "../components/Tasks/TaskForm";
 import { Modal } from "../components/Tasks/Modal";
-import { priorityMap, statusMap, formatDateBR } from "../utils/taskUtils";
-import { ArrowLeft, Check, Trash2 } from "lucide-react";
-import { useParams, useNavigate } from "react-router-dom";
-import { TaskItem } from "../components/Tasks/TaskItem";
+import { priorityMap } from "../utils/taskUtils";
+import { useParams } from "react-router-dom";
 import { LoadingOverlay } from "../components/_Common/LoadingOverlay";
+import { SubtaskList } from "../components/SingleTaskView/SubtaskList";
+import { TaskHeader } from "../components/SingleTaskView/TaskHeader";
 
 export const SingleTaskPage = () => {
-  const {
-    setSelectedTask,
-    tasks,
-    toggleSubtaskStatus,
-    deleteSubtask,
-    getSubtTasks,
-  } = useTasks();
+  const { tasks, getSubtTasks } = useTasks();
   const [isCreatingSubtask, setIsCreatingSubtask] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const { taskId } = useParams();
-  const navigate = useNavigate();
-
   const task = tasks.find((t) => t.id === taskId);
 
   useEffect(() => {
@@ -40,94 +31,11 @@ export const SingleTaskPage = () => {
       <LoadingOverlay show={loading} />
 
       <div className="flex flex-col w-3/4 p-5 gap-5">
-        <div className="flex flex-col md:flex-row">
-          <button
-            className="p-2 bg-zinc-700/75 hover:bg-zinc-800/75 duration-300 w-fit rounded-full h-fit"
-            onClick={() => {
-              setSelectedTask(null);
-              navigate("/tarefas");
-            }}
-          >
-            <ArrowLeft size={24} />
-          </button>
-
-          <section className="mx-auto w-full px-15">
-            <TaskItem key={task.id} task={task} />
-          </section>
-        </div>
+        <TaskHeader task={task} />
 
         <hr className="my-3 text-accent/75" />
 
-        {task.subtasks && task.subtasks.length > 0 && (
-          <section className="flex flex-col gap-2">
-            {task.subtasks.map((subtask) => {
-              const isDone = subtask.status === "concluded";
-              const statusInfo = statusMap[subtask.status];
-
-              return (
-                <div
-                  key={subtask.id}
-                  className="flex items-center gap-5 p-2 bg-zinc-800 border border-zinc-600 rounded-md"
-                >
-                  <button
-                    onClick={() => toggleSubtaskStatus(task.id, subtask.id)}
-                    className={`
-    w-6 h-6 flex items-center justify-center rounded-md border
-    transition-all duration-300 cursor-pointer
-    ${
-      isDone
-        ? "bg-purple-700 border-purple-700"
-        : "bg-zinc-900 border-zinc-600 hover:border-zinc-400"
-    }
-  `}
-                  >
-                    {isDone && <Check size={24} className="text-white" />}
-                  </button>
-
-                  <div className="flex flex-1 flex-col">
-                    <h4
-                      className={`font-semibold ${
-                        isDone ? "line-through text-zinc-400" : ""
-                      }`}
-                    >
-                      {subtask.title}
-                    </h4>
-
-                    <p className={isDone ? "line-through text-zinc-500" : ""}>
-                      {subtask.description}
-                    </p>
-
-                    <p className="text-sm text-zinc-400">
-                      {formatDateBR(subtask.due_date)}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end justify-between gap-5">
-                    <div
-                      className={`flex ms-auto items-center gap-2 w-fit px-2 py-1 
-                        rounded-md text-sm ${statusInfo.bg}`}
-                    >
-                      {statusInfo.icon}
-                      <span className={statusInfo.color}>
-                        {statusInfo.label}
-                      </span>
-                    </div>
-                    <button
-                      className="p-2 bg-red-600 hover:bg-red-800 rounded-full duration-300"
-                      // onClick={() => deleteSubtask(task.id, subtask.id)}
-                      onClick={async () => {
-                        setLoading(true);
-                        await deleteSubtask(task.id, subtask.id);
-                        setLoading(false);
-                      }}
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </section>
-        )}
+        <SubtaskList task={task} setLoading={setLoading} />
 
         <button
           className="px-4 py-2 mx-auto bg-green-600 hover:bg-green-800 duration-300 rounded-md w-fit font-semibold"
