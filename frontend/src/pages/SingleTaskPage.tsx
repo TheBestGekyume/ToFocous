@@ -5,7 +5,7 @@ import { Modal } from "../components/Tasks/Modal";
 import { priorityMap } from "../utils/taskUtils";
 import { useParams } from "react-router-dom";
 import { LoadingOverlay } from "../components/_Common/LoadingOverlay";
-import { SubtaskList } from "../components/SingleTaskView/SubtaskList";
+import { SubtaskList } from "../components/SingleTaskView/SubTaskList";
 import { TaskHeader } from "../components/SingleTaskView/TaskHeader";
 
 export const SingleTaskPage = () => {
@@ -50,7 +50,7 @@ export const SingleTaskPage = () => {
           onClose={() => setIsCreatingSubtask(false)}
         >
           <h4 className="font-bold mb-5 text-2xl text-center text-primary">
-            Criar Item
+            Criar SubTarefa
           </h4>
 
           <TaskForm
