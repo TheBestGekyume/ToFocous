@@ -95,8 +95,9 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
             ${currentPriority.border} rounded-lg bg-zinc-800`}
       >
         <div className="flex flex-col gap-5 w-2/3">
-          <div className={`flex gap-4  items-baseline ${selectedTask? "flex-col-reverse":"flex-row"}`}>
-
+          <div
+            className={`flex gap-4  items-baseline ${selectedTask ? "flex-col-reverse" : "flex-row"}`}
+          >
             <input
               name="title"
               required
@@ -109,7 +110,7 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
                 duration-100 focus:bg-zinc-900 focus:border-accent
                 hover:bg-zinc-700  rounded-md p-1 
                 ${localTask.status === "concluded" ? "line-through text-zinc-400" : ""}
-                ${selectedTask? "w-full": "w-max"}`}
+                ${selectedTask ? "w-full" : "w-max"}`}
             />
 
             {localTask.status !== "concluded" && (
@@ -121,10 +122,9 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
                 onChange={(e) => handleChange("due_date", e.target.value)}
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
-                className="hide-date-icon appearance-none text-md text-zinc-300
-                 px-2 py-1 rounded-sm outline-none focus:bg-zinc-900
-                focus:border-accent focus:text-zinc-300 hover:bg-zinc-700 
-                hover:text-zinc-300 border duration-100"
+                className="text-md text-zinc-300 px-2 py-1 rounded-sm outline-none
+                focus:bg-zinc-900 focus:border-accent focus:text-zinc-300
+                hover:bg-zinc-700 hover:text-zinc-300 border duration-100"
               />
             )}
           </div>
