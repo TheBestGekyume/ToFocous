@@ -20,7 +20,7 @@ export const SingleTaskPage = () => {
     getSubtTasks(taskId);
   }, [taskId, getSubtTasks]);
 
-  if (!task) return <p>Carregando...</p>;
+  if (!task) return <LoadingOverlay show={true}/>;
 
   const currentPriority = priorityMap[task.priority];
 
