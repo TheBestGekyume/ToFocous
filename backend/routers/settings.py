@@ -10,7 +10,7 @@ router = APIRouter(prefix="/settings", tags=["Settings"])
 
 @router.get("/")
 def get_settings(current_user = Depends(get_current_user),supabase = Depends(get_db)):
-    response = supabase.table("user_settings").select("*").eq("user_id", current_user.id).execute()
+    response = supabase.table("task_settings").select("*").eq("user_id", current_user.id).execute()
     settings = response.data[0] 
 
     return{
@@ -31,7 +31,7 @@ def update_settings(data: UpdtSettings,current_user = Depends(get_current_user),
                 "message" : "Nenhuma alteração feita"
             }
         
-        response = supabase.table("user_settings").update(update_data).eq("user_id", current_user.id).execute()
+        response = supabase.table("task_settings").update(update_data).eq("user_id", current_user.id).execute()
 
         return{
             "message" : "Alterações feitas com sucesso.",
