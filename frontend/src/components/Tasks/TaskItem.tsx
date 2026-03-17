@@ -95,23 +95,21 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
             ${currentPriority.border} rounded-lg bg-zinc-800`}
       >
         <div className="flex flex-col gap-5 w-2/3">
-          <div className="flex gap-4 flex-col lg:flex-row items-baseline">
+          <div className={`flex gap-4  items-baseline ${selectedTask? "flex-col-reverse":"flex-row"}`}>
+
             <input
               name="title"
               required
-              value={
-                localTask.title.length > 60
-                  ? `${localTask.title.substring(0, 60)}...`
-                  : localTask.title
-              }
+              value={localTask.title}
               onChange={(e) => handleChange("title", e.target.value)}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
               placeholder={"Insira o Titulo"}
               className={`font-semibold outline-none border border-transparent
-                duration-100 focus:bg-zinc-900 focus:border-accent 
+                duration-100 focus:bg-zinc-900 focus:border-accent
                 hover:bg-zinc-700  rounded-md p-1 
-                ${localTask.status === "concluded" ? "line-through text-zinc-400" : ""}`}
+                ${localTask.status === "concluded" ? "line-through text-zinc-400" : ""}
+                ${selectedTask? "w-full": "w-max"}`}
             />
 
             {localTask.status !== "concluded" && (
@@ -131,14 +129,15 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
             )}
           </div>
 
-          <h4 className="text-zinc-400 w-full">
+          <h4>
             <textarea
               value={localTask.description}
               onChange={(e) => handleChange("description", e.target.value)}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
+              spellCheck={false}
               className="w-full bg-transparent outline-none resize-none 
-              duration-100 focus:bg-zinc-900 focus:border-accent 
+              duration-100 focus:bg-zinc-900 focus:border-accent text-zinc-300
               hover:bg-zinc-700 rounded-sm border border-transparent"
             />
           </h4>

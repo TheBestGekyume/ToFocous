@@ -11,7 +11,11 @@ type SubtaskItemProps = {
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const SubtaskItem = ({ subtask, taskId, setLoading }: SubtaskItemProps) => {
+export const SubtaskItem = ({
+  subtask,
+  taskId,
+  setLoading,
+}: SubtaskItemProps) => {
   const { toggleSubtaskStatus, deleteSubtask, updateSubtask } = useTasks();
 
   const [localSubtask, setLocalSubtask] = useState(subtask);
@@ -22,7 +26,10 @@ export const SubtaskItem = ({ subtask, taskId, setLoading }: SubtaskItemProps) =
     setLocalSubtask(subtask);
   }, [subtask]);
 
-  const handleChange = <K extends keyof TSubTask>(field: K, value: TSubTask[K]) => {
+  const handleChange = <K extends keyof TSubTask>(
+    field: K,
+    value: TSubTask[K]
+  ) => {
     setLocalSubtask((prev) => ({
       ...prev,
       [field]: value,
@@ -54,7 +61,6 @@ export const SubtaskItem = ({ subtask, taskId, setLoading }: SubtaskItemProps) =
 
   return (
     <div className="flex items-center gap-5 p-2 bg-zinc-800 border border-zinc-600 rounded-md">
-      
       <button
         onClick={() => toggleSubtaskStatus(taskId, subtask.id)}
         className={`
@@ -71,7 +77,6 @@ export const SubtaskItem = ({ subtask, taskId, setLoading }: SubtaskItemProps) =
       </button>
 
       <div className="flex flex-1 flex-col gap-1">
-
         <input
           value={localSubtask.title}
           onChange={(e) => handleChange("title", e.target.value)}
@@ -88,6 +93,7 @@ export const SubtaskItem = ({ subtask, taskId, setLoading }: SubtaskItemProps) =
           onChange={(e) => handleChange("description", e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
+          spellCheck={false}
           className={`bg-transparent resize-none outline-none border border-transparent
             focus:bg-zinc-700 focus:border-white rounded-md p-1
             ${isDone ? "line-through text-zinc-500" : ""}
@@ -102,7 +108,6 @@ export const SubtaskItem = ({ subtask, taskId, setLoading }: SubtaskItemProps) =
           onKeyDown={handleKeyDown}
           className="bg-transparent text-sm text-zinc-400 outline-none"
         />
-
       </div>
 
       <button
