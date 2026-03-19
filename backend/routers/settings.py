@@ -14,7 +14,7 @@ def get_settings(current_user = Depends(get_current_user),supabase = Depends(get
     settings = response.data[0] 
 
     return{
-        "use_subtask_time": settings["use_subtask_time"],
+        "use_time": settings["use_time"],
         "use_subtask_priority": settings["use_subtask_priority"],
         "which_date_use_in_calendar": settings["which_date_use_in_calendar"]
         
@@ -35,7 +35,7 @@ def update_settings(data: UpdtSettings,current_user = Depends(get_current_user),
 
         return{
             "message" : "Alterações feitas com sucesso.",
-            "use_subtask_time": response.data[0]["use_subtask_time"],
+            "use_time": response.data[0]["use_time"],
             "use_subtask_priority": response.data[0]["use_subtask_priority"],
             "which_date_use_in_calendar": response.data[0]["which_date_use_in_calendar"]
         }

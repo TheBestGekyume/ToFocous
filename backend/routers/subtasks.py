@@ -51,10 +51,10 @@ def post_subtask(data: PostSubtask, task_id: str, current_user= Depends(get_curr
 
         task_settings = settings.data[0]
 
-        if task_settings["use_subtask_time"] and data.due_time is None:
+        if task_settings["use_time"] and data.due_time is None:
             raise HTTPException(400, "Tempo é obrigatório")
 
-        if not task_settings["use_subtask_time"]:
+        if not task_settings["use_time"]:
             data.due_time = None
 
         if not task_settings["use_subtask_priority"]:
