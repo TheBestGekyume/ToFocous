@@ -1,13 +1,22 @@
 import type { PropsWithChildren } from "react";
 import { Navigate } from "react-router-dom";
-import { isTokenValid } from "../../utils/authUtils";
+import { getAccessToken, getTokenExpiration } from "../../utils/tokenUtils";
 
 export function ProtectedRoute({ children }: PropsWithChildren) {
-  const token = localStorage.getItem("access_token");
+  const token = getAccessToken();
 
-  if (!token || !isTokenValid(token)) {
-    localStorage.removeItem("access_token");
+  if (!token) {
     return <Navigate to="/acesso" replace />;
+  }
+
+  const exp = getTokenExpiration(token);
+
+  if (exp) {
+    const now = Math.floor(Date.now() / 1000);
+
+    if (exp < now) {
+      return <Navigate to="/acesso" replace />;
+    }
   }
 
   return children;
