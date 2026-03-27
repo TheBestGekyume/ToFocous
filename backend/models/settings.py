@@ -9,8 +9,8 @@ class WhichDateUseInCalendar(str, Enum):
 
     
 class UpdtSettings(BaseModel):
-    use_time: Optional[bool] = None
     use_subtask_priority: Optional[bool] = None
     which_date_use_in_calendar: Optional[WhichDateUseInCalendar] = None
-
+    use_time: Optional[bool] = None
+    use_start_date: Optional[bool] = None
 
