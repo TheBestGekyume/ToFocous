@@ -4,13 +4,12 @@ export type TStatus = | "unstarted" | "inProgress" | "concluded";
 
 export type TTask = {
     id: string;
-    // user_id: string;
     title: string;
     description: string;
-    start_date: string;
-    start_time: string;
     due_date: string;
-    due_time: string;
+    due_time?: string | null;
+    start_date?: string | null;
+    start_time?: string | null;
     priority: TPriority;
     status: TStatus;
     subtasks: TSubTask[];
@@ -21,10 +20,10 @@ export type TSubTask = {
     task_id: string;
     title: string;
     description: string;
-    start_date: string;
-    start_time: string;
     due_date: string;
-    due_time: string;
+    due_time?: string | null;
+    start_date?: string | null;
+    start_time?: string | null;
     priority: TPriority;
     status: TStatus;
 };
@@ -32,20 +31,20 @@ export type TSubTask = {
 export type TCreateTaskDTO = {
     title: string;
     description: string | null;
-    due_date: string;
     priority: TPriority;
     status: TStatus | null;
-    start_date: string | null;
-    start_time: string | null;
-    due_time: string | null;
+    due_date: string;
+    start_date?: string | null;
+    start_time?: string | null;
+    due_time?: string | null;
 };
 
 export type TCreateSubtaskDTO = {
-  title: string;
-  description: string | null;
-  due_date: string;
-  priority: TPriority;
-  start_date: string | null;
-  start_time: string | null;
-  due_time: string | null;
+    title: string;
+    description: string | null;
+    priority: TPriority;
+    due_date: string;
+    start_date?: string | null;
+    start_time?: string | null;
+    due_time?: string | null;
 };
