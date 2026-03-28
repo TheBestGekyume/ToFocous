@@ -12,6 +12,7 @@ import {
   priorityOptions,
 } from "../../utils/taskUtils";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
+import { useTaskSettings } from "../../hooks/useTaskSettings";
 
 type TaskProps = {
   task: TTask;
@@ -19,12 +20,23 @@ type TaskProps = {
 };
 
 export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
-  const { selectedTask, setSelectedTask } = useTasks();
   const [localTask, setLocalTask] = useState(task);
   const navigate = useNavigate();
-  const { updateTask } = useTasks();
-  const { deleteTask } = useTasks();
+  const { selectedTask, setSelectedTask, updateTask, deleteTask } = useTasks();
   const [loading, setLoading] = useState(false);
+  const { settings } = useTaskSettings();
+
+  useEffect(() => {
+    setLocalTask(task);
+  }, [task]);
+
+  if (!settings) {
+    return <LoadingOverlay show />;
+  }
+
+  const showStartDate = settings.use_start_date;
+  const showTime = settings.use_time;
+  const showStartTime = settings.use_time && settings.use_start_date;
 
   const changeStatus = async (status: TTask["status"]) => {
     const updated = { ...localTask, status };
@@ -83,10 +95,6 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
   const currentPriority = priorityMap[localTask.priority];
   const currentStatus = statusMap[localTask.status];
 
-  useEffect(() => {
-    setLocalTask(task);
-  }, [task]);
-
   return (
     <>
       <LoadingOverlay show={loading} />
@@ -94,9 +102,9 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
         className={`flex justify-between items-center p-3 border-2
             ${currentPriority.border} rounded-lg bg-zinc-800`}
       >
-        <div className="flex flex-col gap-5 w-2/3">
+        <div className="flex flex-col gap-4 w-2/3">
           <div
-            className={`flex gap-4  items-baseline ${selectedTask ? "flex-col-reverse" : "flex-row"}`}
+            className={`flex flex-wrap gap-4 items-baseline ${selectedTask ? "flex-col-reverse" : "flex-row"}`}
           >
             <input
               name="title"
@@ -105,43 +113,93 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
               onChange={(e) => handleChange("title", e.target.value)}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
-              placeholder={"Insira o Titulo"}
+              placeholder={"Insira o Título"}
               className={`font-semibold outline-none border border-transparent
-                duration-100 focus:bg-zinc-900 focus:border-accent
-                hover:bg-zinc-700  rounded-md p-1 
-                ${localTask.status === "concluded" ? "line-through text-zinc-400" : ""}
-                ${selectedTask ? "w-full" : "w-max"}`}
+              duration-100 focus:bg-zinc-900 focus:border-accent
+            hover:bg-zinc-700 rounded-md p-1 
+            ${localTask.status === "concluded" ? "line-through text-zinc-400" : ""}
+            ${selectedTask ? "w-full" : "w-max"}`}
             />
 
+            {showStartDate && localTask.status !== "concluded" && (
+              <div className="flex flex-col text-xs text-zinc-400">
+                <input
+                  name="start_date"
+                  type="date"
+                  value={localTask.start_date || ""}
+                  onChange={(e) => handleChange("start_date", e.target.value)}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                  className="text-sm text-zinc-300 px-2 py-1 rounded-sm outline-none
+                focus:bg-zinc-900 focus:border-accent
+                hover:bg-zinc-700 border duration-100"
+                />
+                <span>Início</span>
+              </div>
+            )}
+
             {localTask.status !== "concluded" && (
-              <input
-                name="due_date"
-                required
-                type="date"
-                value={localTask.due_date}
-                onChange={(e) => handleChange("due_date", e.target.value)}
-                onBlur={handleBlur}
-                onKeyDown={handleKeyDown}
-                className="text-md text-zinc-300 px-2 py-1 rounded-sm outline-none
-                focus:bg-zinc-900 focus:border-accent focus:text-zinc-300
-                hover:bg-zinc-700 hover:text-zinc-300 border duration-100"
-              />
+              <div className="flex flex-col text-xs text-zinc-400">
+                <input
+                  name="due_date"
+                  type="date"
+                  value={localTask.due_date}
+                  onChange={(e) => handleChange("due_date", e.target.value)}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                  className="text-sm text-zinc-300 px-2 py-1 rounded-sm outline-none
+                focus:bg-zinc-900 focus:border-accent
+                hover:bg-zinc-700 border duration-100"
+                />
+                <span>Prazo</span>
+              </div>
             )}
           </div>
 
-          <h4>
-            <textarea
-              value={localTask.description}
-              onChange={(e) => handleChange("description", e.target.value)}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyDown}
-              spellCheck={false}
-              className="w-full bg-transparent outline-none resize-none 
+          <textarea
+            value={localTask.description}
+            onChange={(e) => handleChange("description", e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            spellCheck={false}
+            className="w-full bg-transparent outline-none resize-none 
               duration-100 focus:bg-zinc-900 focus:border-accent text-zinc-300
-              hover:bg-zinc-700 rounded-sm border border-transparent"
-            />
-          </h4>
+              hover:bg-zinc-700 rounded-sm border border-transparent p-0 m-0"
+          />
 
+          <div className="flex w-full gap-4">
+            {showStartTime && localTask.status !== "concluded" && (
+              <div className="flex flex-col text-xs text-zinc-400">
+                <span>Hora de início</span>
+                <input
+                  type="time"
+                  value={localTask.start_time || ""}
+                  onChange={(e) => handleChange("start_time", e.target.value)}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                  className="text-sm text-zinc-300 px-2 py-1 rounded-sm outline-none
+                 focus:bg-zinc-900 focus:border-accent
+                 hover:bg-zinc-700 border duration-100"
+                />
+              </div>
+            )}
+
+            {showTime && localTask.status !== "concluded" && (
+              <div className="flex flex-col text-xs text-zinc-400">
+                <span>Hora do prazo</span>
+                <input
+                  type="time"
+                  value={localTask.due_time || ""}
+                  onChange={(e) => handleChange("due_time", e.target.value)}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                  className="text-sm text-zinc-300 px-2 py-1 rounded-sm outline-none
+                focus:bg-zinc-900 focus:border-accent
+                hover:bg-zinc-700 border duration-100"
+                />
+              </div>
+            )}
+          </div>
           {localTask.status !== "concluded" && (
             <p className={`text-xs ${timeColor}`}>{timeMessage}</p>
           )}
