@@ -82,9 +82,10 @@ export const SubtaskItem = ({
           onChange={(e) => handleChange("title", e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className={`bg-transparent outline-none border border-transparent
-            focus:bg-zinc-700 focus:border-white rounded-md p-1
-            ${isDone ? "line-through text-zinc-400" : ""}
+          className={`outline-none border border-transparent
+          duration-100 hover:bg-zinc-700 focus:bg-zinc-900
+          focus:border-accent  rounded-md p-1
+          ${isDone ? "line-through text-zinc-400" : ""}
           `}
         />
 
@@ -94,9 +95,9 @@ export const SubtaskItem = ({
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           spellCheck={false}
-          className={`bg-transparent resize-none outline-none border border-transparent
-            focus:bg-zinc-700 focus:border-white rounded-md p-1
-            ${isDone ? "line-through text-zinc-500" : ""}
+          className={`resize-none outline-none border border-transparent duration-100
+          hover:bg-zinc-700 focus:bg-zinc-900 focus:border-accent rounded-md p-1
+          ${isDone ? "line-through text-zinc-500" : ""}
           `}
         />
 
@@ -106,7 +107,9 @@ export const SubtaskItem = ({
           onChange={(e) => handleChange("due_date", e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className="bg-transparent text-sm text-zinc-400 outline-none"
+          className="text-md rounded-sm outline-none focus:bg-zinc-900
+                focus:border-accent focus:text-zinc-300 hover:bg-zinc-700 
+                hover:text-zinc-300 border duration-100 w-max border-transparent"
         />
       </div>
 

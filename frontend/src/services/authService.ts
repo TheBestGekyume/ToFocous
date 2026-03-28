@@ -1,6 +1,5 @@
-import { api } from "./api";
-
-// LOGIN
+import { api, resetAuthState } from "./api";
+import { setTokens } from "../utils/tokenUtils";
 
 type LoginPayload = {
   email: string;
@@ -13,29 +12,20 @@ type LoginResponse = {
   user_id: string;
 };
 
-
 export async function loginUser(payload: LoginPayload) {
-  const response = await api.post<LoginResponse>(
-    "/auth/login",
-    payload
-  );
-  console.log("RESPONSE.DATA = ", response)
-  localStorage.setItem("access_token", response.data.access_token);
-  localStorage.setItem("refresh_token", response.data.refresh_token);
+  const response = await api.post<LoginResponse>("/auth/login", payload);
+  resetAuthState();
+
+  setTokens(response.data.access_token, response.data.refresh_token);
   localStorage.setItem("user_id", response.data.user_id);
 
   return response.data;
 }
 
-//SIGNUP
-
-type SignupPayload = {
+export async function signUpUser(payload: {
   username: string;
   email: string;
   password: string;
-};
-
-export async function signUpUser(payload: SignupPayload) {
-  /* const response = */await api.post("/auth/signup", payload);
-  // return response.data;
+}) {
+  await api.post("/auth/signup", payload);
 }

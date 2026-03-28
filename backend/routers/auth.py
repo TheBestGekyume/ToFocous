@@ -54,11 +54,13 @@ def login(data: LoginData):
 
 @router.post("/refresh")
 def refresh_session(data: RefreshTokenRequest):
-    response = supabase.auth.refresh_session({
-        "refresh_token": data.refresh_token
-    })
+    try:
+        response = supabase.auth.refresh_session(data.refresh_token)
 
-    return {
-        "access_token": response.session.access_token,
-        "refresh_token": response.session.refresh_token
-    }
+        return {
+            "access_token": response.session.access_token,
+            "refresh_token": response.session.refresh_token
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Refresh token inválido ou expirado")

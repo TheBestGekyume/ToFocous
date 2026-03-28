@@ -14,4 +14,3 @@ class UpdtSettings(BaseModel):
     use_time: Optional[bool] = None
     use_start_date: Optional[bool] = None
 
-

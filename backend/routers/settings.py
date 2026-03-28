@@ -18,7 +18,6 @@ def get_settings(current_user = Depends(get_current_user),supabase = Depends(get
         "which_date_use_in_calendar": settings["which_date_use_in_calendar"],
         "use_time": settings["use_time"],
         "use_start_date": settings["use_start_date"]
-        
     }
 
 
