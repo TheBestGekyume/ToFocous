@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from "react";
 import { Navigate } from "react-router-dom";
-import { getAccessToken, getTokenExpiration } from "../../utils/tokenUtils";
+import { clearTokens, getAccessToken, getTokenExpiration } from "../../utils/tokenUtils";
 
 export function ProtectedRoute({ children }: PropsWithChildren) {
   const token = getAccessToken();
@@ -15,6 +15,7 @@ export function ProtectedRoute({ children }: PropsWithChildren) {
     const now = Math.floor(Date.now() / 1000);
 
     if (exp < now) {
+      clearTokens();
       return <Navigate to="/acesso" replace />;
     }
   }
