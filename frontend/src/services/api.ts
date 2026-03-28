@@ -33,10 +33,13 @@ api.interceptors.request.use(async (config) => {
       if (exp - now < 45) {
         try {
           token = await handleRefresh();
-        } catch {
-          clearTokens();
-          // window.location.href = "/acesso";
-          throw new Error("Refresh failed");
+        } catch (error) {
+          if (!isLoggingOut) {
+            isLoggingOut = true;
+            clearTokens();
+          }
+
+          return Promise.reject(error);
         }
       }
     }

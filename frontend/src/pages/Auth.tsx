@@ -4,6 +4,8 @@ import type { Variants } from "framer-motion";
 import { LoginForm } from "../components/Auth/Login";
 import { SignUpForm } from "../components/Auth/SignUp";
 import { useNavigate } from "react-router-dom";
+import { getAccessToken, getTokenExpiration } from "../utils/tokenUtils";
+
 type AuthMode = "login" | "signUp";
 
 const formVariants: Variants = {
@@ -31,14 +33,20 @@ const formVariants: Variants = {
 
 export const Auth = () => {
   const [mode, setMode] = useState<AuthMode>("login");
-  const access_token = localStorage.getItem("access_token");
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (access_token) {
+    const token = getAccessToken();
+
+    if (!token) return;
+
+    const exp = getTokenExpiration(token);
+    const now = Math.floor(Date.now() / 1000);
+
+    if (exp && exp > now) {
       navigate("/tarefas", { replace: true });
     }
-  }, [access_token, navigate]);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background-body perspective-1000">
