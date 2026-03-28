@@ -14,15 +14,12 @@ export const TaskSettingsProvider = ({
   const [settings, setSettings] = useState<ITaskSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-
   
 
-  // 🔹 Load inicial
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getTaskSettings();
-        console.log("meu PIRU BEM GROSSO: ", data)
         setSettings(data);
       } catch (err) {
         console.error(err);
@@ -34,7 +31,6 @@ export const TaskSettingsProvider = ({
     fetchData();
   }, []);
 
-  // 🔹 Update com persistência
   const updateSettings = async (data: Partial<ITaskSettings>) => {
     if (!settings) return;
 

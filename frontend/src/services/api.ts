@@ -11,8 +11,18 @@ type CustomAxiosRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
 };
 
+let isLoggingOut = false;
+
+export function resetAuthState() {
+  isLoggingOut = false;
+}
+
 api.interceptors.request.use(async (config) => {
   let token = getAccessToken();
+
+  if (isLoggingOut) {
+    return Promise.reject(new Error("User logged out"));
+  }
 
   if (token) {
     const exp = getTokenExpiration(token);
@@ -25,7 +35,7 @@ api.interceptors.request.use(async (config) => {
           token = await handleRefresh();
         } catch {
           clearTokens();
-          window.location.href = "/acesso";
+          // window.location.href = "/acesso";
           throw new Error("Refresh failed");
         }
       }
@@ -59,8 +69,11 @@ api.interceptors.response.use(
 
       return api(originalRequest);
     } catch {
-      clearTokens();
-      window.location.href = "/acesso";
+      if (!isLoggingOut) {
+        isLoggingOut = true;
+        clearTokens();
+      }
+
       return Promise.reject(error);
     }
   }

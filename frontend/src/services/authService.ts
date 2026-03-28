@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { api, resetAuthState } from "./api";
 import { setTokens } from "../utils/tokenUtils";
 
 type LoginPayload = {
@@ -14,6 +14,7 @@ type LoginResponse = {
 
 export async function loginUser(payload: LoginPayload) {
   const response = await api.post<LoginResponse>("/auth/login", payload);
+  resetAuthState();
 
   setTokens(response.data.access_token, response.data.refresh_token);
   localStorage.setItem("user_id", response.data.user_id);
