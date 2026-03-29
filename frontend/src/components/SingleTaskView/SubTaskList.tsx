@@ -1,18 +1,18 @@
 import type { TTask } from "../../types/TTask";
-import { SubtaskItem } from "./SubTaskItem";
+import { SubTaskItem } from "./SubTaskItem";
 
-type SubtaskListProps = {
+type SubTaskListProps = {
   task: TTask;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const SubtaskList = ({ task, setLoading }: SubtaskListProps) => {
+export const SubTaskList = ({ task, setLoading }: SubTaskListProps) => {
   if (!task.subtasks || task.subtasks.length === 0) return null;
 
   return (
     <section className="flex flex-col gap-2">
       {task.subtasks.map((subtask) => (
-        <SubtaskItem
+        <SubTaskItem
           key={subtask.id}
           subtask={subtask}
           taskId={task.id}

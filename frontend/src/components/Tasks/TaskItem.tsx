@@ -1,6 +1,13 @@
 import type { TTask } from "../../types/TTask";
 import { useTasks } from "../../contexts/TasksContext";
-import { Check, Eye, Play, Trash2 } from "lucide-react";
+import {
+  AlarmClockCheck,
+  AlarmClockPlus,
+  Check,
+  Eye,
+  Play,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Dropdown } from "./Dropdown";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +21,7 @@ import {
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
 import { useTaskSettings } from "../../hooks/useTaskSettings";
 import { DatePicker } from "../_Common/DatePicker";
+import { TimeInput } from "../_Common/TimeInput";
 
 type TaskProps = {
   task: TTask;
@@ -112,44 +120,63 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
         className={`flex justify-between items-center p-3 border-2
             ${currentPriority.border} rounded-lg bg-zinc-800`}
       >
-        <div className="flex flex-col gap-4 w-2/3">
-          <div
-            className={`flex flex-wrap gap-4 items-baseline ${selectedTask ? "flex-col-reverse" : "flex-row"}`}
-          >
-            <input
-              name="title"
-              required
-              value={localTask.title}
-              onChange={(e) => handleChange("title", e.target.value)}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyDown}
-              placeholder={"Insira o Título"}
-              className={`text-xl font-semibold outline-none border border-transparent
+        <div className="flex flex-col gap-4 w-full">
+          <div className="flex gap-4 flex-wrap">
+            {showStartDate && localTask.status !== "concluded" && (
+              <DatePicker
+                value={localTask.start_date}
+                onChange={(date) => handleChange("start_date", date || "")}
+                icon={Play}
+                title="Data de Início"
+                placeholder="Selecione data de início"
+              />
+            )}
+
+            {localTask.status !== "concluded" && (
+              <DatePicker
+                value={localTask.due_date}
+                onChange={(date) => handleChange("due_date", date || "")}
+                icon={Check}
+                title="Data de Prazo"
+                placeholder="Selecione data de prazo"
+              />
+            )}
+
+            {showStartTime && localTask.status !== "concluded" && (
+              <TimeInput
+                value={localTask.start_time}
+                onChange={(time) => handleChange("start_time", time || "")}
+                title="Hora de início"
+                placeholder="Selecione hora de início"
+                icon={AlarmClockPlus}
+              />
+            )}
+
+            {showTime && localTask.status !== "concluded" && (
+              <TimeInput
+                value={localTask.due_time}
+                onChange={(time) => handleChange("due_time", time || "")}
+                title="Hora de prazo"
+                placeholder="Selecione hora de prazo"
+                icon={AlarmClockCheck}
+              />
+            )}
+          </div>
+
+          <input
+            name="title"
+            required
+            value={localTask.title}
+            onChange={(e) => handleChange("title", e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            placeholder={"Insira o Título"}
+            className={`text-xl font-semibold outline-none border border-transparent
               duration-100 focus:bg-zinc-900 focus:border-accent
             hover:bg-zinc-700 rounded-md p-1 
             ${localTask.status === "concluded" ? "line-through text-zinc-400" : ""}
             ${selectedTask ? "w-full" : "w-max"}`}
-            />
-            <div className="flex gap-4">
-              {showStartDate && localTask.status !== "concluded" && (
-                <DatePicker
-                  value={localTask.start_date}
-                  onChange={(date) => handleChange("start_date", date || "")}
-                  icon={Play}
-                  title="Data de Início"
-                />
-              )}
-
-              {localTask.status !== "concluded" && (
-                <DatePicker
-                  value={localTask.due_date}
-                  onChange={(date) => handleChange("due_date", date || "")}
-                  icon={Check}
-                  title="Data de Prazo"
-                />
-              )}
-            </div>
-          </div>
+          />
 
           <textarea
             value={localTask.description}
@@ -157,44 +184,11 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             spellCheck={false}
-            className="w-full bg-transparent outline-none resize-none rounded-sm border text-text
+            className={`outline-none resize-none rounded-sm border text-text
               border-transparent px-1 m-0 duration-100 focus:bg-zinc-900 focus:border-accent 
-              focus:resize-y hover:bg-zinc-700 hover:resize-y"
+              focus:resize-y hover:bg-zinc-700 hover:resize-y w-9/10 `}
           />
 
-          <div className="flex w-full gap-10 px-1">
-            {showStartTime && localTask.status !== "concluded" && (
-              <div className="flex flex-col text-xs text-text">
-                <span>Hora de início</span>
-                <input
-                  type="time"
-                  value={localTask.start_time || ""}
-                  onChange={(e) => handleChange("start_time", e.target.value)}
-                  onBlur={handleBlur}
-                  onKeyDown={handleKeyDown}
-                  className="text-sm py-1 outline-none
-                 focus:bg-zinc-900 focus:border-accent
-                 hover:bg-zinc-700 border-b duration-100"
-                />
-              </div>
-            )}
-
-            {showTime && localTask.status !== "concluded" && (
-              <div className="flex flex-col text-xs text-text">
-                <span>Hora do prazo</span>
-                <input
-                  type="time"
-                  value={localTask.due_time || ""}
-                  onChange={(e) => handleChange("due_time", e.target.value)}
-                  onBlur={handleBlur}
-                  onKeyDown={handleKeyDown}
-                  className="text-sm py-1 outline-none
-                focus:bg-zinc-900 focus:border-accent
-                hover:bg-zinc-700 border-b duration-100"
-                />
-              </div>
-            )}
-          </div>
           {localTask.status !== "concluded" && (
             <p className={`px-1 text-xs ${timeColor}`}>{timeMessage}</p>
           )}

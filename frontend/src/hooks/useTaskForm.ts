@@ -4,23 +4,23 @@ import type {
     TTask,
     TSubTask,
     TCreateTaskDTO,
-    TCreateSubtaskDTO,
+    TCreateSubTaskDTO,
 } from "../types/TTask";
 
 type UseTaskFormProps = {
     initialTask?: TTask | TSubTask;
     parentTask?: TTask;
     isCreating: boolean;
-    isCreatingSubtask?: boolean;
+    isCreatingSubTask?: boolean;
     onClose?: () => void;
 };
 
 type TaskFormData = Omit<TTask, "subtasks">;
-type SubtaskFormData = TSubTask;
+type SubTaskFormData = TSubTask;
 
 type FormData =
     | { kind: "task"; data: TaskFormData }
-    | { kind: "subtask"; data: SubtaskFormData };
+    | { kind: "subtask"; data: SubTaskFormData };
 
 const emptyTaskForm: TaskFormData = {
     id: "",
@@ -34,7 +34,7 @@ const emptyTaskForm: TaskFormData = {
     due_time: "",
 };
 
-const emptySubtaskForm: SubtaskFormData = {
+const emptySubTaskForm: SubTaskFormData = {
     id: "",
     title: "",
     description: "",
@@ -51,26 +51,26 @@ export const useTaskForm = ({
     initialTask,
     parentTask,
     isCreating,
-    isCreatingSubtask = false,
+    isCreatingSubTask = false,
     onClose,
 }: UseTaskFormProps) => {
 
     const {
         createTask,
         updateTask,
-        createSubtask,
-        updateSubtask,
+        createSubTask,
+        updateSubTask,
     } = useTasks();
 
     const [formData, setFormData] = useState<FormData>(() =>
-        isCreatingSubtask
-            ? { kind: "subtask", data: emptySubtaskForm }
+        isCreatingSubTask
+            ? { kind: "subtask", data: emptySubTaskForm }
             : { kind: "task", data: emptyTaskForm }
     );
 
     useEffect(() => {
         if (!isCreating && initialTask) {
-            if (isCreatingSubtask) {
+            if (isCreatingSubTask) {
                 setFormData({
                     kind: "subtask",
                     data: { ...(initialTask as TSubTask) },
@@ -82,11 +82,11 @@ export const useTaskForm = ({
                 });
             }
         }
-    }, [isCreating, isCreatingSubtask, initialTask]);
+    }, [isCreating, isCreatingSubTask, initialTask]);
 
-    const getEmptyForm = (isSubtask: boolean): FormData =>
-        isSubtask
-            ? { kind: "subtask", data: emptySubtaskForm }
+    const getEmptyForm = (isSubTask: boolean): FormData =>
+        isSubTask
+            ? { kind: "subtask", data: emptySubTaskForm }
             : { kind: "task", data: emptyTaskForm };
 
     const normalizeTaskPayload = (data: TaskFormData): TCreateTaskDTO => ({
@@ -100,7 +100,7 @@ export const useTaskForm = ({
         due_time: data.due_time || null,
     });
 
-    const normalizeSubtaskPayload = (data: TSubTask): TCreateSubtaskDTO => ({
+    const normalizeSubTaskPayload = (data: TSubTask): TCreateSubTaskDTO => ({
         title: data.title,
         description: data.description || null,
         due_date: data.due_date,
@@ -143,17 +143,17 @@ export const useTaskForm = ({
         e.preventDefault();
 
         try {
-            if (isCreatingSubtask) {
+            if (isCreatingSubTask) {
 
                 if (!parentTask) return;
 
                 if (isCreating) {
-                    await createSubtask(
+                    await createSubTask(
                         parentTask.id,
-                        normalizeSubtaskPayload(formData.data as TSubTask)
+                        normalizeSubTaskPayload(formData.data as TSubTask)
                     );
                 } else {
-                    await updateSubtask(
+                    await updateSubTask(
                         parentTask.id,
                         (initialTask as TSubTask).id,
                         formData.data
@@ -173,7 +173,7 @@ export const useTaskForm = ({
 
             }
 
-            setFormData(getEmptyForm(isCreatingSubtask));
+            setFormData(getEmptyForm(isCreatingSubTask));
             onClose?.();
 
         } catch (err) {

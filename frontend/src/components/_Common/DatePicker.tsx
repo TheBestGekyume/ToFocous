@@ -71,8 +71,10 @@ export const DatePicker = ({
         className="flex items-center gap-2 text-sm text-text px-2 py-1 rounded-sm border
         bg-zinc-800 hover:bg-zinc-700 duration-300 focus:border-accent focus:bg-zinc-900"
       >
-        {Icon && <Icon size={16} className="text-text" />}
-        <span>{value ? formatDisplayDate(value) : placeholder}</span>
+        {Icon && <Icon size={16} />}
+        <span className={` ${value ? "text-wrap" : "text-wrap"}`}>
+          {value ? formatDisplayDate(value) : placeholder}
+        </span>
       </button>
 
       {/* Calendar */}

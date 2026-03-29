@@ -45,7 +45,7 @@ export function Dropdown<T>({
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className={`flex items-center gap-2 ${buttonClass}`}
+        className={`flex items-center gap-2 text-nowrap ${buttonClass}`}
       >
         {selected?.icon}
 
@@ -65,7 +65,7 @@ export function Dropdown<T>({
                 onChange(option.value);
                 setOpen(false);
               }}
-              className="flex items-center gap-2 px-3 py-2 hover:bg-zinc-800 w-full text-left"
+              className="flex items-center gap-2 px-3 py-2 hover:bg-zinc-800 w-full text-left text-nowrap"
             >
               {option.icon}
               {option.label}

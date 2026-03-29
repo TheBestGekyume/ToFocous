@@ -39,7 +39,7 @@ export type TCreateTaskDTO = {
     due_time?: string | null;
 };
 
-export type TCreateSubtaskDTO = {
+export type TCreateSubTaskDTO = {
     title: string;
     description: string | null;
     status: TStatus;

@@ -7,13 +7,13 @@ type TaskFormProps = {
   taskToEdit?: TTask | TSubTask;
   parentTask?: TTask;
   isCreating: boolean;
-  isCreatingSubtask?: boolean;
+  isCreatingSubTask?: boolean;
   onClose?: () => void;
 };
 
 export const TaskForm = ({
   isCreating,
-  isCreatingSubtask,
+  isCreatingSubTask,
   taskToEdit,
   parentTask,
   onClose,
@@ -22,7 +22,7 @@ export const TaskForm = ({
     initialTask: taskToEdit,
     parentTask,
     isCreating,
-    isCreatingSubtask,
+    isCreatingSubTask,
     onClose,
   });
 
@@ -61,7 +61,7 @@ export const TaskForm = ({
           />
         </fieldset>
 
-        {!isCreatingSubtask && (
+        {!isCreatingSubTask && (
           <fieldset className="flex flex-col flex-1 min-w-[250px]">
             <label className="font-semibold mb-1">Prioridade</label>
             <select
@@ -88,7 +88,7 @@ export const TaskForm = ({
           />
         </fieldset>
 
-        {!isCreating && !isCreatingSubtask && (
+        {!isCreating && !isCreatingSubTask && (
           <fieldset className="flex flex-col flex-1 min-w-40">
             <label className="font-semibold mb-1">Status</label>
             <select
