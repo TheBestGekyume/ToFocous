@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
+from supabase_auth import datetime
 from backend.dependencies.supabase import get_db
 from backend.models.subtask import PostSubtask, PatchSubtask
 from backend.dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/subtasks", tags=["Subtasks"])
+def format_time(t):
+    return datetime.strptime(t, "%H:%M:%S").strftime("%H:%M") if t else None
 
 
 @router.get("/{task_id}")
@@ -23,9 +26,9 @@ def get_subtasks(task_id: str, current_user=Depends(get_current_user), supabase=
             {
                 "id": subtask["id"],
                 "description": subtask["description"],
-                "start_time": subtask["start_time"],
+                "start_time": format_time(subtask["start_time"]),
                 "title": subtask["title"],
-                "due_time": subtask["due_time"],
+                "due_time": format_time(subtask["due_time"]),
                 "priority": subtask["priority"],
                 "status": subtask["status"],
                 "due_date": subtask["due_date"],
@@ -68,9 +71,9 @@ def post_subtask(data: PostSubtask, task_id: str, current_user= Depends(get_curr
             "title": response.data[0]["title"],
             "description": response.data[0]["description"],
             "start_date": response.data[0]["start_date"],
-            "start_time": response.data[0]["start_time"],
+            "start_time": format_time(response.data[0]["start_time"]),
             "due_date": response.data[0]["due_date"],
-            "due_time": response.data[0]["due_time"],
+            "due_time": format_time(response.data[0]["due_time"]),
             "priority": response.data[0]["priority"],
             "status": response.data[0]["status"]
         }
@@ -108,9 +111,9 @@ def patch_subtask(task_id: str,subtask_id: str,data: PatchSubtask,current_user=D
         filtered_response = {
             "id": response.data[0]["id"],
             "description": response.data[0]["description"],
-            "start_time": response.data[0]["start_time"],
+            "start_time": format_time(response.data[0]["start_time"]),
             "title": response.data[0]["title"],
-            "due_time": response.data[0]["due_time"],
+            "due_time": format_time(response.data[0]["due_time"]),
             "priority": response.data[0]["priority"],
             "status": response.data[0]["status"],
             "due_date": response.data[0]["due_date"],

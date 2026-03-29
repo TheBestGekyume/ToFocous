@@ -1,10 +1,13 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException
 from backend.dependencies.supabase import get_db
 from backend.models.task import PostTask, PatchTask
 from backend.dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
-
+def format_time(t):
+    return datetime.strptime(t, "%H:%M:%S").strftime("%H:%M") if t else None
 
 @router.post("/")
 def post_task(data: PostTask, current_user = Depends(get_current_user),supabase = Depends(get_db)):
@@ -14,16 +17,16 @@ def post_task(data: PostTask, current_user = Depends(get_current_user),supabase 
         response = supabase.table("tasks").insert(postdata).execute()
 
         filtered_response = {
-            "id": response.data[0]["id"],
-            "title": response.data[0]["title"],
-            "description": response.data[0]["description"],
-            "start_time": response.data[0]["start_time"],
-            "start_date": response.data[0]["start_date"],
-            "due_time": response.data[0]["due_time"],
-            "status": response.data[0]["status"],
-            "due_date": response.data[0]["due_date"],
-            "priority": response.data[0]["priority"],
-        }
+        "id": response.data[0]["id"],
+        "title": response.data[0]["title"],
+        "description": response.data[0]["description"],
+        "start_time": format_time(response.data[0]["start_time"]),
+        "start_date": response.data[0]["start_date"],
+        "due_time": format_time(response.data[0]["due_time"]),
+        "due_date": response.data[0]["due_date"],
+        "status": response.data[0]["status"],
+        "priority": response.data[0]["priority"],
+}
 
         return{
             "Message" : "Tarefa criada com sucesso.",
@@ -45,10 +48,10 @@ def get_tasks(current_user = Depends(get_current_user),supabase = Depends(get_db
                 "id": task["id"],
                 "title": task["title"],
                 "description": task["description"],
-                "start_time": task["start_time"],
+                "start_time": format_time(task["start_time"]),
                 "due_date": task["due_date"],
                 "start_date": task["start_date"],
-                "due_time": task["due_time"],
+                "due_time": format_time(task["due_time"]),
                 "priority": task["priority"],
                 "status": task["status"]
             }
@@ -83,10 +86,10 @@ def patch_task(task_id: str, data: PatchTask, current_user = Depends(get_current
         filtered_response = {
             "title": response.data[0]["title"],
             "description": response.data[0]["description"],
-            "start_time": response.data[0]["start_time"],
+            "start_time": format_time(response.data[0]["start_time"]),
             "due_date": response.data[0]["due_date"],
             "start_date": response.data[0]["start_date"],
-            "due_time": response.data[0]["due_time"],
+            "due_time": format_time(response.data[0]["due_time"]),
             "priority": response.data[0]["priority"],
             "status": response.data[0]["status"]
         }
