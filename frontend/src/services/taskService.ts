@@ -1,6 +1,6 @@
 import { api } from "./api";
 
-import type { TTask, TCreateTaskDTO, TSubTask, TCreateSubtaskDTO } from "../types/TTask";
+import type { TTask, TCreateTaskDTO, TSubTask, TCreateSubTaskDTO } from "../types/TTask";
 
 export const taskService = {
 
@@ -29,24 +29,24 @@ export const taskService = {
 
   //SUBTASKS
 
-  async getSubtasks(taskId: string) {
+  async getSubTasks(taskId: string) {
     const res = await api.get(`/subtasks/${taskId}`);
     return res.data;
   },
 
-  async createSubtask(taskId: string, data: TCreateSubtaskDTO): Promise<TSubTask> {
+  async createSubTask(taskId: string, data: TCreateSubTaskDTO): Promise<TSubTask> {
     const res = await api.post(`/subtasks/${taskId}`, data);
     return res.data.data;
   },
 
-  async updateSubtask(subtaskId: string, taskId: string, data: Partial<TSubTask>) {
+  async updateSubTask(subtaskId: string, taskId: string, data: Partial<TSubTask>) {
     const res = await api.patch(`/subtasks/${subtaskId}`, data, {
       params: { task_id: taskId },
     });
     return res.data.data;
   },
 
-  async deleteSubtask(subtaskId: string, taskId: string) {
+  async deleteSubTask(subtaskId: string, taskId: string) {
     const res = await api.delete(`/subtasks/${subtaskId}`, {
       params: { task_id: taskId },
     });

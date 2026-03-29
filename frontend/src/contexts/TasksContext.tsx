@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useMemo, useEffect } from "react";
 import type {
-  TCreateSubtaskDTO,
+  TCreateSubTaskDTO,
   TCreateTaskDTO,
   TSubTask,
   TTask,
@@ -22,18 +22,18 @@ type TasksContextType = {
     type: SortType;
     isAscending: boolean;
   };
-  toggleSubtaskStatus: (taskId: string, subtaskId: string) => void;
+  toggleSubTaskStatus: (taskId: string, subtaskId: string) => void;
   createTask: (data: TCreateTaskDTO) => Promise<void>;
   updateTask: (id: string, data: Partial<TTask>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   getSubtTasks: (taskId: string) => Promise<void>;
-  createSubtask: (taskId: string, data: TCreateSubtaskDTO) => Promise<void>;
-  updateSubtask: (
+  createSubTask: (taskId: string, data: TCreateSubTaskDTO) => Promise<void>;
+  updateSubTask: (
     taskId: string,
     subtaskId: string,
     data: Partial<TSubTask>
   ) => Promise<void>;
-  deleteSubtask: (taskId: string, subtaskId: string) => Promise<void>;
+  deleteSubTask: (taskId: string, subtaskId: string) => Promise<void>;
 };
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
@@ -82,7 +82,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     loadTasks();
   }, []);
 
-  const toggleSubtaskStatus = useCallback(
+  const toggleSubTaskStatus = useCallback(
     (taskId: string, subtaskId: string) => {
       setTasks((prev) => {
         const newTasks = prev.map((task) =>
@@ -154,17 +154,17 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   //CRUD - SUBTASK
 
   const getSubtTasks = useCallback(async (taskId: string) => {
-    const subtasks = await taskService.getSubtasks(taskId);
+    const subtasks = await taskService.getSubTasks(taskId);
 
     setTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, subtasks } : t))
     );
   }, []);
 
-  const createSubtask = useCallback(
-    async (taskId: string, payload: TCreateSubtaskDTO) => {
+  const createSubTask = useCallback(
+    async (taskId: string, payload: TCreateSubTaskDTO) => {
       try {
-        const created = await taskService.createSubtask(taskId, payload);
+        const created = await taskService.createSubTask(taskId, payload);
 
         setTasks((prev) =>
           prev.map((task) =>
@@ -183,10 +183,10 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     []
   );
 
-  const updateSubtask = useCallback(
+  const updateSubTask = useCallback(
     async (taskId: string, subtaskId: string, payload: Partial<TSubTask>) => {
       try {
-        const updated = await taskService.updateSubtask(
+        const updated = await taskService.updateSubTask(
           subtaskId,
           taskId,
           payload
@@ -211,10 +211,10 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     []
   );
 
-  const deleteSubtask = useCallback(
+  const deleteSubTask = useCallback(
     async (taskId: string, subtaskId: string) => {
       try {
-        await taskService.deleteSubtask(subtaskId, taskId);
+        await taskService.deleteSubTask(subtaskId, taskId);
 
         setTasks((prev) =>
           prev.map((task) =>
@@ -242,13 +242,13 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       handleSortConfig,
       resetSort,
       sortConfig,
-      toggleSubtaskStatus,
+      toggleSubTaskStatus,
       createTask,
       updateTask,
       deleteTask,
-      createSubtask,
-      updateSubtask,
-      deleteSubtask,
+      createSubTask,
+      updateSubTask,
+      deleteSubTask,
       getSubtTasks,
     }),
     [
@@ -257,13 +257,13 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       sortConfig,
       handleSortConfig,
       resetSort,
-      toggleSubtaskStatus,
+      toggleSubTaskStatus,
       createTask,
       updateTask,
       deleteTask,
-      createSubtask,
-      updateSubtask,
-      deleteSubtask,
+      createSubTask,
+      updateSubTask,
+      deleteSubTask,
       getSubtTasks,
     ]
   );

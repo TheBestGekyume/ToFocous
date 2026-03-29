@@ -1,33 +1,40 @@
-import { Check, Play, Trash2 } from "lucide-react";
+import {
+  AlarmClockCheck,
+  AlarmClockPlus,
+  Check,
+  Play,
+  Trash2,
+} from "lucide-react";
 import { useTasks } from "../../contexts/TasksContext";
 import { useEffect, useState } from "react";
 import type { TSubTask } from "../../types/TTask";
 import { useTaskSettings } from "../../hooks/useTaskSettings";
 import { DatePicker } from "../_Common/DatePicker";
+import { TimeInput } from "../_Common/TimeInput";
 
-type SubtaskItemProps = {
+type SubTaskItemProps = {
   subtask: TSubTask;
   taskId: string;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const SubtaskItem = ({
+export const SubTaskItem = ({
   subtask,
   taskId,
   setLoading,
-}: SubtaskItemProps) => {
-  const { toggleSubtaskStatus, deleteSubtask, updateSubtask } = useTasks();
+}: SubTaskItemProps) => {
+  const { toggleSubTaskStatus, deleteSubTask, updateSubTask } = useTasks();
   const { settings } = useTaskSettings();
 
-  const [localSubtask, setLocalSubtask] = useState(subtask);
+  const [localSubTask, setLocalSubTask] = useState(subtask);
 
   useEffect(() => {
-    setLocalSubtask(subtask);
+    setLocalSubTask(subtask);
   }, [subtask]);
 
   if (!settings) return null;
 
-  const isDone = localSubtask.status === "concluded";
+  const isDone = localSubTask.status === "concluded";
 
   const showStartDate = settings.use_start_date;
   const showTime = settings.use_time;
@@ -37,31 +44,31 @@ export const SubtaskItem = ({
     field: K,
     value: TSubTask[K]
   ) => {
-    setLocalSubtask((prev) => ({
+    setLocalSubTask((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
   const handleBlur = async () => {
-    if (!localSubtask.title.trim() || !localSubtask.due_date) {
-      setLocalSubtask(subtask);
+    if (!localSubTask.title.trim() || !localSubTask.due_date) {
+      setLocalSubTask(subtask);
       return;
     }
 
     const hasChanged =
-      localSubtask.title !== subtask.title ||
-      localSubtask.description !== subtask.description ||
-      localSubtask.due_date !== subtask.due_date ||
-      localSubtask.start_date !== subtask.start_date ||
-      localSubtask.due_time !== subtask.due_time ||
-      localSubtask.start_time !== subtask.start_time ||
-      localSubtask.priority !== subtask.priority ||
-      localSubtask.status !== subtask.status;
+      localSubTask.title !== subtask.title ||
+      localSubTask.description !== subtask.description ||
+      localSubTask.due_date !== subtask.due_date ||
+      localSubTask.start_date !== subtask.start_date ||
+      localSubTask.due_time !== subtask.due_time ||
+      localSubTask.start_time !== subtask.start_time ||
+      localSubTask.priority !== subtask.priority ||
+      localSubTask.status !== subtask.status;
 
     if (!hasChanged) return;
 
-    await updateSubtask(taskId, subtask.id, localSubtask);
+    await updateSubTask(taskId, subtask.id, localSubTask);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -71,7 +78,7 @@ export const SubtaskItem = ({
     }
 
     if (e.key === "Escape") {
-      setLocalSubtask(subtask);
+      setLocalSubTask(subtask);
       (e.currentTarget as HTMLInputElement | HTMLTextAreaElement).blur();
     }
   };
@@ -80,7 +87,7 @@ export const SubtaskItem = ({
     <div className="flex items-center gap-5 p-3 bg-zinc-800 border border-zinc-600 rounded-md h-fitr">
       {/* Status */}
       <button
-        onClick={() => toggleSubtaskStatus(taskId, subtask.id)}
+        onClick={() => toggleSubTaskStatus(taskId, subtask.id)}
         className={`
           w-6 h-6 flex items-center justify-center rounded-md border
           transition-all duration-300 mt-1
@@ -97,7 +104,7 @@ export const SubtaskItem = ({
       {/* Conteúdo */}
       <div className="flex flex-1 flex-col gap-2">
         <input
-          value={localSubtask.title}
+          value={localSubTask.title}
           onChange={(e) => handleChange("title", e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
@@ -110,7 +117,7 @@ export const SubtaskItem = ({
         />
 
         <textarea
-          value={localSubtask.description}
+          value={localSubTask.description}
           onChange={(e) => handleChange("description", e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
@@ -127,7 +134,7 @@ export const SubtaskItem = ({
           <div className="flex items-end flex-wrap gap-3">
             {showStartDate && (
               <DatePicker
-                value={localSubtask.start_date}
+                value={localSubTask.start_date}
                 onChange={(date) => handleChange("start_date", date || "")}
                 title="Data de início"
                 icon={Play}
@@ -135,50 +142,34 @@ export const SubtaskItem = ({
             )}
 
             <DatePicker
-              value={localSubtask.due_date}
+              value={localSubTask.due_date}
               onChange={(date) => handleChange("due_date", date || "")}
               title="Data de prazo"
               icon={Check}
             />
 
             {(showTime || showStartTime) && (
-              <div className=" ps-4 flex gap-6 text-xs">
+              <>
                 {showStartTime && (
-                  <div className="flex flex-col">
-                    <span>Hora início</span>
-                    <input
-                      type="time"
-                      step={60}
-                      value={localSubtask.start_time || ""}
-                      onChange={(e) =>
-                        handleChange("start_time", e.target.value)
-                      }
-                      onBlur={handleBlur}
-                      onKeyDown={handleKeyDown}
-                      className="text-sm py-1 outline-none border-b
-                  focus:bg-zinc-900 focus:border-accent
-                  hover:bg-zinc-700 duration-100"
-                    />
-                  </div>
+                  <TimeInput
+                    value={localSubTask.start_time}
+                    onChange={(time) => handleChange("start_time", time || "")}
+                    title="Hora de início"
+                    placeholder="Selecione hora de início"
+                    icon={AlarmClockPlus}
+                  />
                 )}
 
                 {showTime && (
-                  <div className="flex flex-col">
-                    <span>Hora prazo</span>
-                    <input
-                      type="time"
-                      step={60}
-                      value={localSubtask.due_time || ""}
-                      onChange={(e) => handleChange("due_time", e.target.value)}
-                      onBlur={handleBlur}
-                      onKeyDown={handleKeyDown}
-                      className="text-sm py-1 outline-none border-b
-                  focus:bg-zinc-900 focus:border-accent
-                  hover:bg-zinc-700 duration-100"
-                    />
-                  </div>
+                  <TimeInput
+                    value={localSubTask.due_time}
+                    onChange={(time) => handleChange("due_time", time || "")}
+                    title="Hora de prazo"
+                    placeholder="Selecione hora de prazo"
+                    icon={AlarmClockCheck}
+                  />
                 )}
-              </div>
+              </>
             )}
           </div>
         )}
@@ -190,7 +181,7 @@ export const SubtaskItem = ({
         onClick={async () => {
           try {
             setLoading(true);
-            await deleteSubtask(taskId, subtask.id);
+            await deleteSubTask(taskId, subtask.id);
           } finally {
             setLoading(false);
           }

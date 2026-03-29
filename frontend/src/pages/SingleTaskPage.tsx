@@ -5,12 +5,12 @@ import { Modal } from "../components/Tasks/Modal";
 import { priorityMap } from "../utils/taskUtils";
 import { useParams } from "react-router-dom";
 import { LoadingOverlay } from "../components/_Common/LoadingOverlay";
-import { SubtaskList } from "../components/SingleTaskView/SubTaskList";
+import { SubTaskList } from "../components/SingleTaskView/SubTaskList";
 import { TaskHeader } from "../components/SingleTaskView/TaskHeader";
 
 export const SingleTaskPage = () => {
   const { tasks, getSubtTasks } = useTasks();
-  const [isCreatingSubtask, setIsCreatingSubtask] = useState(false);
+  const [isCreatingSubTask, setIsCreatingSubTask] = useState(false);
   const [loading, setLoading] = useState(false);
   const { taskId } = useParams();
   const task = tasks.find((t) => t.id === taskId);
@@ -20,7 +20,7 @@ export const SingleTaskPage = () => {
     getSubtTasks(taskId);
   }, [taskId, getSubtTasks]);
 
-  if (!task) return <LoadingOverlay show={true}/>;
+  if (!task) return <LoadingOverlay show={true} />;
 
   const currentPriority = priorityMap[task.priority];
 
@@ -35,19 +35,19 @@ export const SingleTaskPage = () => {
 
         <hr className="my-3 text-accent/75" />
 
-        <SubtaskList task={task} setLoading={setLoading} />
+        <SubTaskList task={task} setLoading={setLoading} />
 
         <button
           className="px-4 py-2 mx-auto bg-green-600 hover:bg-green-800 duration-300 rounded-md w-fit font-semibold"
-          onClick={() => setIsCreatingSubtask(true)}
+          onClick={() => setIsCreatingSubTask(true)}
         >
           + SubTask
         </button>
 
         {/* Modal de criar subtask */}
         <Modal
-          isOpen={isCreatingSubtask}
-          onClose={() => setIsCreatingSubtask(false)}
+          isOpen={isCreatingSubTask}
+          onClose={() => setIsCreatingSubTask(false)}
         >
           <h4 className="font-bold mb-5 text-2xl text-center text-primary">
             Criar SubTarefa
@@ -55,9 +55,9 @@ export const SingleTaskPage = () => {
 
           <TaskForm
             isCreating={true}
-            isCreatingSubtask
+            isCreatingSubTask
             parentTask={task}
-            onClose={() => setIsCreatingSubtask(false)}
+            onClose={() => setIsCreatingSubTask(false)}
           />
         </Modal>
       </div>

@@ -4,7 +4,7 @@ from datetime import time, date
 from backend.models.task import TaskPriority, TaskStatus
 
 
-class PostSubtask(BaseModel):
+class PostSubTask(BaseModel):
     title: str
     description: Optional[str] = None
     due_time: Optional[time] = None
@@ -15,7 +15,7 @@ class PostSubtask(BaseModel):
     status: TaskStatus = TaskStatus.unstarted
 
 
-class PatchSubtask(BaseModel):
+class PatchSubTask(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     start_date: Optional[date] = None

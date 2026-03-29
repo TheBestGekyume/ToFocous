@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from supabase_auth import datetime
 from backend.dependencies.supabase import get_db
-from backend.models.subtask import PostSubtask, PatchSubtask
+from backend.models.subtask import PostSubTask, PatchSubTask
 from backend.dependencies.auth import get_current_user
 
-router = APIRouter(prefix="/subtasks", tags=["Subtasks"])
+router = APIRouter(prefix="/subtasks", tags=["SubTasks"])
 def format_time(t):
     return datetime.strptime(t, "%H:%M:%S").strftime("%H:%M") if t else None
 
@@ -44,7 +44,7 @@ def get_subtasks(task_id: str, current_user=Depends(get_current_user), supabase=
 
 
 @router.post("/{task_id}")
-def post_subtask(data: PostSubtask, task_id: str, current_user= Depends(get_current_user),supabase = Depends(get_db)):
+def post_subtask(data: PostSubTask, task_id: str, current_user= Depends(get_current_user),supabase = Depends(get_db)):
     try:
         task = supabase.table("tasks").select("id").eq("id", task_id).eq("user_id", current_user.id).execute()
         if not task.data:
@@ -89,7 +89,7 @@ def post_subtask(data: PostSubtask, task_id: str, current_user= Depends(get_curr
 
 
 @router.patch("/{subtask_id}")
-def patch_subtask(task_id: str,subtask_id: str,data: PatchSubtask,current_user=Depends(get_current_user),supabase=Depends(get_db)):
+def patch_subtask(task_id: str,subtask_id: str,data: PatchSubTask,current_user=Depends(get_current_user),supabase=Depends(get_db)):
     try:
         task = supabase.table("tasks").select("id").eq("id", task_id).eq("user_id", current_user.id).execute()
 
