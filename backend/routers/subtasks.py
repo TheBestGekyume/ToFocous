@@ -47,15 +47,15 @@ def post_subtask(data: PostSubtask, task_id: str, current_user= Depends(get_curr
         if not task.data:
             raise HTTPException(status_code=404, detail= "Tarefa não encontrada")
         
-        settings = supabase.table("task_settings").select("*").eq("user_id",current_user.id).execute()
+        # settings = supabase.table("task_settings").select("*").eq("user_id",current_user.id).execute()
 
-        task_settings = settings.data[0]
+        # task_settings = settings.data[0]
 
-        if task_settings["use_time"] and data.due_time is None:
-            raise HTTPException(400, "Tempo é obrigatório")
+        # if task_settings["use_time"] and data.due_time is None:
+        #     raise HTTPException(400, "Tempo é obrigatório")
 
-        if not task_settings["use_subtask_priority"]:
-            data.priority = None
+        # if not task_settings["use_subtask_priority"]:
+        #     data.priority = None
         
 
         subtask_data = data.model_dump(mode = "json")

@@ -105,6 +105,7 @@ export const useTaskForm = ({
         description: data.description || null,
         due_date: data.due_date,
         priority: data.priority,
+        status: data.status,
         start_date: data.start_date || null,
         start_time: data.start_time || null,
         due_time: data.due_time || null,
