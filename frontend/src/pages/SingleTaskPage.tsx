@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useTasks } from "../contexts/TasksContext";
+import { useTasks } from "../hooks/useTask";
 import { TaskForm } from "../components/Tasks/TaskForm";
 import { Modal } from "../components/Tasks/Modal";
 import { priorityMap } from "../utils/taskUtils";
@@ -10,7 +10,7 @@ import { TaskHeader } from "../components/SingleTaskView/TaskHeader";
 
 export const SingleTaskPage = () => {
   const { taskId } = useParams<{ taskId: string }>();
-  const { tasks, getSubtTasks } = useTasks();
+  const { tasks, getSubTasks } = useTasks();
 
   const [isCreatingSubTask, setIsCreatingSubTask] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -19,8 +19,8 @@ export const SingleTaskPage = () => {
 
   useEffect(() => {
     if (!taskId) return;
-    getSubtTasks(taskId);
-  }, [taskId, getSubtTasks]);
+    getSubTasks(taskId);
+  }, [taskId, getSubTasks]);
 
   if (!tasks.length) {
     return <LoadingOverlay show />;

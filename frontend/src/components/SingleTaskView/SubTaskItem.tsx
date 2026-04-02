@@ -5,7 +5,7 @@ import {
   Play,
   Trash2,
 } from "lucide-react";
-import { useTasks } from "../../contexts/TasksContext";
+import { useTasks } from "../../hooks/useTask";
 import { useEffect, useState } from "react";
 import type { TSubTask } from "../../types/TTask";
 import { useTaskSettings } from "../../hooks/useTaskSettings";

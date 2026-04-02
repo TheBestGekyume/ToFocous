@@ -8,7 +8,7 @@ import {
   LayoutGrid,
   NotepadText,
 } from "lucide-react";
-import { useTasks } from "../../contexts/TasksContext";
+import { useTasks } from "../../hooks/useTask";
 import { AnimatePresence, motion } from "framer-motion";
 import { Card } from "./Card";
 
