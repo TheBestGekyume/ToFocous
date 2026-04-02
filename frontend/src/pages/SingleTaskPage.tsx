@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useTasks } from "../contexts/TasksContext";
+import { useTasks } from "../hooks/useTask";
 import { TaskForm } from "../components/Tasks/TaskForm";
 import { Modal } from "../components/Tasks/Modal";
 import { priorityMap } from "../utils/taskUtils";
@@ -9,18 +9,26 @@ import { SubTaskList } from "../components/SingleTaskView/SubTaskList";
 import { TaskHeader } from "../components/SingleTaskView/TaskHeader";
 
 export const SingleTaskPage = () => {
-  const { tasks, getSubtTasks } = useTasks();
+  const { taskId } = useParams<{ taskId: string }>();
+  const { tasks, getSubTasks } = useTasks();
+
   const [isCreatingSubTask, setIsCreatingSubTask] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { taskId } = useParams();
+
   const task = tasks.find((t) => t.id === taskId);
 
   useEffect(() => {
     if (!taskId) return;
-    getSubtTasks(taskId);
-  }, [taskId, getSubtTasks]);
+    getSubTasks(taskId);
+  }, [taskId, getSubTasks]);
 
-  if (!task) return <LoadingOverlay show={true} />;
+  if (!tasks.length) {
+    return <LoadingOverlay show />;
+  }
+
+  if (!task) {
+    return <p className="text-center mt-10">Tarefa não encontrada</p>;
+  }
 
   const currentPriority = priorityMap[task.priority];
 
@@ -44,7 +52,6 @@ export const SingleTaskPage = () => {
           + SubTask
         </button>
 
-        {/* Modal de criar subtask */}
         <Modal
           isOpen={isCreatingSubTask}
           onClose={() => setIsCreatingSubTask(false)}
@@ -54,7 +61,7 @@ export const SingleTaskPage = () => {
           </h4>
 
           <TaskForm
-            isCreating={true}
+            isCreating
             isCreatingSubTask
             parentTask={task}
             onClose={() => setIsCreatingSubTask(false)}

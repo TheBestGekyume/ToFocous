@@ -5,7 +5,7 @@ import {
   Play,
   Trash2,
 } from "lucide-react";
-import { useTasks } from "../../contexts/TasksContext";
+import { useTasks } from "../../hooks/useTask";
 import { useEffect, useState } from "react";
 import type { TSubTask } from "../../types/TTask";
 import { useTaskSettings } from "../../hooks/useTaskSettings";
@@ -23,7 +23,7 @@ export const SubTaskItem = ({
   taskId,
   setLoading,
 }: SubTaskItemProps) => {
-  const { toggleSubTaskStatus, deleteSubTask, updateSubTask } = useTasks();
+  const { deleteSubTask, updateSubTask } = useTasks();
   const { settings } = useTaskSettings();
 
   const [localSubTask, setLocalSubTask] = useState(subtask);
@@ -40,6 +40,29 @@ export const SubTaskItem = ({
   const showTime = settings.use_time;
   const showStartTime = settings.use_time && settings.use_start_date;
 
+  // 🔥 commit centralizado
+  const commitUpdate = async (updated: TSubTask) => {
+    try {
+      setLoading(true);
+      await updateSubTask(taskId, subtask.id, updated);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImmediateChange = <K extends keyof TSubTask>(
+    field: K,
+    value: TSubTask[K]
+  ) => {
+    const updated = {
+      ...localSubTask,
+      [field]: value,
+    };
+
+    setLocalSubTask(updated);
+    commitUpdate(updated);
+  };
+
   const handleChange = <K extends keyof TSubTask>(
     field: K,
     value: TSubTask[K]
@@ -50,25 +73,14 @@ export const SubTaskItem = ({
     }));
   };
 
+  // 🔥 inputs de texto
   const handleBlur = async () => {
     if (!localSubTask.title.trim() || !localSubTask.due_date) {
       setLocalSubTask(subtask);
       return;
     }
 
-    const hasChanged =
-      localSubTask.title !== subtask.title ||
-      localSubTask.description !== subtask.description ||
-      localSubTask.due_date !== subtask.due_date ||
-      localSubTask.start_date !== subtask.start_date ||
-      localSubTask.due_time !== subtask.due_time ||
-      localSubTask.start_time !== subtask.start_time ||
-      localSubTask.priority !== subtask.priority ||
-      localSubTask.status !== subtask.status;
-
-    if (!hasChanged) return;
-
-    await updateSubTask(taskId, subtask.id, localSubTask);
+    await commitUpdate(localSubTask);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -83,11 +95,22 @@ export const SubTaskItem = ({
     }
   };
 
+  // 🔥 toggle com persistência (corrigido)
+  const toggleStatus = () => {
+    const updated: TSubTask = {
+      ...localSubTask,
+      status: localSubTask.status === "concluded" ? "unstarted" : "concluded",
+    };
+
+    setLocalSubTask(updated);
+    commitUpdate(updated);
+  };
+
   return (
-    <div className="flex items-center gap-5 p-3 bg-zinc-800 border border-zinc-600 rounded-md h-fitr">
+    <div className="flex items-center gap-5 p-3 bg-zinc-800 border border-zinc-600 rounded-md">
       {/* Status */}
       <button
-        onClick={() => toggleSubTaskStatus(taskId, subtask.id)}
+        onClick={toggleStatus}
         className={`
           w-6 h-6 flex items-center justify-center rounded-md border
           transition-all duration-300 mt-1
@@ -135,7 +158,9 @@ export const SubTaskItem = ({
             {showStartDate && (
               <DatePicker
                 value={localSubTask.start_date}
-                onChange={(date) => handleChange("start_date", date || "")}
+                onChange={(date) =>
+                  handleImmediateChange("start_date", date || "")
+                }
                 title="Data de início"
                 icon={Play}
               />
@@ -143,7 +168,7 @@ export const SubTaskItem = ({
 
             <DatePicker
               value={localSubTask.due_date}
-              onChange={(date) => handleChange("due_date", date || "")}
+              onChange={(date) => handleImmediateChange("due_date", date || "")}
               title="Data de prazo"
               icon={Check}
             />
@@ -153,9 +178,10 @@ export const SubTaskItem = ({
                 {showStartTime && (
                   <TimeInput
                     value={localSubTask.start_time}
-                    onChange={(time) => handleChange("start_time", time || "")}
+                    onChange={(time) =>
+                      handleImmediateChange("start_time", time || "")
+                    }
                     title="Hora de início"
-                    placeholder="Selecione hora de início"
                     icon={AlarmClockPlus}
                   />
                 )}
@@ -163,9 +189,10 @@ export const SubTaskItem = ({
                 {showTime && (
                   <TimeInput
                     value={localSubTask.due_time}
-                    onChange={(time) => handleChange("due_time", time || "")}
+                    onChange={(time) =>
+                      handleImmediateChange("due_time", time || "")
+                    }
                     title="Hora de prazo"
-                    placeholder="Selecione hora de prazo"
                     icon={AlarmClockCheck}
                   />
                 )}
@@ -175,9 +202,8 @@ export const SubTaskItem = ({
         )}
       </div>
 
-      {/* Delete */}
       <button
-        className=" p-2 bg-red-600 hover:bg-red-800 rounded-full"
+        className="p-2 bg-red-600 hover:bg-red-800 rounded-full"
         onClick={async () => {
           try {
             setLoading(true);

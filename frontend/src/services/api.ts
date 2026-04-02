@@ -64,19 +64,14 @@ api.interceptors.response.use(
 
     try {
       const newToken = await handleRefresh();
-
-      console.log("novo token:", newToken)
-
       originalRequest.headers = originalRequest.headers || {};
       originalRequest.headers.Authorization = `Bearer ${newToken}`;
-
       return api(originalRequest);
     } catch {
       if (!isLoggingOut) {
         isLoggingOut = true;
         clearTokens();
       }
-
       return Promise.reject(error);
     }
   }

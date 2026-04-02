@@ -1,6 +1,6 @@
 import "./App.css";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { TasksProvider } from "./contexts/TasksContext";
+import { TasksProvider } from "./providers/TaskProvider";
 import { TaskPage } from "./pages/TasksPage";
 import { Auth } from "./pages/Auth";
 import { TaskSettings } from "./pages/TaskSettings";

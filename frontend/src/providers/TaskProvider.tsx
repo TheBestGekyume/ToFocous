@@ -1,0 +1,215 @@
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { TasksContext, type SortType } from "../contexts/TasksContext";
+import { taskService } from "../services/taskService";
+import { sortTaskList } from "../utils/taskUtils";
+import type {
+  TCreateSubTaskDTO,
+  TCreateTaskDTO,
+  TSubTask,
+  TTask,
+} from "../types/TTask";
+
+export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
+  const [tasks, setTasks] = useState<TTask[]>([]);
+
+  const [sortConfig, setSortConfig] = useState<{
+    type: SortType;
+    isAscending: boolean;
+  }>({
+    type: "",
+    isAscending: true,
+  });
+
+  const sortedTasks = useMemo(() => {
+    if (!sortConfig.type) return tasks;
+    return sortTaskList(tasks, sortConfig);
+  }, [tasks, sortConfig]);
+
+  const handleSortConfig = useCallback((type: SortType, isAscending = true) => {
+    if (!type) return;
+    setSortConfig({ type, isAscending });
+  }, []);
+
+  const resetSort = useCallback(() => {
+    setSortConfig({
+      type: "",
+      isAscending: true,
+    });
+  }, []);
+
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        const data = await taskService.getTasks();
+        setTasks(data);
+      } catch (err) {
+        console.error("Erro ao carregar tarefas", err);
+      }
+    };
+
+    loadTasks();
+  }, []);
+
+  /* CRUD - TASK */
+
+  const createTask = useCallback(async (payload: TCreateTaskDTO) => {
+    try {
+      const created = await taskService.createTask(payload);
+      setTasks((prev) => [created, ...prev]);
+    } catch (err) {
+      console.error("Erro ao criar task", err);
+    }
+  }, []);
+
+  const updateTask = useCallback(
+    async (taskId: string, payload: Partial<TTask>) => {
+      try {
+        const updated = await taskService.updateTask(taskId, payload);
+
+        setTasks((prev) =>
+          prev.map((t) => (t.id === updated.id ? updated : t))
+        );
+      } catch (err) {
+        console.error("Erro ao atualizar task", err);
+      }
+    },
+    []
+  );
+
+  const deleteTask = useCallback(async (taskId: string) => {
+    try {
+      await taskService.deleteTask(taskId);
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    } catch (err) {
+      console.error("Erro ao deletar task", err);
+    }
+  }, []);
+
+  /* CRUD - SUBTASK */
+
+  const getSubTasks = useCallback(async (taskId: string) => {
+    try {
+      const subtasks = await taskService.getSubTasks(taskId);
+
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskId ? { ...t, subtasks } : t))
+      );
+    } catch (err) {
+      console.error("Erro ao buscar subtasks", err);
+    }
+  }, []);
+
+  const createSubTask = useCallback(
+    async (taskId: string, payload: TCreateSubTaskDTO) => {
+      try {
+        const created = await taskService.createSubTask(taskId, payload);
+
+        setTasks((prev) =>
+          prev.map((task) =>
+            task.id === taskId
+              ? {
+                  ...task,
+                  subtasks: [...(task.subtasks ?? []), created],
+                }
+              : task
+          )
+        );
+      } catch (err) {
+        console.error("Erro ao criar subtask", err);
+      }
+    },
+    []
+  );
+
+  const updateSubTask = useCallback(
+    async (taskId: string, subtaskId: string, payload: Partial<TSubTask>) => {
+      try {
+        const updated = await taskService.updateSubTask(
+          subtaskId,
+          taskId,
+          payload
+        );
+
+        setTasks((prev) =>
+          prev.map((task) =>
+            task.id === taskId
+              ? {
+                  ...task,
+                  subtasks: (task.subtasks ?? []).map((st) =>
+                    st.id === updated.id ? updated : st
+                  ),
+                }
+              : task
+          )
+        );
+      } catch (err) {
+        console.error("Erro ao atualizar subtask", err);
+      }
+    },
+    []
+  );
+
+  const deleteSubTask = useCallback(
+    async (taskId: string, subtaskId: string) => {
+      try {
+        await taskService.deleteSubTask(subtaskId, taskId);
+
+        setTasks((prev) =>
+          prev.map((task) =>
+            task.id === taskId
+              ? {
+                  ...task,
+                  subtasks: task.subtasks.filter((st) => st.id !== subtaskId),
+                }
+              : task
+          )
+        );
+      } catch (err) {
+        console.error("Erro ao deletar subtask", err);
+      }
+    },
+    []
+  );
+
+  const value = useMemo(
+    () => ({
+      tasks: sortedTasks,
+      setTasks,
+      handleSortConfig,
+      resetSort,
+      sortConfig,
+      createTask,
+      updateTask,
+      deleteTask,
+      createSubTask,
+      updateSubTask,
+      deleteSubTask,
+      getSubTasks,
+    }),
+    [
+      sortedTasks,
+      sortConfig,
+      handleSortConfig,
+      resetSort,
+      createTask,
+      updateTask,
+      deleteTask,
+      createSubTask,
+      updateSubTask,
+      deleteSubTask,
+      getSubTasks,
+    ]
+  );
+
+  return (
+    <TasksContext.Provider value={value}>{children}</TasksContext.Provider>
+  );
+};
+
+// export const useTasks = () => {
+//   const ctx = useContext(TasksContext);
+//   if (!ctx) {
+//     throw new Error("useTasks deve ser usado dentro de um <TasksProvider>");
+//   }
+//   return ctx;
+// };

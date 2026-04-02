@@ -18,7 +18,6 @@ export const taskService = {
 
   async updateTask(id: string, data: Partial<TTask>): Promise<TTask> {
     const res = await api.patch(`/tasks/${id}`, data);
-    // console.log("updateTask response = ", res);
     return res.data.data;
   },
 

@@ -1,5 +1,5 @@
 import type { TTask } from "../../types/TTask";
-import { useTasks } from "../../contexts/TasksContext";
+import { useTasks } from "../../hooks/useTask";
 import {
   AlarmClockCheck,
   AlarmClockPlus,
@@ -8,9 +8,9 @@ import {
   Play,
   Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Dropdown } from "./Dropdown";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   priorityMap,
   statusMap,
@@ -27,16 +27,24 @@ type TaskProps = {
   task: TTask;
 };
 
-export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
+export const TaskItem = ({ task }: TaskProps) => {
   const [localTask, setLocalTask] = useState(task);
   const navigate = useNavigate();
-  const { selectedTask, setSelectedTask, updateTask, deleteTask } = useTasks();
+  const { taskId } = useParams<{ taskId?: string }>();
+  const isDetailsPage = !!taskId;
+
+  const { updateTask, deleteTask } = useTasks();
   const [loading, setLoading] = useState(false);
   const { settings } = useTaskSettings();
 
-  useEffect(() => {
-    setLocalTask(task);
-  }, [task]);
+  const commitUpdate = async (updatedTask: TTask) => {
+    try {
+      setLoading(true);
+      await updateTask(task.id, updatedTask);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!settings) {
     return <LoadingOverlay show />;
@@ -46,16 +54,23 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
   const showTime = settings.use_time;
   const showStartTime = settings.use_time && settings.use_start_date;
 
-  const changeStatus = async (status: TTask["status"]) => {
-    const updated = { ...localTask, status };
-    setLocalTask(updated);
-    await updateTask(task.id, updated);
-  };
+  const changeStatus = (status: TTask["status"]) =>
+    handleImmediateChange("status", status);
 
-  const changePriority = async (priority: TTask["priority"]) => {
-    const updated = { ...localTask, priority };
+  const changePriority = (priority: TTask["priority"]) =>
+    handleImmediateChange("priority", priority);
+
+  const handleImmediateChange = <K extends keyof TTask>(
+    field: K,
+    value: TTask[K]
+  ) => {
+    const updated = {
+      ...localTask,
+      [field]: value,
+    };
+
     setLocalTask(updated);
-    await updateTask(task.id, updated);
+    commitUpdate(updated);
   };
 
   const handleChange = <K extends keyof TTask>(field: K, value: TTask[K]) => {
@@ -71,19 +86,7 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
       return;
     }
 
-    const hasChanged =
-      localTask.title !== task.title ||
-      localTask.description !== task.description ||
-      localTask.due_date !== task.due_date ||
-      localTask.start_date !== task.start_date ||
-      localTask.due_time !== task.due_time ||
-      localTask.start_time !== task.start_time ||
-      localTask.priority !== task.priority ||
-      localTask.status !== task.status;
-
-    if (!hasChanged) return;
-
-    await updateTask(task.id, localTask);
+    await commitUpdate(localTask);
   };
 
   const handleKeyDown = async (e: React.KeyboardEvent) => {
@@ -100,7 +103,7 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
 
   const handleDeleteTask = async () => {
     const deleteConfirm = window.confirm(
-      `Queer mesmo deletar a tarefa "${localTask.title}"`
+      `Quer mesmo deletar a tarefa "${localTask.title}"?`
     );
     if (!deleteConfirm) return;
     await deleteTask(localTask.id);
@@ -116,38 +119,42 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
   return (
     <>
       <LoadingOverlay show={loading} />
+
       <div
         className={`flex justify-between items-center p-3 border-2
-            ${currentPriority.border} rounded-lg bg-zinc-800`}
+          ${currentPriority.border} rounded-lg bg-zinc-800`}
       >
         <div className="flex flex-col gap-4 w-full">
           <div className="flex gap-4 flex-wrap">
             {showStartDate && localTask.status !== "concluded" && (
               <DatePicker
                 value={localTask.start_date}
-                onChange={(date) => handleChange("start_date", date || "")}
+                onChange={(date) =>
+                  handleImmediateChange("start_date", date || "")
+                }
                 icon={Play}
                 title="Data de Início"
-                placeholder="Selecione data de início"
               />
             )}
 
             {localTask.status !== "concluded" && (
               <DatePicker
                 value={localTask.due_date}
-                onChange={(date) => handleChange("due_date", date || "")}
+                onChange={(date) =>
+                  handleImmediateChange("due_date", date || "")
+                }
                 icon={Check}
                 title="Data de Prazo"
-                placeholder="Selecione data de prazo"
               />
             )}
 
             {showStartTime && localTask.status !== "concluded" && (
               <TimeInput
                 value={localTask.start_time}
-                onChange={(time) => handleChange("start_time", time || "")}
+                onChange={(time) =>
+                  handleImmediateChange("start_time", time || "")
+                }
                 title="Hora de início"
-                placeholder="Selecione hora de início"
                 icon={AlarmClockPlus}
               />
             )}
@@ -155,9 +162,10 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
             {showTime && localTask.status !== "concluded" && (
               <TimeInput
                 value={localTask.due_time}
-                onChange={(time) => handleChange("due_time", time || "")}
+                onChange={(time) =>
+                  handleImmediateChange("due_time", time || "")
+                }
                 title="Hora de prazo"
-                placeholder="Selecione hora de prazo"
                 icon={AlarmClockCheck}
               />
             )}
@@ -170,12 +178,12 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
             onChange={(e) => handleChange("title", e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            placeholder={"Insira o Título"}
+            placeholder="Insira o Título"
             className={`text-xl font-semibold outline-none border border-transparent
               duration-100 focus:bg-zinc-900 focus:border-accent
-            hover:bg-zinc-700 rounded-md p-1 
-            ${localTask.status === "concluded" ? "line-through text-zinc-400" : ""}
-            ${selectedTask ? "w-full" : "w-max"}`}
+              hover:bg-zinc-700 rounded-md p-1 
+              ${localTask.status === "concluded" ? "line-through text-zinc-400" : ""}
+              ${isDetailsPage ? "w-full" : "w-max"}`}
           />
 
           <textarea
@@ -184,9 +192,9 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             spellCheck={false}
-            className={`outline-none resize-none rounded-sm border text-text
+            className="outline-none resize-none rounded-sm border text-text
               border-transparent px-1 m-0 duration-100 focus:bg-zinc-900 focus:border-accent 
-              focus:resize-y hover:bg-zinc-700 hover:resize-y w-9/10 `}
+              focus:resize-y hover:bg-zinc-700 hover:resize-y w-9/10"
           />
 
           {localTask.status !== "concluded" && (
@@ -204,12 +212,10 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
                 ${currentPriority.color}`}
               renderLabel={(value) => `Prioridade: ${priorityMap[value].label}`}
             />
-            {!selectedTask && (
+
+            {!isDetailsPage && (
               <button
-                onClick={() => {
-                  setSelectedTask(task);
-                  navigate(`/tarefa/${task.id}`);
-                }}
+                onClick={() => navigate(`/tarefa/${task.id}`)}
                 className="bg-indigo-600 hover:bg-indigo-800 duration-150 p-2 rounded-full"
               >
                 <Eye size={20} />
@@ -218,7 +224,9 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
           </div>
 
           <div
-            className={`flex ${selectedTask ? "flex-col" : "flex-row"} items-end gap-4`}
+            className={`flex ${
+              isDetailsPage ? "flex-col" : "flex-row"
+            } items-end gap-4`}
           >
             <Dropdown
               value={localTask.status}
@@ -226,7 +234,7 @@ export const TaskItem = ({ task /*, setTasks*/ }: TaskProps) => {
               onChange={changeStatus}
               buttonClass={`flex items-center gap-2 rounded-sm px-2 py-1 duration-100 border
                 border-transparent hover:bg-zinc-950 focus:bg-zinc-900 focus:border-accent
-                ${currentStatus.bg} ${currentStatus.color} `}
+                ${currentStatus.bg} ${currentStatus.color}`}
             />
 
             <button

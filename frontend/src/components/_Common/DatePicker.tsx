@@ -6,6 +6,7 @@ import "react-day-picker/dist/style.css";
 type DatePickerProps = {
   value?: string | null;
   onChange: (date: string | null) => void;
+  onBlur?: () => void; 
   placeholder?: string;
   title: string;
   icon: LucideIcon;
@@ -14,6 +15,7 @@ type DatePickerProps = {
 export const DatePicker = ({
   value,
   onChange,
+  // onBlur,
   placeholder = "Selecionar data",
   title = "",
   icon: Icon,
@@ -26,11 +28,13 @@ export const DatePicker = ({
   const handleSelect = (date?: Date) => {
     if (!date) {
       onChange(null);
+      // onBlur?.();
       return;
     }
 
     const formatted = date.toLocaleDateString("en-CA");
     onChange(formatted);
+    //  onBlur?.();
     setOpen(false);
   };
 
@@ -41,7 +45,6 @@ export const DatePicker = ({
     return `${day} / ${month} / ${year}`;
   };
 
-  // ✅ click outside correto
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (!containerRef.current) return;
