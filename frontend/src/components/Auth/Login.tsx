@@ -15,14 +15,11 @@ export const LoginForm = ({ onSwitch }: { onSwitch: () => void }) => {
     setLoading(true);
 
     try {
-      await loginUser({ email, password });    
+      await loginUser({ email, password });
       navigate("/");
-      // console.log("Login realizado com sucesso");
-
     } catch (err: unknown) {
       setError("Email ou senha inválidos");
       console.error(err);
-      
     } finally {
       setLoading(false);
     }

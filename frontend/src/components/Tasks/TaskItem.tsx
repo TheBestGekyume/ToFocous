@@ -38,7 +38,6 @@ export const TaskItem = ({ task }: TaskProps) => {
   const { settings } = useTaskSettings();
 
   const commitUpdate = async (updatedTask: TTask) => {
-    console.log("commitUpdate...");
     try {
       setLoading(true);
       await updateTask(task.id, updatedTask);

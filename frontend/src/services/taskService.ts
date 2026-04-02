@@ -18,9 +18,6 @@ export const taskService = {
 
   async updateTask(id: string, data: Partial<TTask>): Promise<TTask> {
     const res = await api.patch(`/tasks/${id}`, data);
-    console.log("updateTask data = ", data);
-    console.log("updateTask res = ", res);
-
     return res.data.data;
   },
 
@@ -45,10 +42,6 @@ export const taskService = {
     const res = await api.patch(`/subtasks/${subtaskId}`, data, {
       params: { task_id: taskId },
     });
-    console.log("updateSubTask data = ", data);
-    console.log("updateSubTask res = ", res);
-
-
     return res.data.data;
   },
 
