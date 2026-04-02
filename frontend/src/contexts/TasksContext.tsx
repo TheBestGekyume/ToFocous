@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useMemo, useEffect } from "react";
+import { createContext, useContext, useState, useMemo, useEffect, useCallback } from "react";
 import type {
   TCreateSubTaskDTO,
   TCreateTaskDTO,
@@ -7,15 +7,12 @@ import type {
 } from "../types/TTask";
 import { sortTaskList } from "../utils/taskUtils";
 import { taskService } from "../services/taskService";
-import { useCallback } from "react";
 
 type SortType = "date" | "priority" | "status" | "";
 
 type TasksContextType = {
   tasks: TTask[];
   setTasks: React.Dispatch<React.SetStateAction<TTask[]>>;
-  selectedTask: TTask | null;
-  setSelectedTask: React.Dispatch<React.SetStateAction<TTask | null>>;
   handleSortConfig: (type: SortType, isAscending?: boolean) => void;
   resetSort: () => void;
   sortConfig: {
@@ -40,9 +37,6 @@ const TasksContext = createContext<TasksContextType | undefined>(undefined);
 
 export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   const [tasks, setTasks] = useState<TTask[]>([]);
-  // console.log("Tasks:", tasks);
-
-  const [selectedTask, setSelectedTask] = useState<TTask | null>(null);
 
   const [sortConfig, setSortConfig] = useState<{
     type: SortType;
@@ -84,8 +78,8 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
 
   const toggleSubTaskStatus = useCallback(
     (taskId: string, subtaskId: string) => {
-      setTasks((prev) => {
-        const newTasks = prev.map((task) =>
+      setTasks((prev) =>
+        prev.map((task) =>
           task.id === taskId
             ? {
                 ...task,
@@ -102,20 +96,13 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
                 ),
               }
             : task
-        );
-
-        if (selectedTask?.id === taskId) {
-          const updated = newTasks.find((t) => t.id === taskId);
-          setSelectedTask(updated || null);
-        }
-
-        return newTasks;
-      });
+        )
+      );
     },
-    [selectedTask]
+    []
   );
 
-  /*CRUD - TASK */
+  /* CRUD - TASK */
 
   const createTask = useCallback(async (payload: TCreateTaskDTO) => {
     try {
@@ -144,14 +131,13 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   const deleteTask = useCallback(async (taskId: string) => {
     try {
       await taskService.deleteTask(taskId);
-
       setTasks((prev) => prev.filter((t) => t.id !== taskId));
     } catch (err) {
       console.error("Erro ao deletar task", err);
     }
   }, []);
 
-  //CRUD - SUBTASK
+  /* CRUD - SUBTASK */
 
   const getSubtTasks = useCallback(async (taskId: string) => {
     const subtasks = await taskService.getSubTasks(taskId);
@@ -237,8 +223,6 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     () => ({
       tasks: sortedTasks,
       setTasks,
-      selectedTask,
-      setSelectedTask,
       handleSortConfig,
       resetSort,
       sortConfig,
@@ -253,7 +237,6 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     }),
     [
       sortedTasks,
-      selectedTask,
       sortConfig,
       handleSortConfig,
       resetSort,
@@ -269,14 +252,17 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   return (
-    <TasksContext.Provider value={value}>{children}</TasksContext.Provider>
+    <TasksContext.Provider value={value}>
+      {children}
+    </TasksContext.Provider>
   );
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useTasks = () => {
   const ctx = useContext(TasksContext);
-  if (!ctx)
+  if (!ctx) {
     throw new Error("useTasks deve ser usado dentro de um <TasksProvider>");
+  }
   return ctx;
 };

@@ -9,10 +9,12 @@ import { SubTaskList } from "../components/SingleTaskView/SubTaskList";
 import { TaskHeader } from "../components/SingleTaskView/TaskHeader";
 
 export const SingleTaskPage = () => {
+  const { taskId } = useParams<{ taskId: string }>();
   const { tasks, getSubtTasks } = useTasks();
+
   const [isCreatingSubTask, setIsCreatingSubTask] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { taskId } = useParams();
+
   const task = tasks.find((t) => t.id === taskId);
 
   useEffect(() => {
@@ -20,7 +22,13 @@ export const SingleTaskPage = () => {
     getSubtTasks(taskId);
   }, [taskId, getSubtTasks]);
 
-  if (!task) return <LoadingOverlay show={true} />;
+  if (!tasks.length) {
+    return <LoadingOverlay show />;
+  }
+
+  if (!task) {
+    return <p className="text-center mt-10">Tarefa não encontrada</p>;
+  }
 
   const currentPriority = priorityMap[task.priority];
 
@@ -44,7 +52,6 @@ export const SingleTaskPage = () => {
           + SubTask
         </button>
 
-        {/* Modal de criar subtask */}
         <Modal
           isOpen={isCreatingSubTask}
           onClose={() => setIsCreatingSubTask(false)}
@@ -54,7 +61,7 @@ export const SingleTaskPage = () => {
           </h4>
 
           <TaskForm
-            isCreating={true}
+            isCreating
             isCreatingSubTask
             parentTask={task}
             onClose={() => setIsCreatingSubTask(false)}
