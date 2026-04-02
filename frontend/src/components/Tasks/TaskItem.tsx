@@ -8,7 +8,7 @@ import {
   Play,
   Trash2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Dropdown } from "./Dropdown";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -37,9 +37,15 @@ export const TaskItem = ({ task }: TaskProps) => {
   const [loading, setLoading] = useState(false);
   const { settings } = useTaskSettings();
 
-  useEffect(() => {
-    setLocalTask(task);
-  }, [task]);
+  const commitUpdate = async (updatedTask: TTask) => {
+    console.log("commitUpdate...");
+    try {
+      setLoading(true);
+      await updateTask(task.id, updatedTask);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!settings) {
     return <LoadingOverlay show />;
@@ -49,16 +55,23 @@ export const TaskItem = ({ task }: TaskProps) => {
   const showTime = settings.use_time;
   const showStartTime = settings.use_time && settings.use_start_date;
 
-  const changeStatus = async (status: TTask["status"]) => {
-    const updated = { ...localTask, status };
-    setLocalTask(updated);
-    await updateTask(task.id, updated);
-  };
+  const changeStatus = (status: TTask["status"]) =>
+    handleImmediateChange("status", status);
 
-  const changePriority = async (priority: TTask["priority"]) => {
-    const updated = { ...localTask, priority };
+  const changePriority = (priority: TTask["priority"]) =>
+    handleImmediateChange("priority", priority);
+
+  const handleImmediateChange = <K extends keyof TTask>(
+    field: K,
+    value: TTask[K]
+  ) => {
+    const updated = {
+      ...localTask,
+      [field]: value,
+    };
+
     setLocalTask(updated);
-    await updateTask(task.id, updated);
+    commitUpdate(updated);
   };
 
   const handleChange = <K extends keyof TTask>(field: K, value: TTask[K]) => {
@@ -74,19 +87,7 @@ export const TaskItem = ({ task }: TaskProps) => {
       return;
     }
 
-    const hasChanged =
-      localTask.title !== task.title ||
-      localTask.description !== task.description ||
-      localTask.due_date !== task.due_date ||
-      localTask.start_date !== task.start_date ||
-      localTask.due_time !== task.due_time ||
-      localTask.start_time !== task.start_time ||
-      localTask.priority !== task.priority ||
-      localTask.status !== task.status;
-
-    if (!hasChanged) return;
-
-    await updateTask(task.id, localTask);
+    await commitUpdate(localTask);
   };
 
   const handleKeyDown = async (e: React.KeyboardEvent) => {
@@ -129,7 +130,9 @@ export const TaskItem = ({ task }: TaskProps) => {
             {showStartDate && localTask.status !== "concluded" && (
               <DatePicker
                 value={localTask.start_date}
-                onChange={(date) => handleChange("start_date", date || "")}
+                onChange={(date) =>
+                  handleImmediateChange("start_date", date || "")
+                }
                 icon={Play}
                 title="Data de Início"
               />
@@ -138,7 +141,9 @@ export const TaskItem = ({ task }: TaskProps) => {
             {localTask.status !== "concluded" && (
               <DatePicker
                 value={localTask.due_date}
-                onChange={(date) => handleChange("due_date", date || "")}
+                onChange={(date) =>
+                  handleImmediateChange("due_date", date || "")
+                }
                 icon={Check}
                 title="Data de Prazo"
               />
@@ -147,7 +152,9 @@ export const TaskItem = ({ task }: TaskProps) => {
             {showStartTime && localTask.status !== "concluded" && (
               <TimeInput
                 value={localTask.start_time}
-                onChange={(time) => handleChange("start_time", time || "")}
+                onChange={(time) =>
+                  handleImmediateChange("start_time", time || "")
+                }
                 title="Hora de início"
                 icon={AlarmClockPlus}
               />
@@ -156,7 +163,9 @@ export const TaskItem = ({ task }: TaskProps) => {
             {showTime && localTask.status !== "concluded" && (
               <TimeInput
                 value={localTask.due_time}
-                onChange={(time) => handleChange("due_time", time || "")}
+                onChange={(time) =>
+                  handleImmediateChange("due_time", time || "")
+                }
                 title="Hora de prazo"
                 icon={AlarmClockCheck}
               />

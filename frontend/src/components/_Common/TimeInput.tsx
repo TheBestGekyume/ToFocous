@@ -4,7 +4,7 @@ import type { LucideIcon } from "lucide-react";
 type TimeInputProps = {
   value?: string | null;
   onChange: (time: string | null) => void;
-  onBlur?: () => void;
+  // onBlur?: () => void;
   title: string;
   placeholder?: string;
   icon: LucideIcon;
@@ -13,7 +13,7 @@ type TimeInputProps = {
 export const TimeInput = ({
   value,
   onChange,
-  onBlur,
+  // onBlur,
   title,
   placeholder = "hh:mm",
   icon: Icon,
@@ -50,18 +50,16 @@ export const TimeInput = ({
           setInternalValue(val);
           onChange(val || null);
 
-          onBlur?.();
+          // onBlur?.();
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
 
-            // força blur → dispara onBlur
             (e.currentTarget as HTMLInputElement).blur();
           }
 
           if (e.key === "Escape") {
-            // opcional: cancelar edição
             setInternalValue(value || "");
             (e.currentTarget as HTMLInputElement).blur();
           }

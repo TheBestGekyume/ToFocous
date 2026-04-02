@@ -19,7 +19,7 @@ type TasksContextType = {
     type: SortType;
     isAscending: boolean;
   };
-  toggleSubTaskStatus: (taskId: string, subtaskId: string) => void;
+  // toggleSubTaskStatus: (taskId: string, subtaskId: string) => void;
   createTask: (data: TCreateTaskDTO) => Promise<void>;
   updateTask: (id: string, data: Partial<TTask>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
@@ -76,31 +76,31 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     loadTasks();
   }, []);
 
-  const toggleSubTaskStatus = useCallback(
-    (taskId: string, subtaskId: string) => {
-      setTasks((prev) =>
-        prev.map((task) =>
-          task.id === taskId
-            ? {
-                ...task,
-                subtasks: task.subtasks.map((subtask) =>
-                  subtask.id === subtaskId
-                    ? {
-                        ...subtask,
-                        status:
-                          subtask.status === "concluded"
-                            ? ("unstarted" as const)
-                            : ("concluded" as const),
-                      }
-                    : subtask
-                ),
-              }
-            : task
-        )
-      );
-    },
-    []
-  );
+  // const toggleSubTaskStatus = useCallback(
+  //   (taskId: string, subtaskId: string) => {
+  //     setTasks((prev) =>
+  //       prev.map((task) =>
+  //         task.id === taskId
+  //           ? {
+  //               ...task,
+  //               subtasks: task.subtasks.map((subtask) =>
+  //                 subtask.id === subtaskId
+  //                   ? {
+  //                       ...subtask,
+  //                       status:
+  //                         subtask.status === "concluded"
+  //                           ? ("unstarted" as const)
+  //                           : ("concluded" as const),
+  //                     }
+  //                   : subtask
+  //               ),
+  //             }
+  //           : task
+  //       )
+  //     );
+  //   },
+  //   []
+  // );
 
   /* CRUD - TASK */
 
@@ -226,7 +226,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       handleSortConfig,
       resetSort,
       sortConfig,
-      toggleSubTaskStatus,
+      // toggleSubTaskStatus,
       createTask,
       updateTask,
       deleteTask,
@@ -240,7 +240,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       sortConfig,
       handleSortConfig,
       resetSort,
-      toggleSubTaskStatus,
+      // toggleSubTaskStatus,
       createTask,
       updateTask,
       deleteTask,
