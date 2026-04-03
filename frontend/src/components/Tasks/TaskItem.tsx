@@ -8,7 +8,7 @@ import {
   Play,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dropdown } from "./Dropdown";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -32,15 +32,24 @@ export const TaskItem = ({ task }: TaskProps) => {
   const navigate = useNavigate();
   const { taskId } = useParams<{ taskId?: string }>();
   const isDetailsPage = !!taskId;
-
   const { updateTask, deleteTask } = useTasks();
   const [loading, setLoading] = useState(false);
   const { settings } = useTaskSettings();
+  const lastSavedTaskRef = useRef(task);
+
+  useEffect(() => {
+    setLocalTask(task);
+    lastSavedTaskRef.current = task;
+  }, [task]);
 
   const commitUpdate = async (updatedTask: TTask) => {
+    if (!hasTaskChanged(updatedTask, lastSavedTaskRef.current)) return;
+
     try {
       setLoading(true);
-      await updateTask(task.id, updatedTask);
+      const updated = await updateTask(task.id, updatedTask);
+
+      lastSavedTaskRef.current = updated ?? updatedTask;
     } finally {
       setLoading(false);
     }
@@ -64,6 +73,8 @@ export const TaskItem = ({ task }: TaskProps) => {
     field: K,
     value: TTask[K]
   ) => {
+    if (localTask[field] === value) return;
+
     const updated = {
       ...localTask,
       [field]: value,
@@ -107,6 +118,19 @@ export const TaskItem = ({ task }: TaskProps) => {
     );
     if (!deleteConfirm) return;
     await deleteTask(localTask.id);
+  };
+
+  const hasTaskChanged = (a: TTask, b: TTask) => {
+    return (
+      a.title !== b.title ||
+      a.description !== b.description ||
+      a.due_date !== b.due_date ||
+      a.start_date !== b.start_date ||
+      a.due_time !== b.due_time ||
+      a.start_time !== b.start_time ||
+      a.priority !== b.priority ||
+      a.status !== b.status
+    );
   };
 
   const { msg: timeMessage, color: timeColor } = getTimeMessage(

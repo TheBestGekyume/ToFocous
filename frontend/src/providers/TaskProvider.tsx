@@ -69,8 +69,11 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
         setTasks((prev) =>
           prev.map((t) => (t.id === updated.id ? updated : t))
         );
+
+        return updated;
       } catch (err) {
         console.error("Erro ao atualizar task", err);
+        throw err;
       }
     },
     []
@@ -205,11 +208,3 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     <TasksContext.Provider value={value}>{children}</TasksContext.Provider>
   );
 };
-
-// export const useTasks = () => {
-//   const ctx = useContext(TasksContext);
-//   if (!ctx) {
-//     throw new Error("useTasks deve ser usado dentro de um <TasksProvider>");
-//   }
-//   return ctx;
-// };
