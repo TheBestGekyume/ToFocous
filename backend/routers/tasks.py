@@ -7,43 +7,75 @@ from backend.dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 def format_time(t):
-    return datetime.strptime(t, "%H:%M:%S").strftime("%H:%M") if t else None
+    if not t:
+        return None
+
+    try:
+        if "T" in t:
+            dt = datetime.fromisoformat(t.replace("Z", ""))
+        else:
+            # caso venha só hora com milissegundo
+            dt = datetime.strptime(t, "%H:%M:%S.%f")
+
+        return dt.strftime("%H:%M")
+
+    except Exception:
+        return t 
 
 @router.post("/")
-def post_task(data: PostTask, current_user = Depends(get_current_user),supabase = Depends(get_db)):
+def post_task(data: PostTask, current_user = Depends(get_current_user), supabase = Depends(get_db)):
     try:
         postdata = data.model_dump(mode="json")
+
         postdata["user_id"] = current_user.id
+
         response = supabase.table("tasks").insert(postdata).execute()
 
-        filtered_response = {
-        "id": response.data[0]["id"],
-        "title": response.data[0]["title"],
-        "description": response.data[0]["description"],
-        "start_time": format_time(response.data[0]["start_time"]),
-        "start_date": response.data[0]["start_date"],
-        "due_time": format_time(response.data[0]["due_time"]),
-        "due_date": response.data[0]["due_date"],
-        "status": response.data[0]["status"],
-        "priority": response.data[0]["priority"],
-}
+        task = response.data[0]
 
-        return{
-            "Message" : "Tarefa criada com sucesso.",
+        filtered_response = {
+            "id": task["id"],
+            "title": task["title"],
+            "description": task["description"],
+            "start_time": format_time(task["start_time"]),
+            "start_date": task["start_date"],
+            "due_time": format_time(task["due_time"]),
+            "due_date": task["due_date"],
+            "status": task["status"],
+            "priority": task["priority"],
+            "project_id": task["project_id"]
+        }
+
+        return {
+            "Message": "Tarefa criada com sucesso.",
             "data": filtered_response
         }
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/")
-def get_tasks(current_user = Depends(get_current_user),supabase = Depends(get_db)):
-    response = supabase.table("tasks").select("*").eq("user_id", current_user.id).execute()
-    tasks = response.data
-    if not response.data:
-        return []
+def get_tasks(
+    project_id: str = None,
+    current_user = Depends(get_current_user),
+    supabase = Depends(get_db)
+):
+    try:
+        query = supabase.table("tasks").select("*")
 
-    filtered_tasks = [
+        if project_id:
+            query = query.eq("project_id", project_id)
+        else:
+            query = query.eq("user_id", current_user.id)
+
+        response = query.execute()
+        tasks = response.data
+
+        if not tasks:
+            return []
+
+        filtered_tasks = [
             {
                 "id": task["id"],
                 "title": task["title"],
@@ -53,22 +85,25 @@ def get_tasks(current_user = Depends(get_current_user),supabase = Depends(get_db
                 "start_date": task["start_date"],
                 "due_time": format_time(task["due_time"]),
                 "priority": task["priority"],
-                "status": task["status"]
+                "status": task["status"],
+                "project_id": task["project_id"]
             }
             for task in tasks
         ]
-    return filtered_tasks
+
+        return filtered_tasks
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.patch("/{task_id}")
-def patch_task(task_id: str, data: PatchTask, current_user = Depends(get_current_user),supabase = Depends(get_db)):
+def patch_task(task_id: str, data: PatchTask, current_user = Depends(get_current_user), supabase = Depends(get_db)):
     try:
         patchdata = data.model_dump(exclude_none=True, mode="json")
 
         if not patchdata:
-            return {
-                "message": "Nenhuma alteração feita"
-            }
+            return {"message": "Nenhuma alteração feita"}
 
         response = supabase.table("tasks") \
             .update(patchdata) \
@@ -82,16 +117,18 @@ def patch_task(task_id: str, data: PatchTask, current_user = Depends(get_current
                 detail="Tarefa não encontrada"
             )
 
+        task = response.data[0]
 
         filtered_response = {
-            "title": response.data[0]["title"],
-            "description": response.data[0]["description"],
-            "start_time": format_time(response.data[0]["start_time"]),
-            "due_date": response.data[0]["due_date"],
-            "start_date": response.data[0]["start_date"],
-            "due_time": format_time(response.data[0]["due_time"]),
-            "priority": response.data[0]["priority"],
-            "status": response.data[0]["status"]
+            "title": task["title"],
+            "description": task["description"],
+            "start_time": format_time(task["start_time"]),
+            "due_date": task["due_date"],
+            "start_date": task["start_date"],
+            "due_time": format_time(task["due_time"]),
+            "priority": task["priority"],
+            "status": task["status"],
+            "project_id": task["project_id"]
         }
 
         return {
@@ -101,7 +138,6 @@ def patch_task(task_id: str, data: PatchTask, current_user = Depends(get_current
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
 
 @router.delete("/{task_id}")
 def delete_task(task_id: str, current_user = Depends(get_current_user),supabase = Depends(get_db)):

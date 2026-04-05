@@ -25,6 +25,7 @@ class PostTask(BaseModel):
     priority: TaskPriority
     start_time: Optional[time] = None
     status: TaskStatus = TaskStatus.unstarted
+    project_id: str
 
 
 class PatchTask(BaseModel):
@@ -36,3 +37,4 @@ class PatchTask(BaseModel):
     start_time: Optional[time] = None
     priority: Optional[TaskPriority] = None
     status: Optional[TaskStatus] = None
+    project_id: Optional[str] = None
