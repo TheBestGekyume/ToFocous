@@ -9,6 +9,8 @@ import { DatePicker } from "../_Common/DatePicker";
 import { TimeInput } from "../_Common/TimeInput";
 import { useSubTaskItem } from "../../hooks/useSubTaskItem";
 import type { TSubTask } from "../../types/TTask";
+import { priorityMap, priorityOptions } from "../../utils/taskUtils";
+import { Dropdown } from "../Tasks/Dropdown";
 
 type Props = {
   subtask: TSubTask;
@@ -21,6 +23,7 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
     localData,
     isDone,
     showStartDate,
+    showPriority,
     showTime,
     showStartTime,
     handleChange,
@@ -77,46 +80,61 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
         />
 
         {!isDone && (
-          <div className="flex items-end flex-wrap gap-3">
-            {showStartDate && (
+          <div className="flex justify-between">
+            <div className="flex items-end flex-wrap gap-3">
+              {showStartDate && (
+                <DatePicker
+                  value={localData.start_date}
+                  onChange={(date) =>
+                    handleImmediateChange("start_date", date || "")
+                  }
+                  title="Data de início"
+                  icon={Play}
+                />
+              )}
+
               <DatePicker
-                value={localData.start_date}
+                value={localData.due_date}
                 onChange={(date) =>
-                  handleImmediateChange("start_date", date || "")
+                  handleImmediateChange("due_date", date || "")
                 }
-                title="Data de início"
-                icon={Play}
+                title="Data de prazo"
+                icon={Check}
               />
-            )}
 
-            <DatePicker
-              value={localData.due_date}
-              onChange={(date) =>
-                handleImmediateChange("due_date", date || "")
-              }
-              title="Data de prazo"
-              icon={Check}
-            />
+              {showStartTime && (
+                <TimeInput
+                  value={localData.start_time}
+                  onChange={(time) =>
+                    handleImmediateChange("start_time", time || "")
+                  }
+                  title="Hora de início"
+                  icon={AlarmClockPlus}
+                />
+              )}
 
-            {showStartTime && (
-              <TimeInput
-                value={localData.start_time}
-                onChange={(time) =>
-                  handleImmediateChange("start_time", time || "")
+              {showTime && (
+                <TimeInput
+                  value={localData.due_time}
+                  onChange={(time) =>
+                    handleImmediateChange("due_time", time || "")
+                  }
+                  title="Hora de prazo"
+                  icon={AlarmClockCheck}
+                />
+              )}
+            </div>
+            {showPriority && (
+              <Dropdown
+                value={localData.priority}
+                options={priorityOptions}
+                onChange={(value) => handleImmediateChange("priority", value)}
+                buttonClass={`px-2 py-1 rounded-sm text-sm font-semibold
+                ${priorityMap[localData.priority]?.color}
+                hover:bg-zinc-700 duration-100`}
+                renderLabel={(value) =>
+                  `Prioridade: ${priorityMap[value].label}`
                 }
-                title="Hora de início"
-                icon={AlarmClockPlus}
-              />
-            )}
-
-            {showTime && (
-              <TimeInput
-                value={localData.due_time}
-                onChange={(time) =>
-                  handleImmediateChange("due_time", time || "")
-                }
-                title="Hora de prazo"
-                icon={AlarmClockCheck}
               />
             )}
           </div>

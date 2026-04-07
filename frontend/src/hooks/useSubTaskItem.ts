@@ -2,6 +2,7 @@ import { useEditableItem } from "./useEditableItem";
 import { useTasks } from "./useTasks";
 import { useTaskSettings } from "./useTaskSettings";
 import type { TSubTask } from "../types/TTask";
+import { useMemo } from "react";
 
 type Props = {
   subtask: TSubTask;
@@ -17,8 +18,15 @@ export const useSubTaskItem = ({
   const { updateSubTask, deleteSubTask } = useTasks();
   const { settings } = useTaskSettings();
 
+  const normalizedSubtask = useMemo(() => {
+  return {
+    ...subtask,
+    priority: subtask.priority ?? "low",
+  };
+}, [subtask]);
+
   const editable = useEditableItem<TSubTask>({
-    initialData: subtask,
+    initialData: normalizedSubtask,
     onUpdate: async (updated) => {
       setLoading(true);
       try {
@@ -43,7 +51,8 @@ export const useSubTaskItem = ({
       a.start_date !== b.start_date ||
       a.due_time !== b.due_time ||
       a.start_time !== b.start_time ||
-      a.status !== b.status,
+      a.status !== b.status ||
+      a.priority !== b.priority,
   });
 
   const isDone = editable.localData.status === "concluded";
@@ -60,7 +69,7 @@ export const useSubTaskItem = ({
 
     settings,
     isDone,
-
+    showPriority: settings?.use_subtask_priority ?? false,
     showStartDate: settings?.use_start_date ?? false,
     showTime: settings?.use_time ?? false,
     showStartTime:

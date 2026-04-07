@@ -36,12 +36,9 @@ export const TaskSettingsProvider = ({
 
     const updated = { ...settings, ...data };
 
-    // regra de negócio
     if (!updated.use_start_date) {
       updated.which_date_use_in_calendar = "UseDueDate";
     }
-
-    // optimistic update
     setSettings(updated);
     setUpdating(true);
 
@@ -50,7 +47,6 @@ export const TaskSettingsProvider = ({
     } catch (err) {
       console.error(err);
 
-      // rollback simples
       setSettings(settings);
     } finally {
       setUpdating(false);
