@@ -1,5 +1,3 @@
-import type { TTask } from "../../types/TTask";
-import { useTasks } from "../../hooks/useTask";
 import {
   AlarmClockCheck,
   AlarmClockPlus,
@@ -8,9 +6,7 @@ import {
   Play,
   Trash2,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { Dropdown } from "./Dropdown";
-import { useNavigate, useParams } from "react-router-dom";
 import {
   priorityMap,
   statusMap,
@@ -19,119 +15,37 @@ import {
   priorityOptions,
 } from "../../utils/taskUtils";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
-import { useTaskSettings } from "../../hooks/useTaskSettings";
 import { DatePicker } from "../_Common/DatePicker";
 import { TimeInput } from "../_Common/TimeInput";
+import { useTaskItem } from "../../hooks/useTaskItem";
+import type { TTask } from "../../types/TTask";
 
 type TaskProps = {
   task: TTask;
 };
 
 export const TaskItem = ({ task }: TaskProps) => {
-  const [localTask, setLocalTask] = useState(task);
-  const navigate = useNavigate();
-  const { taskId } = useParams<{ taskId?: string }>();
-  const isDetailsPage = !!taskId;
-  const { updateTask, deleteTask } = useTasks();
-  const [loading, setLoading] = useState(false);
-  const { settings } = useTaskSettings();
-  const lastSavedTaskRef = useRef(task);
-
-  useEffect(() => {
-    setLocalTask(task);
-    lastSavedTaskRef.current = task;
-  }, [task]);
-
-  const commitUpdate = async (updatedTask: TTask) => {
-    if (!hasTaskChanged(updatedTask, lastSavedTaskRef.current)) return;
-
-    try {
-      setLoading(true);
-      const updated = await updateTask(task.id, updatedTask);
-
-      lastSavedTaskRef.current = updated ?? updatedTask;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    localTask,
+    loading,
+    settings,
+    isDetailsPage,
+    showStartDate,
+    showTime,
+    showStartTime,
+    handleChange,
+    handleBlur,
+    handleKeyDown,
+    handleDeleteTask,
+    changeStatus,
+    changePriority,
+    handleImmediateChange,
+    navigateToDetails,
+  } = useTaskItem(task);
 
   if (!settings) {
     return <LoadingOverlay show />;
   }
-
-  const showStartDate = settings.use_start_date;
-  const showTime = settings.use_time;
-  const showStartTime = settings.use_time && settings.use_start_date;
-
-  const changeStatus = (status: TTask["status"]) =>
-    handleImmediateChange("status", status);
-
-  const changePriority = (priority: TTask["priority"]) =>
-    handleImmediateChange("priority", priority);
-
-  const handleImmediateChange = <K extends keyof TTask>(
-    field: K,
-    value: TTask[K]
-  ) => {
-    if (localTask[field] === value) return;
-
-    const updated = {
-      ...localTask,
-      [field]: value,
-    };
-
-    setLocalTask(updated);
-    commitUpdate(updated);
-  };
-
-  const handleChange = <K extends keyof TTask>(field: K, value: TTask[K]) => {
-    setLocalTask((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleBlur = async () => {
-    if (!localTask.title.trim() || !localTask.due_date) {
-      setLocalTask(task);
-      return;
-    }
-
-    await commitUpdate(localTask);
-  };
-
-  const handleKeyDown = async (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      (e.currentTarget as HTMLInputElement | HTMLTextAreaElement).blur();
-    }
-
-    if (e.key === "Escape") {
-      setLocalTask(task);
-      (e.currentTarget as HTMLInputElement | HTMLTextAreaElement).blur();
-    }
-  };
-
-  const handleDeleteTask = async () => {
-    const deleteConfirm = window.confirm(
-      `Quer mesmo deletar a tarefa "${localTask.title}"?`
-    );
-    if (!deleteConfirm) return;
-    await deleteTask(localTask.id);
-  };
-
-  const hasTaskChanged = (a: TTask, b: TTask) => {
-    return (
-      a.title !== b.title ||
-      a.description !== b.description ||
-      a.due_date !== b.due_date ||
-      a.start_date !== b.start_date ||
-      a.due_time !== b.due_time ||
-      a.start_time !== b.start_time ||
-      a.priority !== b.priority ||
-      a.status !== b.status
-    );
-  };
 
   const { msg: timeMessage, color: timeColor } = getTimeMessage(
     new Date(localTask.due_date)
@@ -239,7 +153,7 @@ export const TaskItem = ({ task }: TaskProps) => {
 
             {!isDetailsPage && (
               <button
-                onClick={() => navigate(`/tarefa/${task.id}`)}
+                onClick={navigateToDetails}
                 className="bg-indigo-600 hover:bg-indigo-800 duration-150 p-2 rounded-full"
               >
                 <Eye size={20} />
@@ -262,14 +176,7 @@ export const TaskItem = ({ task }: TaskProps) => {
             />
 
             <button
-              onClick={async () => {
-                try {
-                  setLoading(true);
-                  await handleDeleteTask();
-                } finally {
-                  setLoading(false);
-                }
-              }}
+              onClick={handleDeleteTask}
               className="bg-red-600 hover:bg-red-800 duration-150 p-2 rounded-full"
             >
               <Trash2 size={20} />
