@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useTasks } from "../hooks/useTask";
+import { useTasks } from "../hooks/useTasks";
 import { TaskForm } from "../components/Tasks/TaskForm";
 import { Modal } from "../components/Tasks/Modal";
 import { priorityMap } from "../utils/taskUtils";

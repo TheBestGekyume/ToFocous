@@ -18,7 +18,7 @@ type Props = {
 
 export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
   const {
-    localSubTask,
+    localData,
     isDone,
     showStartDate,
     showTime,
@@ -49,10 +49,9 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
         {isDone && <Check size={16} className="text-white" />}
       </button>
 
-      {/* Conteúdo */}
       <div className="flex flex-1 flex-col gap-2">
         <input
-          value={localSubTask.title}
+          value={localData.title}
           onChange={(e) => handleChange("title", e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
@@ -65,7 +64,7 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
         />
 
         <textarea
-          value={localSubTask.description}
+          value={localData.description}
           onChange={(e) => handleChange("description", e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
@@ -77,12 +76,11 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
           `}
         />
 
-        {/* Datas */}
         {!isDone && (
           <div className="flex items-end flex-wrap gap-3">
             {showStartDate && (
               <DatePicker
-                value={localSubTask.start_date}
+                value={localData.start_date}
                 onChange={(date) =>
                   handleImmediateChange("start_date", date || "")
                 }
@@ -92,7 +90,7 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
             )}
 
             <DatePicker
-              value={localSubTask.due_date}
+              value={localData.due_date}
               onChange={(date) =>
                 handleImmediateChange("due_date", date || "")
               }
@@ -102,7 +100,7 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
 
             {showStartTime && (
               <TimeInput
-                value={localSubTask.start_time}
+                value={localData.start_time}
                 onChange={(time) =>
                   handleImmediateChange("start_time", time || "")
                 }
@@ -113,7 +111,7 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
 
             {showTime && (
               <TimeInput
-                value={localSubTask.due_time}
+                value={localData.due_time}
                 onChange={(time) =>
                   handleImmediateChange("due_time", time || "")
                 }
@@ -125,7 +123,6 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
         )}
       </div>
 
-      {/* Delete */}
       <button
         className="p-2 bg-red-600 hover:bg-red-800 rounded-full"
         onClick={handleDelete}

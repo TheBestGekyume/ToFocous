@@ -26,7 +26,7 @@ type TaskProps = {
 
 export const TaskItem = ({ task }: TaskProps) => {
   const {
-    localTask,
+    localData,
     loading,
     settings,
     isDetailsPage,
@@ -36,23 +36,21 @@ export const TaskItem = ({ task }: TaskProps) => {
     handleChange,
     handleBlur,
     handleKeyDown,
-    handleDeleteTask,
+    handleDelete,
     changeStatus,
     changePriority,
     handleImmediateChange,
     navigateToDetails,
   } = useTaskItem(task);
 
-  if (!settings) {
-    return <LoadingOverlay show />;
-  }
+  if (!settings) return <LoadingOverlay show />;
 
   const { msg: timeMessage, color: timeColor } = getTimeMessage(
-    new Date(localTask.due_date)
+    new Date(localData.due_date)
   );
 
-  const currentPriority = priorityMap[localTask.priority];
-  const currentStatus = statusMap[localTask.status];
+  const currentPriority = priorityMap[localData.priority];
+  const currentStatus = statusMap[localData.status];
 
   return (
     <>
@@ -64,9 +62,9 @@ export const TaskItem = ({ task }: TaskProps) => {
       >
         <div className="flex flex-col gap-4 w-full">
           <div className="flex gap-4 flex-wrap">
-            {showStartDate && localTask.status !== "concluded" && (
+            {showStartDate && localData.status !== "concluded" && (
               <DatePicker
-                value={localTask.start_date}
+                value={localData.start_date}
                 onChange={(date) =>
                   handleImmediateChange("start_date", date || "")
                 }
@@ -75,9 +73,9 @@ export const TaskItem = ({ task }: TaskProps) => {
               />
             )}
 
-            {localTask.status !== "concluded" && (
+            {localData.status !== "concluded" && (
               <DatePicker
-                value={localTask.due_date}
+                value={localData.due_date}
                 onChange={(date) =>
                   handleImmediateChange("due_date", date || "")
                 }
@@ -86,9 +84,9 @@ export const TaskItem = ({ task }: TaskProps) => {
               />
             )}
 
-            {showStartTime && localTask.status !== "concluded" && (
+            {showStartTime && localData.status !== "concluded" && (
               <TimeInput
-                value={localTask.start_time}
+                value={localData.start_time}
                 onChange={(time) =>
                   handleImmediateChange("start_time", time || "")
                 }
@@ -97,9 +95,9 @@ export const TaskItem = ({ task }: TaskProps) => {
               />
             )}
 
-            {showTime && localTask.status !== "concluded" && (
+            {showTime && localData.status !== "concluded" && (
               <TimeInput
-                value={localTask.due_time}
+                value={localData.due_time}
                 onChange={(time) =>
                   handleImmediateChange("due_time", time || "")
                 }
@@ -110,9 +108,7 @@ export const TaskItem = ({ task }: TaskProps) => {
           </div>
 
           <input
-            name="title"
-            required
-            value={localTask.title}
+            value={localData.title}
             onChange={(e) => handleChange("title", e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
@@ -120,12 +116,12 @@ export const TaskItem = ({ task }: TaskProps) => {
             className={`text-xl font-semibold outline-none border border-transparent
               duration-100 focus:bg-zinc-900 focus:border-accent
               hover:bg-zinc-700 rounded-md p-1 
-              ${localTask.status === "concluded" ? "line-through text-zinc-400" : ""}
+              ${localData.status === "concluded" ? "line-through text-zinc-400" : ""}
               ${isDetailsPage ? "w-full" : "w-max"}`}
           />
 
           <textarea
-            value={localTask.description}
+            value={localData.description}
             onChange={(e) => handleChange("description", e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
@@ -135,7 +131,7 @@ export const TaskItem = ({ task }: TaskProps) => {
               focus:resize-y hover:bg-zinc-700 hover:resize-y w-9/10"
           />
 
-          {localTask.status !== "concluded" && (
+          {localData.status !== "concluded" && (
             <p className={`px-1 text-xs ${timeColor}`}>{timeMessage}</p>
           )}
         </div>
@@ -143,12 +139,14 @@ export const TaskItem = ({ task }: TaskProps) => {
         <div className="flex flex-col items-end justify-center gap-4 text-sm">
           <div className="flex gap-4 w-max">
             <Dropdown
-              value={localTask.priority}
+              value={localData.priority}
               options={priorityOptions}
               onChange={changePriority}
-              buttonClass={`font-bold px-2 py-1 focus:bg-zinc-900 hover:bg-zinc-700 rounded-sm duration-100
+              buttonClass={`font-bold px-2 py-1 hover:bg-zinc-700 rounded-sm duration-100
                 ${currentPriority.color}`}
-              renderLabel={(value) => `Prioridade: ${priorityMap[value].label}`}
+              renderLabel={(value) =>
+                `Prioridade: ${priorityMap[value].label}`
+              }
             />
 
             {!isDetailsPage && (
@@ -167,16 +165,16 @@ export const TaskItem = ({ task }: TaskProps) => {
             } items-end gap-4`}
           >
             <Dropdown
-              value={localTask.status}
+              value={localData.status}
               options={statusOptions}
               onChange={changeStatus}
               buttonClass={`flex items-center gap-2 rounded-sm px-2 py-1 duration-100 border
-                border-transparent hover:bg-zinc-950 focus:bg-zinc-900 focus:border-accent
+                border-transparent hover:bg-zinc-950
                 ${currentStatus.bg} ${currentStatus.color}`}
             />
 
             <button
-              onClick={handleDeleteTask}
+              onClick={handleDelete}
               className="bg-red-600 hover:bg-red-800 duration-150 p-2 rounded-full"
             >
               <Trash2 size={20} />

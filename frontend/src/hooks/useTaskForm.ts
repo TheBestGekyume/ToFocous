@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useTasks } from "../hooks/useTask";
+import { useTasks } from "./useTasks";
 import type {
     TTask,
     TSubTask,
