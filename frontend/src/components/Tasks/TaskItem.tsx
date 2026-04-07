@@ -1,5 +1,3 @@
-import type { TTask } from "../../types/TTask";
-import { useTasks } from "../../hooks/useTask";
 import {
   AlarmClockCheck,
   AlarmClockPlus,
@@ -8,9 +6,7 @@ import {
   Play,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
 import { Dropdown } from "./Dropdown";
-import { useNavigate, useParams } from "react-router-dom";
 import {
   priorityMap,
   statusMap,
@@ -19,102 +15,42 @@ import {
   priorityOptions,
 } from "../../utils/taskUtils";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
-import { useTaskSettings } from "../../hooks/useTaskSettings";
 import { DatePicker } from "../_Common/DatePicker";
 import { TimeInput } from "../_Common/TimeInput";
+import { useTaskItem } from "../../hooks/useTaskItem";
+import type { TTask } from "../../types/TTask";
 
 type TaskProps = {
   task: TTask;
 };
 
 export const TaskItem = ({ task }: TaskProps) => {
-  const [localTask, setLocalTask] = useState(task);
-  const navigate = useNavigate();
-  const { taskId } = useParams<{ taskId?: string }>();
-  const isDetailsPage = !!taskId;
+  const {
+    localData,
+    loading,
+    settings,
+    isDetailsPage,
+    showStartDate,
+    showTime,
+    showStartTime,
+    handleChange,
+    handleBlur,
+    handleKeyDown,
+    handleDelete,
+    changeStatus,
+    changePriority,
+    handleImmediateChange,
+    navigateToDetails,
+  } = useTaskItem(task);
 
-  const { updateTask, deleteTask } = useTasks();
-  const [loading, setLoading] = useState(false);
-  const { settings } = useTaskSettings();
-
-  const commitUpdate = async (updatedTask: TTask) => {
-    try {
-      setLoading(true);
-      await updateTask(task.id, updatedTask);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!settings) {
-    return <LoadingOverlay show />;
-  }
-
-  const showStartDate = settings.use_start_date;
-  const showTime = settings.use_time;
-  const showStartTime = settings.use_time && settings.use_start_date;
-
-  const changeStatus = (status: TTask["status"]) =>
-    handleImmediateChange("status", status);
-
-  const changePriority = (priority: TTask["priority"]) =>
-    handleImmediateChange("priority", priority);
-
-  const handleImmediateChange = <K extends keyof TTask>(
-    field: K,
-    value: TTask[K]
-  ) => {
-    const updated = {
-      ...localTask,
-      [field]: value,
-    };
-
-    setLocalTask(updated);
-    commitUpdate(updated);
-  };
-
-  const handleChange = <K extends keyof TTask>(field: K, value: TTask[K]) => {
-    setLocalTask((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleBlur = async () => {
-    if (!localTask.title.trim() || !localTask.due_date) {
-      setLocalTask(task);
-      return;
-    }
-
-    await commitUpdate(localTask);
-  };
-
-  const handleKeyDown = async (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      (e.currentTarget as HTMLInputElement | HTMLTextAreaElement).blur();
-    }
-
-    if (e.key === "Escape") {
-      setLocalTask(task);
-      (e.currentTarget as HTMLInputElement | HTMLTextAreaElement).blur();
-    }
-  };
-
-  const handleDeleteTask = async () => {
-    const deleteConfirm = window.confirm(
-      `Quer mesmo deletar a tarefa "${localTask.title}"?`
-    );
-    if (!deleteConfirm) return;
-    await deleteTask(localTask.id);
-  };
+  if (!settings) return <LoadingOverlay show />;
 
   const { msg: timeMessage, color: timeColor } = getTimeMessage(
-    new Date(localTask.due_date)
+    new Date(localData.due_date)
   );
 
-  const currentPriority = priorityMap[localTask.priority];
-  const currentStatus = statusMap[localTask.status];
+  const currentPriority = priorityMap[localData.priority];
+  const currentStatus = statusMap[localData.status];
 
   return (
     <>
@@ -126,9 +62,9 @@ export const TaskItem = ({ task }: TaskProps) => {
       >
         <div className="flex flex-col gap-4 w-full">
           <div className="flex gap-4 flex-wrap">
-            {showStartDate && localTask.status !== "concluded" && (
+            {showStartDate && localData.status !== "concluded" && (
               <DatePicker
-                value={localTask.start_date}
+                value={localData.start_date}
                 onChange={(date) =>
                   handleImmediateChange("start_date", date || "")
                 }
@@ -137,9 +73,9 @@ export const TaskItem = ({ task }: TaskProps) => {
               />
             )}
 
-            {localTask.status !== "concluded" && (
+            {localData.status !== "concluded" && (
               <DatePicker
-                value={localTask.due_date}
+                value={localData.due_date}
                 onChange={(date) =>
                   handleImmediateChange("due_date", date || "")
                 }
@@ -148,9 +84,9 @@ export const TaskItem = ({ task }: TaskProps) => {
               />
             )}
 
-            {showStartTime && localTask.status !== "concluded" && (
+            {showStartTime && localData.status !== "concluded" && (
               <TimeInput
-                value={localTask.start_time}
+                value={localData.start_time}
                 onChange={(time) =>
                   handleImmediateChange("start_time", time || "")
                 }
@@ -159,9 +95,9 @@ export const TaskItem = ({ task }: TaskProps) => {
               />
             )}
 
-            {showTime && localTask.status !== "concluded" && (
+            {showTime && localData.status !== "concluded" && (
               <TimeInput
-                value={localTask.due_time}
+                value={localData.due_time}
                 onChange={(time) =>
                   handleImmediateChange("due_time", time || "")
                 }
@@ -172,9 +108,7 @@ export const TaskItem = ({ task }: TaskProps) => {
           </div>
 
           <input
-            name="title"
-            required
-            value={localTask.title}
+            value={localData.title}
             onChange={(e) => handleChange("title", e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
@@ -182,12 +116,12 @@ export const TaskItem = ({ task }: TaskProps) => {
             className={`text-xl font-semibold outline-none border border-transparent
               duration-100 focus:bg-zinc-900 focus:border-accent
               hover:bg-zinc-700 rounded-md p-1 
-              ${localTask.status === "concluded" ? "line-through text-zinc-400" : ""}
+              ${localData.status === "concluded" ? "line-through text-zinc-400" : ""}
               ${isDetailsPage ? "w-full" : "w-max"}`}
           />
 
           <textarea
-            value={localTask.description}
+            value={localData.description}
             onChange={(e) => handleChange("description", e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
@@ -197,7 +131,7 @@ export const TaskItem = ({ task }: TaskProps) => {
               focus:resize-y hover:bg-zinc-700 hover:resize-y w-9/10"
           />
 
-          {localTask.status !== "concluded" && (
+          {localData.status !== "concluded" && (
             <p className={`px-1 text-xs ${timeColor}`}>{timeMessage}</p>
           )}
         </div>
@@ -205,17 +139,19 @@ export const TaskItem = ({ task }: TaskProps) => {
         <div className="flex flex-col items-end justify-center gap-4 text-sm">
           <div className="flex gap-4 w-max">
             <Dropdown
-              value={localTask.priority}
+              value={localData.priority}
               options={priorityOptions}
               onChange={changePriority}
-              buttonClass={`font-bold px-2 py-1 focus:bg-zinc-900 hover:bg-zinc-700 rounded-sm duration-100
+              buttonClass={`font-bold px-2 py-1 hover:bg-zinc-700 rounded-sm duration-100
                 ${currentPriority.color}`}
-              renderLabel={(value) => `Prioridade: ${priorityMap[value].label}`}
+              renderLabel={(value) =>
+                `Prioridade: ${priorityMap[value].label}`
+              }
             />
 
             {!isDetailsPage && (
               <button
-                onClick={() => navigate(`/tarefa/${task.id}`)}
+                onClick={navigateToDetails}
                 className="bg-indigo-600 hover:bg-indigo-800 duration-150 p-2 rounded-full"
               >
                 <Eye size={20} />
@@ -229,23 +165,16 @@ export const TaskItem = ({ task }: TaskProps) => {
             } items-end gap-4`}
           >
             <Dropdown
-              value={localTask.status}
+              value={localData.status}
               options={statusOptions}
               onChange={changeStatus}
               buttonClass={`flex items-center gap-2 rounded-sm px-2 py-1 duration-100 border
-                border-transparent hover:bg-zinc-950 focus:bg-zinc-900 focus:border-accent
+                border-transparent hover:bg-zinc-950
                 ${currentStatus.bg} ${currentStatus.color}`}
             />
 
             <button
-              onClick={async () => {
-                try {
-                  setLoading(true);
-                  await handleDeleteTask();
-                } finally {
-                  setLoading(false);
-                }
-              }}
+              onClick={handleDelete}
               className="bg-red-600 hover:bg-red-800 duration-150 p-2 rounded-full"
             >
               <Trash2 size={20} />

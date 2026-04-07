@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useTasks } from "../hooks/useTask";
+import { useTasks } from "../hooks/useTasks";
 import { TaskForm } from "../components/Tasks/TaskForm";
 import { Modal } from "../components/Tasks/Modal";
 import { priorityMap } from "../utils/taskUtils";
@@ -41,16 +41,16 @@ export const SingleTaskPage = () => {
       <div className="flex flex-col w-3/4 p-5 gap-5">
         <TaskHeader task={task} />
 
-        <hr className="my-3 text-accent/75" />
-
-        <SubTaskList task={task} setLoading={setLoading} />
-
         <button
           className="px-4 py-2 mx-auto bg-green-600 hover:bg-green-800 duration-300 rounded-md w-fit font-semibold"
           onClick={() => setIsCreatingSubTask(true)}
         >
           + SubTask
         </button>
+
+        <hr className="my-3 text-accent/75" />
+
+        <SubTaskList task={task} setLoading={setLoading} />
 
         <Modal
           isOpen={isCreatingSubTask}

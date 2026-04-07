@@ -8,7 +8,7 @@ import {
   LayoutGrid,
   NotepadText,
 } from "lucide-react";
-import { useTasks } from "../../hooks/useTask";
+import { useTasks } from "../../hooks/useTasks";
 import { AnimatePresence, motion } from "framer-motion";
 import { Card } from "./Card";
 
@@ -56,8 +56,6 @@ export const Statistics = () => {
       legend: { display: false },
     },
   };
-
-  
 
   return (
     <section className="max-w-2/3 lg:max-w-1/2 mx-auto p-5 mb-5">

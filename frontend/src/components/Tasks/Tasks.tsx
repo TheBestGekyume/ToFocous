@@ -1,7 +1,7 @@
 import { TaskForm } from "./TaskForm";
 import { TaskItem } from "./TaskItem";
 import { SortTasks } from "./SortTasks";
-import { useTasks } from "../../hooks/useTask";
+import { useTasks } from "../../hooks/useTasks";
 
 export const Tasks = () => {
   const { tasks, setTasks } = useTasks();
