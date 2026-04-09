@@ -80,6 +80,10 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const deleteTask = useCallback(async (taskId: string) => {
+    const userResponse = window.confirm(
+      "Essa tarefa será excluida permanetemente, quer continuar?"
+    );
+    if (!userResponse) return;
     try {
       await taskService.deleteTask(taskId);
       setTasks((prev) => prev.filter((t) => t.id !== taskId));
@@ -154,6 +158,10 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
 
   const deleteSubTask = useCallback(
     async (taskId: string, subtaskId: string) => {
+      const userResponse = window.confirm(
+        "Essa subtarefa será excluida permanetemente, quer continuar?"
+      );
+      if (!userResponse) return;
       try {
         await taskService.deleteSubTask(subtaskId, taskId);
 
