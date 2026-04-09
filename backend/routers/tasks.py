@@ -120,6 +120,7 @@ def patch_task(task_id: str, data: PatchTask, current_user = Depends(get_current
         task = response.data[0]
 
         filtered_response = {
+            "id": task["id"],
             "title": task["title"],
             "description": task["description"],
             "start_time": format_time(task["start_time"]),
