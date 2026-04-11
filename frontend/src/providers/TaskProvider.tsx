@@ -52,6 +52,15 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
 
   /* CRUD - TASK */
 
+  const getTasksByProject = useCallback(async (projectId: string) => {
+    try {
+      const data = await taskService.getTasksByProject(projectId);
+      setTasks(data);
+    } catch (err) {
+      console.error(`Erro ao buscar task no projeto ${projectId}: ${err}`);
+    }
+  }, []);
+
   const createTask = useCallback(async (payload: TCreateTaskDTO) => {
     try {
       const created = await taskService.createTask(payload);
@@ -189,6 +198,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       handleSortConfig,
       resetSort,
       sortConfig,
+      getTasksByProject,
       createTask,
       updateTask,
       deleteTask,
@@ -202,6 +212,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       sortConfig,
       handleSortConfig,
       resetSort,
+      getTasksByProject,
       createTask,
       updateTask,
       deleteTask,

@@ -1,7 +1,7 @@
 import {
   CalendarDays,
   CircleX,
-  ListTodo,
+  FolderKanban,
   LogOut,
   Settings,
   TextAlignJustify,
@@ -43,7 +43,9 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
 
       <aside
         className={`fixed left-0 top-0 h-screen w-48 bg-zinc-950 border-r border-default
-    transition-transform duration-300 z-50 ${open ? "translate-x-0" : "-translate-x-full"} `}
+        transition-transform duration-300 z-50 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <div className="flex flex-col h-full px-3 pt-4 pb-6">
           <div className="flex justify-end relative mb-15">
@@ -59,14 +61,14 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
             </button>
           </div>
 
-          {/* MENU */}
           <nav className="flex flex-col gap-5">
+            {/* 🔥 PROJECTS */}
             <Link
-              to="/tarefas"
+              to="/projects"
               className="flex items-center hover:text-purple-500 duration-150"
             >
-              <ListTodo />
-              <span className="px-3">Tarefas</span>
+              <FolderKanban />
+              <span className="px-3">Projects</span>
             </Link>
 
             <Link
@@ -94,8 +96,10 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
             </Link>
           </nav>
 
-          {/* FOOTER / LOGOUT */}
-          <button onClick={logOut} className="mt-auto flex items-center hover:text-red-500 duration-150">
+          <button
+            onClick={logOut}
+            className="mt-auto flex items-center hover:text-red-500 duration-150"
+          >
             <LogOut />
             <span className="px-3">Sair</span>
           </button>

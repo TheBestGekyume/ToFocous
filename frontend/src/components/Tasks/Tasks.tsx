@@ -1,13 +1,25 @@
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
+
 import { TaskForm } from "./TaskForm";
 import { TaskItem } from "./TaskItem";
 import { SortTasks } from "./SortTasks";
 import { useTasks } from "../../hooks/useTasks";
 
 export const Tasks = () => {
-  const { tasks, setTasks } = useTasks();
+  const { tasks, setTasks, getTasksByProject } = useTasks();
+  const { projectId } = useParams();
+
+  useEffect(() => {
+    if (projectId) {
+      getTasksByProject(projectId);
+    }
+  }, [getTasksByProject, projectId]);
 
   const clearCompleted = () => {
-    setTasks((prev) => prev.filter((task) => task.status !== "concluded"));
+    setTasks((prev) =>
+      prev.filter((task) => task.status !== "concluded")
+    );
   };
 
   return (
@@ -22,7 +34,7 @@ export const Tasks = () => {
             <SortTasks />
             <button
               onClick={clearCompleted}
-              className="p-2 cursor-pointer rounded-md text-red-200 bg-red-600 hover:bg-red-900 font-semibold transition-colors"
+              className="p-2 rounded-md text-red-200 bg-red-600 hover:bg-red-900 font-semibold transition-colors"
             >
               Limpar Concluídas
             </button>
@@ -30,7 +42,9 @@ export const Tasks = () => {
 
           <div className="flex flex-col gap-3">
             {tasks.length > 0 ? (
-              tasks.map((task) => <TaskItem key={task.id} task={task} />)
+              tasks.map((task) => (
+                <TaskItem key={task.id} task={task} />
+              ))
             ) : (
               <p className="text-zinc-500 text-center italic">
                 Nenhuma tarefa adicionada ainda.

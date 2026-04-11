@@ -21,6 +21,7 @@ export type TasksContextType = {
   };
 
   /* TASK */
+  getTasksByProject: (projectId: string) => Promise<void>;
   createTask: (data: TCreateTaskDTO) => Promise<void>;
   updateTask: (id: string, data: Partial<TTask>) => Promise<TTask | undefined>;
   deleteTask: (id: string) => Promise<void>;

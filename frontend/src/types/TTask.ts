@@ -37,6 +37,7 @@ export type TCreateTaskDTO = {
     start_date?: string | null;
     start_time?: string | null;
     due_time?: string | null;
+    project_id:string;
 };
 
 export type TCreateSubTaskDTO = {
