@@ -6,6 +6,7 @@ import type {
     TCreateTaskDTO,
     TCreateSubTaskDTO,
 } from "../types/TTask";
+import { useParams } from "react-router-dom";
 
 type UseTaskFormProps = {
     initialTask?: TTask | TSubTask;
@@ -62,6 +63,8 @@ export const useTaskForm = ({
         updateSubTask,
     } = useTasks();
 
+    const { projectId } = useParams();
+
     const [formData, setFormData] = useState<FormData>(() =>
         isCreatingSubTask
             ? { kind: "subtask", data: emptySubTaskForm }
@@ -98,6 +101,7 @@ export const useTaskForm = ({
         start_date: data.start_date || null,
         start_time: data.start_time || null,
         due_time: data.due_time || null,
+        project_id: projectId!
     });
 
     const normalizeSubTaskPayload = (data: TSubTask): TCreateSubTaskDTO => ({
@@ -163,6 +167,9 @@ export const useTaskForm = ({
             } else {
 
                 if (isCreating) {
+                    if (!projectId) {
+                        throw new Error("Project ID não encontrado");
+                    }
                     await createTask(normalizeTaskPayload(formData.data as TaskFormData));
                 } else {
                     await updateTask(
