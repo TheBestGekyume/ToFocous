@@ -8,6 +8,7 @@ export const useTaskItem = (task: TTask) => {
     const navigate = useNavigate();
     const { taskId } = useParams<{ taskId?: string }>();
     const isDetailsPage = !!taskId;
+    const { projectId } = useParams();
 
     const { updateTask, deleteTask } = useTasks();
     const { settings } = useTaskSettings();
@@ -34,7 +35,7 @@ export const useTaskItem = (task: TTask) => {
     const changePriority = (priority: TTask["priority"]) =>
         editable.handleImmediateChange("priority", priority);
 
-    const navigateToDetails = () => navigate(`/tarefa/${task.id}`);
+    const navigateToDetails = () => navigate(`/projects/${projectId}/tasks/${task.id}`);
 
     return {
         ...editable,
