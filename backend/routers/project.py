@@ -12,23 +12,25 @@ def post_project(
     supabase=Depends(get_db)
 ):
     try:
-        postdata = data.model_dump(mode="json")
 
-        # IMPORTANTE: dono do projeto
+        postdata = data.model_dump(mode="json")
         postdata["user_id"] = current_user.id
 
         response = supabase.table("projects").insert(postdata).execute()
 
         project = response.data[0]
 
+        filtered_response = {
+            "id": project["id"],
+            "title": project["title"],
+            "description": project["description"],
+            "color": project["color"]
+        }
+
+
         return {
             "message": "Projeto criado com sucesso.",
-            "data": {
-                "id": project["id"],
-                "title": project["title"],
-                "description": project["description"],
-                "color": project["color"]
-            }
+            "data": filtered_response
         }
 
     except Exception as e:
