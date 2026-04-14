@@ -13,8 +13,6 @@ export const projectService = {
   },
 
   async update(id: string, payload: TUpdateProjectDTO): Promise<TProject> {
-    console.log("UPDATE PAYLOAD:", payload);
-    console.log("PROJECT ID:", id);
     const { data } = await api.patch(`/projects/${id}`, payload);
     return data.data;
   },
