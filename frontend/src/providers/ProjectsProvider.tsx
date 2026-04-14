@@ -32,9 +32,10 @@ export const ProjectsProvider = ({
 
   const updateProject = async (id: string, payload: TUpdateProjectDTO) => {
     const updated = await projectService.update(id, payload);
-    setProjects((prev) =>
-      prev.map((p) => (p.id === id ? updated : p))
-    );
+
+    setProjects((prev) => prev.map((p) => (p.id === id ? updated : p)));
+
+    return updated;
   };
 
   const deleteProject = async (id: string) => {

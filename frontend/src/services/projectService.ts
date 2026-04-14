@@ -9,12 +9,14 @@ export const projectService = {
 
   async create(payload: TCreateProjectDTO): Promise<TProject> {
     const { data } = await api.post("/projects/", payload);
-    return data;
+    return data.data;
   },
 
   async update(id: string, payload: TUpdateProjectDTO): Promise<TProject> {
+    console.log("UPDATE PAYLOAD:", payload);
+    console.log("PROJECT ID:", id);
     const { data } = await api.patch(`/projects/${id}`, payload);
-    return data;
+    return data.data;
   },
 
   async delete(id: string): Promise<void> {

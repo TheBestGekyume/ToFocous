@@ -1,22 +1,29 @@
 import { useProjects } from "../../hooks/useProjects";
+import type { TProject } from "../../types/TProject";
 import { ProjectItem } from "./ProjectItem";
 
-export const ProjectList = () => {
-  const { projects, loading } = useProjects();
+type Props = {
+  onEdit: (project: TProject) => void;
+  onDelete: (project: TProject) => void;
+};
 
-  if (loading) return <p>Loading...</p>;
+export const ProjectList = ({ onEdit, onDelete }: Props) => {
+  const { projects } = useProjects();
+  console.log(projects);
+  projects.map((p) => console.log(p.id));
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {projects?.length > 0 ? (
-        projects.map((project) => (
-          <ProjectItem key={project.id} project={project} />
-        ))
-      ) : (
-        <p className="text-zinc-500 text-center italic">
-          Nenhum projeto encontrado.
-        </p>
-      )}
+    <div className="columns-1 sm:columns-2 md:columns-3 mt-4">
+      {projects.map((project) => (
+        <div key={project.id} className="mb-4 break-inside-avoid">
+          <ProjectItem
+            key={project.id}
+            project={project}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        </div>
+      ))}
     </div>
   );
 };

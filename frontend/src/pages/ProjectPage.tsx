@@ -1,29 +1,52 @@
 import { useState } from "react";
-import { ProjectList } from "../components/Projects/ProjectList";
 import { ProjectForm } from "../components/Projects/ProjectForm";
+import { ProjectList } from "../components/Projects/ProjectList";
 import { Header } from "../components/Tasks/Header";
+import type { TProject } from "../types/TProject";
+import { useProjects } from "../hooks/useProjects";
+import { Plus } from "lucide-react";
 
 export const ProjectsPage = () => {
-  const [open, setOpen] = useState(false);
-
+  const [openCreate, setOpenCreate] = useState(false);
+  const [editingProject, setEditingProject] = useState<TProject | null>(null);
+  const { deleteProject } = useProjects();
   return (
     <div>
       <Header />
 
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Projects</h1>
+      <div className="px-10">
+        <div className="flex items-end justify-center mt-5 gap-2">
+          <h1 className="text-2xl font-bold text-white">Projetos</h1>
 
-        <button
-          onClick={() => setOpen(true)}
-          className="bg-accent hover:bg-purple-700 px-4 py-2 rounded-md font-semibold transition"
-        >
-          + Novo Projeto
-        </button>
+          <button
+            onClick={() => setOpenCreate(true)}
+            className="bg-accent hover:bg-purple-700 p-1 rounded-md font-semibold transition"
+          >
+            <Plus size={22} />  
+          </button>
+        </div>
+
+        <ProjectList
+          onEdit={setEditingProject}
+          onDelete={(project) => {
+            if (confirm("Tem certeza que deseja deletar este projeto?")) {
+              deleteProject(project.id);
+            }
+          }}
+        />
+
+        {openCreate && (
+          <ProjectForm mode="create" onClose={() => setOpenCreate(false)} />
+        )}
+
+        {editingProject && (
+          <ProjectForm
+            mode="edit"
+            project={editingProject}
+            onClose={() => setEditingProject(null)}
+          />
+        )}
       </div>
-
-      <ProjectList />
-
-      {open && <ProjectForm onClose={() => setOpen(false)} />}
     </div>
   );
 };
