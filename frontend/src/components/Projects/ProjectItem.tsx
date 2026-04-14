@@ -15,7 +15,7 @@ export const ProjectItem = ({ project, onEdit }: Props) => {
 
   return (
     <div
-      className="relative p-4 rounded-xl shadow-md cursor-pointer transition"
+      className="relative p-4 rounded-xl shadow-md cursor-pointer duration-300 hover:scale-105"
       style={{
         backgroundColor: project.color + "75",
         border: `2px solid ${project.color}`,
@@ -31,7 +31,7 @@ export const ProjectItem = ({ project, onEdit }: Props) => {
         </div>
 
         {/* ACTIONS */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 ps-2">
           {/* EDIT */}
           <button
             className="p-2 rounded-full bg-yellow-400 hover:bg-yellow-600 transition shadow-md"
