@@ -1,15 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import type { TProject } from "../../types/TProject";
 import { Pencil, Trash2 } from "lucide-react";
+import { useProjects } from "../../hooks/useProjects";
 
 type Props = {
   project: TProject;
   onEdit: (project: TProject) => void;
-  onDelete: (project: TProject) => void;
 };
 
-export const ProjectItem = ({ project, onEdit, onDelete }: Props) => {
+export const ProjectItem = ({ project, onEdit }: Props) => {
   const navigate = useNavigate();
+
+  const { deleteProject } = useProjects();
 
   return (
     <div
@@ -23,8 +25,7 @@ export const ProjectItem = ({ project, onEdit, onDelete }: Props) => {
       <div className="flex justify-between items-center ">
         <div>
           <h2 className="text-xl font-bold mb-2">
-            {project.title[0].toUpperCase() +
-              project.title.substring(1)}
+            {project.title[0].toUpperCase() + project.title.substring(1)}
           </h2>
           <p className="text-sm text-zinc-300">{project.description}</p>
         </div>
@@ -47,7 +48,10 @@ export const ProjectItem = ({ project, onEdit, onDelete }: Props) => {
             className="p-2 rounded-full bg-red-500 hover:bg-red-700 transition shadow-md"
             onClick={(e) => {
               e.stopPropagation();
-              onDelete(project);
+
+              if (confirm("Tem certeza?")) {
+                deleteProject(project.id);
+              }
             }}
           >
             <Trash2 size={16} className="text-white" />
