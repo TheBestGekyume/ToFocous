@@ -1,13 +1,12 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-
 import { TaskForm } from "./TaskForm";
 import { TaskItem } from "./TaskItem";
 import { SortTasks } from "./SortTasks";
 import { useTasks } from "../../hooks/useTasks";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
 
-export const Tasks = () => {
+export const TaskList = () => {
   const { tasks, setTasks, getTasksByProject, loading } = useTasks();
   const { projectId } = useParams();
 
