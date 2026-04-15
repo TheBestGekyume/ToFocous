@@ -88,6 +88,7 @@ def patch_project(
         return {
             "message": "Projeto atualizado com sucesso.",
             "data": {
+                "id": project["id"],
                 "title": project["title"],
                 "description": project["description"],
                 "color": project["color"]
