@@ -40,6 +40,7 @@ export const TimeInput = ({
 
       <input
         type={inputType}
+        step={60}
         value={internalValue}
         placeholder={inputType === "text" ? placeholder : undefined}
         onFocus={() => setIsFocused(true)}

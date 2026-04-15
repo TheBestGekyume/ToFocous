@@ -6,21 +6,24 @@ from backend.models.task import PostTask, PatchTask
 from backend.dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
+
 def format_time(t):
     if not t:
         return None
 
     try:
         if "T" in t:
-            dt = datetime.fromisoformat(t.replace("Z", ""))
-        else:
-            # caso venha só hora com milissegundo
-            dt = datetime.strptime(t, "%H:%M:%S.%f")
+            t = t.replace("Z", "")
+            dt = datetime.fromisoformat(t)
+            return dt.strftime("%H:%M")
 
-        return dt.strftime("%H:%M")
+        if len(t) >= 8:
+            return t[:5]
+
+        return None
 
     except Exception:
-        return t 
+        return None
 
 @router.post("/")
 def post_task(data: PostTask, current_user = Depends(get_current_user), supabase = Depends(get_db)):
