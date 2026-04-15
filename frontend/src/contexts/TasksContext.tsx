@@ -14,6 +14,7 @@ export type TasksContextType = {
 
   handleSortConfig: (type: SortType, isAscending?: boolean) => void;
   resetSort: () => void;
+  loading: boolean; 
 
   sortConfig: {
     type: SortType;
