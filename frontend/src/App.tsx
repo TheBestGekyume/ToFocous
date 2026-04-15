@@ -12,7 +12,7 @@ import { Schedule } from "./pages/Schedule";
 import { ProtectedRoute } from "./components/_Common/ProtectedRoute";
 
 import { TaskPage } from "./pages/TasksPage"; // 🔥 você continua usando ele
-import { SingleTaskPage } from "./pages/SingleTaskPage";
+import { SubTasksPage } from "./pages/SubTasksPage";
 
 // opcional (lista de projetos)
 import { ProjectsPage } from "./pages/ProjectPage";
@@ -49,7 +49,7 @@ function App() {
           {/* DETALHE DA TASK */}
           <Route
             path="/projects/:projectId/tasks/:taskId"
-            element={<SingleTaskPage />}
+            element={<SubTasksPage />}
           />
 
           {/* OUTROS */}
