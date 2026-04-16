@@ -54,16 +54,16 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   /* CRUD - TASK */
 
   const getTasksByProject = useCallback(async (projectId: string) => {
-  try {
-    setLoading(true);
-    const data = await taskService.getTasksByProject(projectId);
-    setTasks(data);
-  } catch (err) {
-    console.error(`Erro ao buscar task no projeto ${projectId}: ${err}`);
-  } finally {
-    setLoading(false);
-  }
-}, []);
+    try {
+      setLoading(true);
+      const data = await taskService.getTasksByProject(projectId);
+      setTasks(data);
+    } catch (err) {
+      console.error(`Erro ao buscar task no projeto ${projectId}: ${err}`);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const createTask = useCallback(async (payload: TCreateTaskDTO) => {
     try {
@@ -80,7 +80,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
         const updated = await taskService.updateTask(taskId, payload);
 
         setTasks((prev) =>
-          prev.map((t) => (t.id === updated.id ? updated : t))
+          prev.map((t) => (t.id === updated.id ? { ...t, ...updated } : t))
         );
 
         return updated;
