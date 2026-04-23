@@ -18,7 +18,7 @@ export const ProjectsProvider = ({
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const data = await projectService.getAll();
+      const data = await projectService.getAllProjects();
       setProjects(data);
     } finally {
       setLoading(false);
@@ -26,12 +26,12 @@ export const ProjectsProvider = ({
   };
 
   const createProject = async (payload: TCreateProjectDTO) => {
-    const newProject = await projectService.create(payload);
+    const newProject = await projectService.createProject(payload);
     setProjects((prev) => [...prev, newProject]);
   };
 
   const updateProject = async (id: string, payload: TUpdateProjectDTO) => {
-    const updated = await projectService.update(id, payload);
+    const updated = await projectService.updateProject(id, payload);
 
     setProjects((prev) => prev.map((p) => (p.id === id ? updated : p)));
 
@@ -39,7 +39,7 @@ export const ProjectsProvider = ({
   };
 
   const deleteProject = async (id: string) => {
-    await projectService.delete(id);
+    await projectService.deleteProject(id);
     setProjects((prev) => prev.filter((p) => p.id !== id));
   };
 

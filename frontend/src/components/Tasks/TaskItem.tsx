@@ -117,7 +117,7 @@ export const TaskItem = ({ task }: TaskProps) => {
               duration-100 focus:bg-zinc-900 focus:border-accent
               hover:bg-zinc-700 rounded-md p-1 
               ${localData.status === "concluded" ? "line-through text-zinc-400" : ""}
-              ${isDetailsPage ? "w-full" : "w-max"}`}
+              ${isDetailsPage ? "w-full" : "w-4/5"}`}
           />
 
           <textarea
@@ -136,7 +136,7 @@ export const TaskItem = ({ task }: TaskProps) => {
           )}
         </div>
 
-        <div className="flex flex-col items-end justify-center gap-4 text-sm">
+        <div className="flex flex-col items-end justify-center gap-4 text-sm ms-5">
           <div className="flex gap-4 w-max">
             <Dropdown
               value={localData.priority}

@@ -5,9 +5,11 @@ import { TaskItem } from "./TaskItem";
 import { SortTasks } from "./SortTasks";
 import { useTasks } from "../../hooks/useTasks";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
+// import { useProjects } from "../../hooks/useProjects";
 
 export const TaskList = () => {
   const { tasks, setTasks, getTasksByProject, loading } = useTasks();
+  // const {} = useProjects();
   const { projectId } = useParams();
 
   useEffect(() => {
@@ -31,7 +33,8 @@ export const TaskList = () => {
 
             <hr className="text-zinc-700" />
 
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-4">
+
               <SortTasks />
               <button
                 onClick={clearCompleted}

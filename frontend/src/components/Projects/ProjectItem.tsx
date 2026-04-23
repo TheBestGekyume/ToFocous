@@ -49,7 +49,12 @@ export const ProjectItem = ({ project, onEdit }: Props) => {
             onClick={(e) => {
               e.stopPropagation();
 
-              if (confirm("Tem certeza?")) {
+              if (
+                confirm(
+                  `O Projeto ${project.title} será e todas as tarefas e subtarefas serão PERMANENTEMENTE excluidos.
+Deseja continuar?`
+                )
+              ) {
                 deleteProject(project.id);
               }
             }}
