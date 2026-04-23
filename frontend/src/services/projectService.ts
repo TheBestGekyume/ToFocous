@@ -2,8 +2,14 @@ import { api } from "./api";
 import type { TCreateProjectDTO, TProject, TUpdateProjectDTO } from "../types/TProject";
 
 export const projectService = {
+
+  async getProjectById(id: string): Promise<TProject> {
+    const { data } = await api.get(`/projects/${id}`);
+    return data;
+  },
+
   async getAllProjects(): Promise<TProject[]> {
-    const { data } = await api.get("/projects/");
+    const { data } = await api.get("/projects/"); 
     return data;
   },
 

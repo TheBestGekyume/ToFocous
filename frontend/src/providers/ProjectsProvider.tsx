@@ -15,11 +15,32 @@ export const ProjectsProvider = ({
   const [projects, setProjects] = useState<TProject[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchProjects = async () => {
+  const fetchProjects = async (): Promise<TProject[]> => {
     setLoading(true);
     try {
       const data = await projectService.getAllProjects();
       setProjects(data);
+      return data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getProjectById = async (id: string): Promise<TProject> => {
+    const existingProject = projects.find((p) => p.id === id);
+
+    if (existingProject) {
+      return existingProject;
+    }
+
+    setLoading(true);
+
+    try {
+      const data = await projectService.getProjectById(id);
+
+      setProjects((prev) => [...prev, data]);
+
+      return data;
     } finally {
       setLoading(false);
     }
@@ -53,6 +74,7 @@ export const ProjectsProvider = ({
         projects,
         loading,
         fetchProjects,
+        getProjectById,
         createProject,
         updateProject,
         deleteProject,

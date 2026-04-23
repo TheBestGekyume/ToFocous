@@ -9,7 +9,8 @@ export type ProjectsContextType = {
   projects: TProject[];
   loading: boolean;
 
-  fetchProjects: () => Promise<void>;
+  fetchProjects: () => Promise<TProject[]>;
+  getProjectById: (id:string) => Promise<TProject>
   createProject: (data: TCreateProjectDTO) => Promise<void>;
   updateProject: (id: string, data: TUpdateProjectDTO) => Promise<TProject>;
   deleteProject: (id: string) => Promise<void>;
