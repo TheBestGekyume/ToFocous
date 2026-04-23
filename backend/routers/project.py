@@ -35,6 +35,37 @@ def post_project(
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/{project_id}")
+def get_project_by_id(
+    project_id: str,
+    current_user=Depends(get_current_user),
+    supabase=Depends(get_db)
+):
+    try:
+        response = supabase.table("projects") \
+            .select("*") \
+            .eq("id", project_id) \
+            .single() \
+            .execute()
+
+        if not response.data:
+            raise HTTPException(
+                status_code=404,
+                detail="Projeto não encontrado"
+            )
+
+        project = response.data
+
+        return {
+            "id": project["id"],
+            "title": project["title"],
+            "description": project["description"],
+            "color": project["color"]
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
     
 @router.get("/")
 def get_projects(
