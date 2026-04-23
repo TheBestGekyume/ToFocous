@@ -23,7 +23,8 @@ export const Header = () => {
     return (
         <header
             id="header"
-            className="bg-background-header text-text py-5 px-8 relative flex flex-col items-center"
+            className="bg-background-header text-text py-5 px-8 
+            relative flex flex-col items-center mb-6"
         >
             <div className="absolute top-5 right-8">{/* <ThemeToggle /> */}</div>
 

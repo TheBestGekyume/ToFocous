@@ -1,20 +1,15 @@
 import "./App.css";
 import { Routes, Route, Navigate } from "react-router-dom";
-
 import { TasksProvider } from "./providers/TaskProvider";
 import { TaskSettingsProvider } from "./providers/TaskSettingsProvider";
-
 import { Auth } from "./pages/Auth";
 import { TaskSettings } from "./pages/TaskSettings";
 import { AppLayout } from "./AppLayout";
 import { Profile } from "./pages/Profile";
 import { Schedule } from "./pages/Schedule";
 import { ProtectedRoute } from "./components/_Common/ProtectedRoute";
-
-import { TaskPage } from "./pages/TasksPage"; // 🔥 você continua usando ele
-import { SingleTaskPage } from "./pages/SingleTaskPage";
-
-// opcional (lista de projetos)
+import { TaskPage } from "./pages/TasksPage";
+import { SubTasksPage } from "./pages/SubTasksPage";
 import { ProjectsPage } from "./pages/ProjectPage";
 import { ProjectsProvider } from "./providers/ProjectsProvider";
 
@@ -37,22 +32,17 @@ function App() {
             </ProtectedRoute>
           }
         >
-          {/* DEFAULT */}
           <Route path="/" element={<Navigate to="/projects" replace />} />
 
-          {/* PROJECTS */}
           <Route path="/projects" element={<ProjectsPage />} />
 
-          {/* 🔥 TASK PAGE AGORA DEPENDE DO PROJECT */}
           <Route path="/projects/:projectId" element={<TaskPage />} />
 
-          {/* DETALHE DA TASK */}
           <Route
             path="/projects/:projectId/tasks/:taskId"
-            element={<SingleTaskPage />}
+            element={<SubTasksPage />}
           />
 
-          {/* OUTROS */}
           <Route path="/configuracoes" element={<TaskSettings />} />
           <Route path="/perfil" element={<Profile />} />
           <Route path="/agenda" element={<Schedule />} />

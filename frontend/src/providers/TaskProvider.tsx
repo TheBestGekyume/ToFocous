@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { TasksContext, type SortType } from "../contexts/TasksContext";
 import { taskService } from "../services/taskService";
 import { sortTaskList } from "../utils/taskUtils";
@@ -11,6 +11,7 @@ import type {
 
 export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   const [tasks, setTasks] = useState<TTask[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const [sortConfig, setSortConfig] = useState<{
     type: SortType;
@@ -37,27 +38,30 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     });
   }, []);
 
-  useEffect(() => {
-    const loadTasks = async () => {
-      try {
-        const data = await taskService.getTasks();
-        setTasks(data);
-      } catch (err) {
-        console.error("Erro ao carregar tarefas", err);
-      }
-    };
+  // useEffect(() => {
+  //   const loadTasks = async () => {
+  //     try {
+  //       const data = await taskService.getTasks();
+  //       setTasks(data);
+  //     } catch (err) {
+  //       console.error("Erro ao carregar tarefas", err);
+  //     }
+  //   };
 
-    loadTasks();
-  }, []);
+  //   loadTasks();
+  // }, []);
 
   /* CRUD - TASK */
 
   const getTasksByProject = useCallback(async (projectId: string) => {
     try {
+      setLoading(true);
       const data = await taskService.getTasksByProject(projectId);
       setTasks(data);
     } catch (err) {
       console.error(`Erro ao buscar task no projeto ${projectId}: ${err}`);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -76,7 +80,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
         const updated = await taskService.updateTask(taskId, payload);
 
         setTasks((prev) =>
-          prev.map((t) => (t.id === updated.id ? updated : t))
+          prev.map((t) => (t.id === updated.id ? { ...t, ...updated } : t))
         );
 
         return updated;
@@ -195,6 +199,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     () => ({
       tasks: sortedTasks,
       setTasks,
+      loading,
       handleSortConfig,
       resetSort,
       sortConfig,
@@ -210,6 +215,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     [
       sortedTasks,
       sortConfig,
+      loading,
       handleSortConfig,
       resetSort,
       getTasksByProject,

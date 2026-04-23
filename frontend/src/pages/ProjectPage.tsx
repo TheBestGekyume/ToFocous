@@ -13,7 +13,7 @@ export const ProjectsPage = () => {
       <Header />
 
       <div className="px-10">
-        <div className="flex items-end justify-center mt-5 gap-2">
+        <div className="flex items-end justify-center gap-2">
           <h1 className="text-2xl font-bold text-white">Projetos</h1>
 
           <button
