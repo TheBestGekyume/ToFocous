@@ -8,7 +8,7 @@ origins = [
     "http://localhost:5173",  # Vite
     "http://127.0.0.1:5173",
     "https://tofocousapi.onrender.com",
-    "https://tofocous.netlify.app/"
+    "https://tofocous.netlify.app"
 ]
 
 app.add_middleware(
