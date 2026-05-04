@@ -14,7 +14,7 @@ export type TasksContextType = {
 
   handleSortConfig: (type: SortType, isAscending?: boolean) => void;
   resetSort: () => void;
-  loading: boolean; 
+  loading: boolean;
 
   sortConfig: {
     type: SortType;
@@ -22,6 +22,7 @@ export type TasksContextType = {
   };
 
   /* TASK */
+  getTasks: () => Promise<void>;
   getTasksByProject: (projectId: string) => Promise<void>;
   createTask: (data: TCreateTaskDTO) => Promise<void>;
   updateTask: (id: string, data: Partial<TTask>) => Promise<TTask | undefined>;

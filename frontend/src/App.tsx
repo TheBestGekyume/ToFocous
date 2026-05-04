@@ -6,12 +6,12 @@ import { Auth } from "./pages/Auth";
 import { TaskSettings } from "./pages/TaskSettings";
 import { AppLayout } from "./AppLayout";
 import { Profile } from "./pages/Profile";
-import { Schedule } from "./pages/Schedule";
 import { ProtectedRoute } from "./components/_Common/ProtectedRoute";
 import { TaskPage } from "./pages/TasksPage";
 import { SubTasksPage } from "./pages/SubTasksPage";
 import { ProjectsPage } from "./pages/ProjectPage";
 import { ProjectsProvider } from "./providers/ProjectsProvider";
+import { AgendaPage } from "./pages/AgendaPage";
 
 function App() {
   return (
@@ -43,9 +43,12 @@ function App() {
             element={<SubTasksPage />}
           />
 
+          <Route path="/agenda" element={<AgendaPage />} />
+
           <Route path="/configuracoes" element={<TaskSettings />} />
           <Route path="/perfil" element={<Profile />} />
-          <Route path="/agenda" element={<Schedule />} />
+
+          <Route path="/agenda" element={<Navigate to="/projects" replace />} />
         </Route>
       </Routes>
     </div>
