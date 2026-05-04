@@ -25,6 +25,7 @@ type FormData =
 
 const emptyTaskForm: TaskFormData = {
     id: "",
+    project_id: "",
     title: "",
     description: "",
     due_date: "",

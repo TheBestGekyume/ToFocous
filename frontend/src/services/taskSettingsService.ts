@@ -1,4 +1,4 @@
-import { api } from "../services/api"; // ou onde está seu axios
+import { api } from "../services/api";
 import type { ITaskSettings } from "../types/TSettings";
 
 export async function getTaskSettings(): Promise<ITaskSettings> {

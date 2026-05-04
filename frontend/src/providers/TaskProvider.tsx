@@ -38,18 +38,6 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     });
   }, []);
 
-  // useEffect(() => {
-  //   const loadTasks = async () => {
-  //     try {
-  //       const data = await taskService.getTasks();
-  //       setTasks(data);
-  //     } catch (err) {
-  //       console.error("Erro ao carregar tarefas", err);
-  //     }
-  //   };
-
-  //   loadTasks();
-  // }, []);
 
   /* CRUD - TASK */
 
