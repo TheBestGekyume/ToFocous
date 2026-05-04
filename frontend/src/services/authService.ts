@@ -23,9 +23,10 @@ export async function loginUser(payload: LoginPayload) {
 }
 
 export async function signUpUser(payload: {
-  username: string;
+  name: string;
   email: string;
   password: string;
 }) {
-  await api.post("/auth/signup", payload);
+  const response = await api.post("/auth/signup", payload);
+  return response;
 }
