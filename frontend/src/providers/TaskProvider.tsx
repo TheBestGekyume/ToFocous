@@ -53,6 +53,19 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
 
   /* CRUD - TASK */
 
+  const getTasks = useCallback(async () => {
+  try {
+    setLoading(true);
+
+    const data = await taskService.getTasks();
+    setTasks(data);
+  } catch (err) {
+    console.error("Erro ao buscar tasks do usuário", err);
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
   const getTasksByProject = useCallback(async (projectId: string) => {
     try {
       setLoading(true);
@@ -203,6 +216,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       handleSortConfig,
       resetSort,
       sortConfig,
+      getTasks,
       getTasksByProject,
       createTask,
       updateTask,
@@ -218,6 +232,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       loading,
       handleSortConfig,
       resetSort,
+      getTasks,
       getTasksByProject,
       createTask,
       updateTask,
