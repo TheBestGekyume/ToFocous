@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { signUpUser } from "../../services/authService";
+import axios from "axios";
 
 export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -25,21 +26,23 @@ export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
 
     try {
       await signUpUser({
-        username,
+        name,
         email,
         password,
       });
 
       setSuccess("Conta criada com sucesso!");
 
-      // opcional: trocar automaticamente para login após alguns segundos
       setTimeout(() => {
         onSwitch();
       }, 1500);
-
     } catch (err: unknown) {
-      setError("Erro ao criar conta! Problema interno.");
-      console.error(err)
+      if (axios.isAxiosError(err)) {
+        console.log("ERRO BACK:", err.response?.data);
+        setError(err.response?.data?.detail || "Erro ao criar conta");
+      } else {
+        setError("Erro inesperado");
+      }
     } finally {
       setLoading(false);
     }
@@ -50,8 +53,8 @@ export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
       <input
         type="text"
         placeholder="Nome de usuário"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
         className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
         required
       />
