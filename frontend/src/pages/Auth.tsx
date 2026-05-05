@@ -44,7 +44,7 @@ export const Auth = () => {
     const now = Math.floor(Date.now() / 1000);
 
     if (exp && exp > now) {
-      navigate("/tarefas", { replace: true });
+      navigate("/", { replace: true });
     }
   }, [navigate]);
 
