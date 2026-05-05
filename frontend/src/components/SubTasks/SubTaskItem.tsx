@@ -29,10 +29,39 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
     handleChange,
     handleBlur,
     handleKeyDown,
+    handleDescriptionKeyDown,
     handleImmediateChange,
     toggleStatus,
     handleDelete,
   } = useSubTaskItem({ subtask, taskId, setLoading });
+
+  // const handleDescriptionKeyDown = (
+  //   e: React.KeyboardEvent<HTMLTextAreaElement>
+  // ) => {
+  //   if (e.key === "Enter" && e.shiftKey) {
+  //     e.preventDefault();
+
+  //     const textarea = e.currentTarget;
+  //     const start = textarea.selectionStart;
+  //     const end = textarea.selectionEnd;
+
+  //     const currentValue = localData.description ?? "";
+
+  //     const nextValue =
+  //       currentValue.slice(0, start) + "\n" + currentValue.slice(end);
+
+  //     handleChange("description", nextValue);
+
+  //     requestAnimationFrame(() => {
+  //       textarea.selectionStart = start + 1;
+  //       textarea.selectionEnd = start + 1;
+  //     });
+
+  //     return;
+  //   }
+
+  //   handleKeyDown(e);
+  // };
 
   return (
     <div className="flex items-center gap-5 p-3 bg-zinc-800 border border-zinc-600 rounded-md">
@@ -70,7 +99,7 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
           value={localData.description}
           onChange={(e) => handleChange("description", e.target.value)}
           onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
+          onKeyDown={handleDescriptionKeyDown}
           spellCheck={false}
           placeholder="Descrição"
           className={`resize-none outline-none border border-transparent duration-100
