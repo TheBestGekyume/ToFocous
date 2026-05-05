@@ -43,8 +43,7 @@ export const TaskPage = () => {
     <div className="flex flex-col w-full max-w-5xl mx-auto">
       {currentProject && (
         <div className="py-10">
-          <ProjectItem project={currentProject}   showActions={false} />
-          
+          <ProjectItem project={currentProject} showActions={false} />
         </div>
       )}
       <div className="flex flex-col bg-background-header/40 border border-zinc-500 rounded-xl p-5 gap-8">
@@ -65,9 +64,13 @@ export const TaskPage = () => {
                   Limpar Concluídas
                 </button>
               </div>
-              <h4 className="text-xl text-accent pe-2">
-                <span className="text-white">/</span> {currentProject?.title}
-              </h4>{" "}
+              {currentProject && (
+                <h4 className="text-xl text-accent pe-2">
+                  <span className="text-white">/</span>{" "}
+                  {currentProject.title[0].toUpperCase() +
+                    currentProject.title.substring(1)}
+                </h4>
+              )}
             </div>
 
             <TaskList />
