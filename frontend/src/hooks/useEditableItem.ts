@@ -8,6 +8,10 @@ type UseEditableItemProps<T> = {
   hasChanged?: (a: T, b: T) => boolean;
 };
 
+type StringField<T> = {
+  [K in keyof T]: T[K] extends string | null | undefined ? K : never;
+}[keyof T];
+
 export function useEditableItem<T>({
   initialData,
   onUpdate,
@@ -80,7 +84,7 @@ export function useEditableItem<T>({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       (e.currentTarget as HTMLElement).blur();
     }
@@ -91,6 +95,35 @@ export function useEditableItem<T>({
       (e.currentTarget as HTMLElement).blur();
     }
   };
+
+  const handleTextareaKeyDown =
+  <K extends StringField<T>>(field: K) =>
+  (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && e.shiftKey) {
+      e.preventDefault();
+
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+
+      const currentValue = String(localData[field] ?? "");
+
+      const nextValue =
+        currentValue.slice(0, start) + "\n" + currentValue.slice(end);
+
+      handleChange(field, nextValue as T[K]);
+
+      requestAnimationFrame(() => {
+        textarea.selectionStart = start + 1;
+        textarea.selectionEnd = start + 1;
+      });
+
+      return;
+    }
+
+    handleKeyDown(e);
+  };
+
 
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -111,6 +144,7 @@ export function useEditableItem<T>({
     handleImmediateChange,
     handleBlur,
     handleKeyDown,
+    handleTextareaKeyDown,
     handleDelete,
   };
 }

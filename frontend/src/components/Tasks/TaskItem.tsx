@@ -36,6 +36,7 @@ export const TaskItem = ({ task }: TaskProps) => {
     handleChange,
     handleBlur,
     handleKeyDown,
+    handleDescriptionKeyDown,
     handleDelete,
     changeStatus,
     changePriority,
@@ -124,7 +125,7 @@ export const TaskItem = ({ task }: TaskProps) => {
             value={localData.description}
             onChange={(e) => handleChange("description", e.target.value)}
             onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
+            onKeyDown={handleDescriptionKeyDown}
             spellCheck={false}
             className="outline-none resize-none rounded-sm border text-text
               border-transparent px-1 m-0 duration-100 focus:bg-zinc-900 focus:border-accent 
@@ -144,9 +145,7 @@ export const TaskItem = ({ task }: TaskProps) => {
               onChange={changePriority}
               buttonClass={`font-bold px-2 py-1 hover:bg-zinc-700 rounded-sm duration-100
                 ${currentPriority.color}`}
-              renderLabel={(value) =>
-                `Prioridade: ${priorityMap[value].label}`
-              }
+              renderLabel={(value) => `Prioridade: ${priorityMap[value].label}`}
             />
 
             {!isDetailsPage && (

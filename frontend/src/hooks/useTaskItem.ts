@@ -37,6 +37,8 @@ export const useTaskItem = (task: TTask) => {
 
     const navigateToDetails = () => navigate(`/projects/${projectId}/tasks/${task.id}`);
 
+    const handleDescriptionKeyDown = editable.handleTextareaKeyDown("description");
+
     return {
         ...editable,
 
@@ -51,5 +53,6 @@ export const useTaskItem = (task: TTask) => {
         changeStatus,
         changePriority,
         navigateToDetails,
+        handleDescriptionKeyDown
     };
 };
