@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { loginUser } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export const LoginForm = ({ onSwitch }: { onSwitch: () => void }) => {
   const [email, setEmail] = useState("");
@@ -18,7 +19,9 @@ export const LoginForm = ({ onSwitch }: { onSwitch: () => void }) => {
       await loginUser({ email, password });
       navigate("/");
     } catch (err: unknown) {
-      setError("Email ou senha inválidos");
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.detail || "Erro ao criar conta");
+      }
       console.error(err);
     } finally {
       setLoading(false);
