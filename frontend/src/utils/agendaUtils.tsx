@@ -1,3 +1,4 @@
+import type { TWhichDateUseInCalendar } from "../types/TSettings";
 import type { TPriority, TStatus, TSubTask, TTask } from "../types/TTask";
 
 export type AgendaItemType = "task" | "subtask";
@@ -106,14 +107,61 @@ export const getMonthCalendarDays = (date: Date) => {
   return days;
 };
 
+const isConcluded = (status: TStatus) => {
+  return status === "concluded";
+};
+
 const isValidDate = (date?: string | null): date is string => {
   return !!date && !Number.isNaN(new Date(`${date}T00:00:00`).getTime());
 };
 
-const buildTaskDateItems = (task: TTask): AgendaItem[] => {
+const shouldUseStartDate = (
+  whichDateUseInCalendar: TWhichDateUseInCalendar
+) => {
+  return (
+    whichDateUseInCalendar === "UseStartDate" ||
+    whichDateUseInCalendar === "UseBoth"
+  );
+};
+
+const shouldUseDueDate = (whichDateUseInCalendar: TWhichDateUseInCalendar) => {
+  return (
+    whichDateUseInCalendar === "UseDueDate" ||
+    whichDateUseInCalendar === "UseBoth"
+  );
+};
+
+const shouldAvoidDuplicateDate = (
+  whichDateUseInCalendar: TWhichDateUseInCalendar,
+  startDate: string | null,
+  dueDate: string | null
+) => {
+  return (
+    whichDateUseInCalendar === "UseBoth" &&
+    !!startDate &&
+    !!dueDate &&
+    startDate === dueDate
+  );
+};
+
+const buildTaskDateItems = (
+  task: TTask,
+  whichDateUseInCalendar: TWhichDateUseInCalendar
+): AgendaItem[] => {
+  if (isConcluded(task.status)) return [];
+
   const items: AgendaItem[] = [];
 
-  if (isValidDate(task.start_date)) {
+  const startDate = isValidDate(task.start_date) ? task.start_date : null;
+  const dueDate = isValidDate(task.due_date) ? task.due_date : null;
+
+  const avoidDuplicateDate = shouldAvoidDuplicateDate(
+    whichDateUseInCalendar,
+    startDate,
+    dueDate
+  );
+
+  if (shouldUseStartDate(whichDateUseInCalendar) && startDate) {
     items.push({
       id: task.id,
       taskId: task.id,
@@ -121,13 +169,17 @@ const buildTaskDateItems = (task: TTask): AgendaItem[] => {
       type: "task",
       dateType: "start_date",
       title: task.title,
-      date: task.start_date,
+      date: startDate,
       priority: task.priority,
       status: task.status,
     });
   }
 
-  if (isValidDate(task.due_date)) {
+  if (
+    shouldUseDueDate(whichDateUseInCalendar) &&
+    dueDate &&
+    !avoidDuplicateDate
+  ) {
     items.push({
       id: task.id,
       taskId: task.id,
@@ -135,7 +187,7 @@ const buildTaskDateItems = (task: TTask): AgendaItem[] => {
       type: "task",
       dateType: "due_date",
       title: task.title,
-      date: task.due_date,
+      date: dueDate,
       priority: task.priority,
       status: task.status,
     });
@@ -144,10 +196,24 @@ const buildTaskDateItems = (task: TTask): AgendaItem[] => {
   return items;
 };
 
-const buildSubTaskDateItems = (task: TTask, subtask: TSubTask): AgendaItem[] => {
+const buildSubTaskDateItems = (
+  task: TTask,
+  subtask: TSubTask,
+  whichDateUseInCalendar: TWhichDateUseInCalendar
+): AgendaItem[] => {
+  if (isConcluded(subtask.status)) return [];
   const items: AgendaItem[] = [];
 
-  if (isValidDate(subtask.start_date)) {
+  const startDate = isValidDate(subtask.start_date) ? subtask.start_date : null;
+  const dueDate = isValidDate(subtask.due_date) ? subtask.due_date : null;
+
+  const avoidDuplicateDate = shouldAvoidDuplicateDate(
+    whichDateUseInCalendar,
+    startDate,
+    dueDate
+  );
+
+  if (shouldUseStartDate(whichDateUseInCalendar) && startDate) {
     items.push({
       id: subtask.id,
       taskId: task.id,
@@ -156,13 +222,17 @@ const buildSubTaskDateItems = (task: TTask, subtask: TSubTask): AgendaItem[] => 
       dateType: "start_date",
       title: subtask.title,
       parentTitle: task.title,
-      date: subtask.start_date,
+      date: startDate,
       priority: subtask.priority,
       status: subtask.status,
     });
   }
 
-  if (isValidDate(subtask.due_date)) {
+  if (
+    shouldUseDueDate(whichDateUseInCalendar) &&
+    dueDate &&
+    !avoidDuplicateDate
+  ) {
     items.push({
       id: subtask.id,
       taskId: task.id,
@@ -171,7 +241,7 @@ const buildSubTaskDateItems = (task: TTask, subtask: TSubTask): AgendaItem[] => 
       dateType: "due_date",
       title: subtask.title,
       parentTitle: task.title,
-      date: subtask.due_date,
+      date: dueDate,
       priority: subtask.priority,
       status: subtask.status,
     });
@@ -180,11 +250,14 @@ const buildSubTaskDateItems = (task: TTask, subtask: TSubTask): AgendaItem[] => 
   return items;
 };
 
-export const buildAgendaItems = (tasks: TTask[]) => {
+export const buildAgendaItems = (
+  tasks: TTask[],
+  whichDateUseInCalendar: TWhichDateUseInCalendar = "UseBoth"
+) => {
   return tasks.flatMap((task) => [
-    ...buildTaskDateItems(task),
+    ...buildTaskDateItems(task, whichDateUseInCalendar),
     ...(task.subtasks ?? []).flatMap((subtask) =>
-      buildSubTaskDateItems(task, subtask)
+      buildSubTaskDateItems(task, subtask, whichDateUseInCalendar)
     ),
   ]);
 };
