@@ -2,12 +2,14 @@ import axios, { type InternalAxiosRequestConfig } from "axios";
 import { handleRefresh } from "./refreshService";
 import { clearTokens, getAccessToken, getTokenExpiration } from "../utils/tokenUtils";
 
+const apiUrl = import.meta.env.VITE_API_URL;
 
-
+if (!apiUrl) {
+  throw new Error("VITE_API_URL não foi definida.");
+}
 
 export const api = axios.create({
-  baseURL: "https://tofocousapi.onrender.com/",
-  // baseURL: "http://127.0.0.1:8000",
+  baseURL: apiUrl,
 });
 
 type CustomAxiosRequestConfig = InternalAxiosRequestConfig & {

@@ -19,11 +19,11 @@ export const useSubTaskItem = ({
   const { settings } = useTaskSettings();
 
   const normalizedSubtask = useMemo(() => {
-  return {
-    ...subtask,
-    priority: subtask.priority ?? "low",
-  };
-}, [subtask]);
+    return {
+      ...subtask,
+      priority: subtask.priority ?? "low",
+    };
+  }, [subtask]);
 
   const editable = useEditableItem<TSubTask>({
     initialData: normalizedSubtask,
@@ -55,6 +55,8 @@ export const useSubTaskItem = ({
       a.priority !== b.priority,
   });
 
+  const handleDescriptionKeyDown = editable.handleTextareaKeyDown("description");
+
   const isDone = editable.localData.status === "concluded";
 
   const toggleStatus = () => {
@@ -63,6 +65,8 @@ export const useSubTaskItem = ({
       isDone ? "unstarted" : "concluded"
     );
   };
+
+
 
   return {
     ...editable,
@@ -76,5 +80,6 @@ export const useSubTaskItem = ({
       (settings?.use_time && settings?.use_start_date) ?? false,
 
     toggleStatus,
+    handleDescriptionKeyDown
   };
 };

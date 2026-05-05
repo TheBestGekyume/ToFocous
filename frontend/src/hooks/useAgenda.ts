@@ -10,6 +10,7 @@ import {
   groupAgendaItemsByDate,
 } from "../utils/agendaUtils";
 import type { AgendaProjectOption } from "../components/Agenda/AgendaHeader";
+import { useTaskSettings } from "./useTaskSettings";
 
 export const useAgenda = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export const useAgenda = () => {
   const [hoveredDateKey, setHoveredDateKey] = useState<string | null>(null);
   const [pinnedDateKey, setPinnedDateKey] = useState<string | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState("all");
+  const { settings } = useTaskSettings();
 
   useEffect(() => {
     getTasks();
@@ -49,9 +51,12 @@ export const useAgenda = () => {
     return tasks.filter((task) => task.project_id === selectedProjectId);
   }, [tasks, selectedProjectId]);
 
-  const agendaItems = useMemo(() => {
-    return buildAgendaItems(filteredTasks);
-  }, [filteredTasks]);
+const agendaItems = useMemo(() => {
+  return buildAgendaItems(
+    filteredTasks,
+    settings?.which_date_use_in_calendar ?? "UseBoth"
+  );
+}, [filteredTasks, settings?.which_date_use_in_calendar]);
 
   const agendaItemsByDate = useMemo(() => {
     return groupAgendaItemsByDate(agendaItems);
