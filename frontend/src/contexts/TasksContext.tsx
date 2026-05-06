@@ -24,21 +24,22 @@ export type TasksContextType = {
   /* TASK */
   getTasks: () => Promise<void>;
   getTasksByProject: (projectId: string) => Promise<void>;
-  createTask: (data: TCreateTaskDTO) => Promise<void>;
-  updateTask: (id: string, data: Partial<TTask>) => Promise<TTask | undefined>;
-  deleteTask: (id: string) => Promise<void>;
+  createTask: (payload: TCreateTaskDTO) => Promise<TTask>;
+  updateTask: (taskId: string, payload: Partial<TTask>) => Promise<TTask>;
+  deleteTask: (taskId: string) => Promise<void>;
 
   /* SUBTASK */
-  getSubTasks: (taskId: string) => Promise<void>;
-  createSubTask: (taskId: string, data: TCreateSubTaskDTO) => Promise<void>;
+  getSubTasks: (taskId: string) => Promise<TSubTask[]>;
+  createSubTask: (
+    taskId: string,
+    payload: TCreateSubTaskDTO
+  ) => Promise<TSubTask>;
   updateSubTask: (
     taskId: string,
     subtaskId: string,
-    data: Partial<TSubTask>
-  ) => Promise<void>;
+    payload: Partial<TSubTask>
+  ) => Promise<TSubTask>;
   deleteSubTask: (taskId: string, subtaskId: string) => Promise<void>;
 };
 
-export const TasksContext = createContext<TasksContextType | undefined>(
-  undefined
-);
+export const TasksContext = createContext<TasksContextType | null>(null);
