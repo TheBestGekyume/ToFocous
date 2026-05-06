@@ -20,7 +20,7 @@ export const LoginForm = ({ onSwitch }: { onSwitch: () => void }) => {
       navigate("/");
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.detail || "Erro ao criar conta");
+        setError(err.response?.data?.detail || "Erro ao entrar na conta");
       }
       console.error(err);
     } finally {

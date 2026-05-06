@@ -21,51 +21,29 @@ type Props = {
 export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
   const {
     localData,
+
     isDone,
+
     showStartDate,
     showPriority,
     showTime,
     showStartTime,
+
     handleChange,
     handleBlur,
     handleKeyDown,
     handleDescriptionKeyDown,
     handleImmediateChange,
-    toggleStatus,
     handleDelete,
+
+    toggleStatus,
+    changePriority,
   } = useSubTaskItem({ subtask, taskId, setLoading });
 
-  // const handleDescriptionKeyDown = (
-  //   e: React.KeyboardEvent<HTMLTextAreaElement>
-  // ) => {
-  //   if (e.key === "Enter" && e.shiftKey) {
-  //     e.preventDefault();
-
-  //     const textarea = e.currentTarget;
-  //     const start = textarea.selectionStart;
-  //     const end = textarea.selectionEnd;
-
-  //     const currentValue = localData.description ?? "";
-
-  //     const nextValue =
-  //       currentValue.slice(0, start) + "\n" + currentValue.slice(end);
-
-  //     handleChange("description", nextValue);
-
-  //     requestAnimationFrame(() => {
-  //       textarea.selectionStart = start + 1;
-  //       textarea.selectionEnd = start + 1;
-  //     });
-
-  //     return;
-  //   }
-
-  //   handleKeyDown(e);
-  // };
+  const currentPriority = priorityMap[localData.priority];
 
   return (
     <div className="flex items-center gap-5 p-3 bg-zinc-800 border border-zinc-600 rounded-md">
-      {/* Status */}
       <button
         onClick={toggleStatus}
         className={`
@@ -153,14 +131,15 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
                 />
               )}
             </div>
+
             {showPriority && (
               <Dropdown
                 value={localData.priority}
                 options={priorityOptions}
-                onChange={(value) => handleImmediateChange("priority", value)}
+                onChange={changePriority}
                 buttonClass={`px-2 py-1 rounded-sm text-sm font-semibold
-                ${priorityMap[localData.priority]?.color}
-                hover:bg-zinc-700 duration-100`}
+                  ${currentPriority.color}
+                  hover:bg-zinc-700 duration-100`}
                 renderLabel={(value) =>
                   `Prioridade: ${priorityMap[value].label}`
                 }
