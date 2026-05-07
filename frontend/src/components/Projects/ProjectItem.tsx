@@ -19,6 +19,15 @@ export const ProjectItem = ({ project, onEdit, showActions = true }: Props) => {
 
   const [showUsersModal, setShowUsersModal] = useState(false);
 
+  const handleProjectClick = () => {
+    if (showActions) {
+      navigate(`/projects/${project.id}`);
+      return;
+    }
+
+    setShowUsersModal(true);
+  };
+
   return (
     <>
       <div
@@ -29,28 +38,34 @@ export const ProjectItem = ({ project, onEdit, showActions = true }: Props) => {
           backgroundColor: project.color + "75",
           border: `2px solid ${project.color}`,
         }}
-        onClick={() =>
-          showActions
-            ? navigate(`/projects/${project.id}`)
-            : navigate(`/projects/`)
-        }
+        onClick={handleProjectClick}
       >
         <div className="flex justify-between items-center">
           {!showActions && (
-            <button className="p-2 me-5 bg-zinc-700/75 hover:bg-zinc-800/75 duration-300 w-fit rounded-full h-fit">
+            <button
+              className="p-2 me-5 bg-zinc-700/75 hover:bg-zinc-800/75 duration-300 w-fit rounded-full h-fit"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/projects/`);
+              }}
+            >
               <ArrowLeft size={24} />
             </button>
           )}
+
           <div className="flex items-center">
-            <button
-              className={`p-2 rounded-full bg-blue-500 hover:bg-blue-700 transition ${showActions ? "order-0" : "order-1"}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowUsersModal(true);
-              }}
-            >
-              <UserRoundPlus size={16} className="text-white" />
-            </button>
+            {showActions && (
+              <button
+                className="p-2 rounded-full bg-blue-500 hover:bg-blue-700 transition"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowUsersModal(true);
+                }}
+              >
+                <UserRoundPlus size={16} className="text-white" />
+              </button>
+            )}
+
             <div className="w-full text-start px-3">
               <h2 className="text-xl font-bold mb-2">
                 {project.title[0].toUpperCase() + project.title.substring(1)}
@@ -59,6 +74,7 @@ export const ProjectItem = ({ project, onEdit, showActions = true }: Props) => {
               <p className="text-sm text-zinc-300">{project.description}</p>
             </div>
           </div>
+
           {showActions && (
             <div className="flex flex-col gap-2 ps-2">
               <button
