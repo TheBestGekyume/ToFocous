@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { TProject } from "../../types/TProject";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, UserRoundPlus } from "lucide-react";
 import { useProjects } from "../../hooks/useProjects";
 import { ProjectUsersModal } from "./ProjectUsersModal";
 
@@ -46,7 +46,7 @@ export const ProjectItem = ({ project, onEdit, showActions = true }: Props) => {
               className="p-2 me-5 bg-zinc-700/75 hover:bg-zinc-800/75 duration-300 w-fit rounded-full h-fit"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate("/projects/");
+                navigate(`/projects/`);
               }}
             >
               <ArrowLeft size={24} />
@@ -54,6 +54,18 @@ export const ProjectItem = ({ project, onEdit, showActions = true }: Props) => {
           )}
 
           <div className="flex items-center">
+            {showActions && (
+              <button
+                className="p-2 rounded-full bg-blue-500 hover:bg-blue-700 transition"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowUsersModal(true);
+                }}
+              >
+                <UserRoundPlus size={16} className="text-white" />
+              </button>
+            )}
+
             <div className="w-full text-start px-3">
               <h2 className="text-xl font-bold mb-2">
                 {project.title[0].toUpperCase() + project.title.substring(1)}
