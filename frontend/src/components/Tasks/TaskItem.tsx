@@ -28,18 +28,25 @@ export const TaskItem = ({ task }: TaskProps) => {
   const {
     localData,
     loading,
+
     settings,
+
+    isDone,
     isDetailsPage,
+
     showStartDate,
     showTime,
     showStartTime,
+
     handleChange,
     handleBlur,
     handleKeyDown,
+    handleDescriptionKeyDown,
     handleDelete,
+    handleImmediateChange,
+
     changeStatus,
     changePriority,
-    handleImmediateChange,
     navigateToDetails,
   } = useTaskItem(task);
 
@@ -62,29 +69,29 @@ export const TaskItem = ({ task }: TaskProps) => {
       >
         <div className="flex flex-col gap-4 w-full">
           <div className="flex gap-4 flex-wrap">
-            {showStartDate && localData.status !== "concluded" && (
+            {showStartDate && !isDone && (
               <DatePicker
                 value={localData.start_date}
                 onChange={(date) =>
                   handleImmediateChange("start_date", date || "")
                 }
                 icon={Play}
-                title="Data de Início"
+                title="Data de início"
               />
             )}
 
-            {localData.status !== "concluded" && (
+            {!isDone && (
               <DatePicker
                 value={localData.due_date}
                 onChange={(date) =>
                   handleImmediateChange("due_date", date || "")
                 }
                 icon={Check}
-                title="Data de Prazo"
+                title="Data de prazo"
               />
             )}
 
-            {showStartTime && localData.status !== "concluded" && (
+            {showStartTime && !isDone && (
               <TimeInput
                 value={localData.start_time}
                 onChange={(time) =>
@@ -95,7 +102,7 @@ export const TaskItem = ({ task }: TaskProps) => {
               />
             )}
 
-            {showTime && localData.status !== "concluded" && (
+            {showTime && !isDone && (
               <TimeInput
                 value={localData.due_time}
                 onChange={(time) =>
@@ -112,31 +119,31 @@ export const TaskItem = ({ task }: TaskProps) => {
             onChange={(e) => handleChange("title", e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            placeholder="Insira o Título"
+            placeholder="Insira o título"
             className={`text-xl font-semibold outline-none border border-transparent
               duration-100 focus:bg-zinc-900 focus:border-accent
               hover:bg-zinc-700 rounded-md p-1 
-              ${localData.status === "concluded" ? "line-through text-zinc-400" : ""}
-              ${isDetailsPage ? "w-full" : "w-max"}`}
+              ${isDone ? "line-through text-zinc-400" : ""}
+              ${isDetailsPage ? "w-full" : "w-4/5"}`}
           />
 
           <textarea
             value={localData.description}
             onChange={(e) => handleChange("description", e.target.value)}
             onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
+            onKeyDown={handleDescriptionKeyDown}
             spellCheck={false}
             className="outline-none resize-none rounded-sm border text-text
               border-transparent px-1 m-0 duration-100 focus:bg-zinc-900 focus:border-accent 
               focus:resize-y hover:bg-zinc-700 hover:resize-y w-9/10"
           />
 
-          {localData.status !== "concluded" && (
+          {!isDone && (
             <p className={`px-1 text-xs ${timeColor}`}>{timeMessage}</p>
           )}
         </div>
 
-        <div className="flex flex-col items-end justify-center gap-4 text-sm">
+        <div className="flex flex-col items-end justify-center gap-4 text-sm ms-5">
           <div className="flex gap-4 w-max">
             <Dropdown
               value={localData.priority}
@@ -144,9 +151,7 @@ export const TaskItem = ({ task }: TaskProps) => {
               onChange={changePriority}
               buttonClass={`font-bold px-2 py-1 hover:bg-zinc-700 rounded-sm duration-100
                 ${currentPriority.color}`}
-              renderLabel={(value) =>
-                `Prioridade: ${priorityMap[value].label}`
-              }
+              renderLabel={(value) => `Prioridade: ${priorityMap[value].label}`}
             />
 
             {!isDetailsPage && (

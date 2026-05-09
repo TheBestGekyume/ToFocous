@@ -37,20 +37,40 @@ def login(data: LoginData):
             "password": data.password
         })
 
-        if response.user is None:
-            return {"error": "Credenciais inválidas"}
-
+        if response.user is None or response.session is None:
+            raise HTTPException(
+                status_code=401,
+                detail="Email ou senha inválidos."
+            )
 
         return {
             "access_token": response.session.access_token,
             "refresh_token": response.session.refresh_token,
             "user_id": response.user.id
         }
-    
+
+    except HTTPException:
+        raise
+
     except Exception as e:
-        if "Email not confirmed" in str(e):
-            raise HTTPException(status_code=400, detail="Confirme seu email antes de entrar.")
-        
+        error_message = str(e)
+
+        if "Email not confirmed" in error_message:
+            raise HTTPException(
+                status_code=400,
+                detail="Confirme seu email antes de entrar."
+            )
+
+        if "Invalid login credentials" in error_message:
+            raise HTTPException(
+                status_code=401,
+                detail="Email ou senha inválidos."
+            )
+
+        raise HTTPException(
+            status_code=500,
+            detail="Erro interno ao tentar fazer login."
+        )
 
 @router.post("/refresh")
 def refresh_session(data: RefreshTokenRequest):

@@ -6,7 +6,7 @@ export const AppLayout = () => {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex">
+    <div className="flex pb-10">
       <Sidebar open={open} setOpen={setOpen} />
 
       <div

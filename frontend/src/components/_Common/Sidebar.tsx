@@ -65,6 +65,7 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
             {/* 🔥 PROJECTS */}
             <Link
               to="/projects"
+              onClick={() => setOpen(false)}
               className="flex items-center hover:text-purple-500 duration-150"
             >
               <FolderKanban />
@@ -73,6 +74,7 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
 
             <Link
               to="/agenda"
+              onClick={() => setOpen(false)}
               className="flex items-center hover:text-purple-500 duration-150"
             >
               <CalendarDays />
@@ -81,6 +83,7 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
 
             <Link
               to="/perfil"
+              onClick={() => setOpen(false)}
               className="flex items-center hover:text-purple-500 duration-150"
             >
               <UserRound />
@@ -89,6 +92,7 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
 
             <Link
               to="/configuracoes"
+              onClick={() => setOpen(false)}
               className="flex items-center hover:text-purple-500 duration-150"
             >
               <Settings />

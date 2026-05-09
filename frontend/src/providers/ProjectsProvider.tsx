@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ProjectsContext } from "../contexts/ProjectsContext";
 import { projectService } from "../services/projectService";
 import type {
@@ -6,6 +6,28 @@ import type {
   TProject,
   TUpdateProjectDTO,
 } from "../types/TProject";
+
+const upsertProject = (list: TProject[], project: TProject): TProject[] => {
+  const alreadyExists = list.some((item) => item.id === project.id);
+
+  if (alreadyExists) {
+    return list.map((item) =>
+      item.id === project.id ? project : item
+    );
+  }
+
+  return [...list, project];
+};
+
+const removeDuplicatedProjects = (list: TProject[]): TProject[] => {
+  const map = new Map<string, TProject>();
+
+  list.forEach((project) => {
+    map.set(project.id, project);
+  });
+
+  return Array.from(map.values());
+};
 
 export const ProjectsProvider = ({
   children,
@@ -15,36 +37,70 @@ export const ProjectsProvider = ({
   const [projects, setProjects] = useState<TProject[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async (): Promise<TProject[]> => {
     setLoading(true);
+
     try {
-      const data = await projectService.getAll();
-      setProjects(data);
+      const data = await projectService.getAllProjects();
+      const uniqueProjects = removeDuplicatedProjects(data);
+
+      setProjects(uniqueProjects);
+
+      return uniqueProjects;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const createProject = async (payload: TCreateProjectDTO) => {
-    const newProject = await projectService.create(payload);
-    setProjects((prev) => [...prev, newProject]);
-  };
+  const getProjectById = useCallback(
+    async (id: string): Promise<TProject> => {
+      const existingProject = projects.find((p) => p.id === id);
 
-  const updateProject = async (id: string, payload: TUpdateProjectDTO) => {
-    const updated = await projectService.update(id, payload);
-    setProjects((prev) =>
-      prev.map((p) => (p.id === id ? updated : p))
-    );
-  };
+      if (existingProject) {
+        return existingProject;
+      }
 
-  const deleteProject = async (id: string) => {
-    await projectService.delete(id);
+      setLoading(true);
+
+      try {
+        const data = await projectService.getProjectById(id);
+
+        setProjects((prev) => upsertProject(prev, data));
+
+        return data;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [projects]
+  );
+
+  const createProject = useCallback(async (payload: TCreateProjectDTO) => {
+    const newProject = await projectService.createProject(payload);
+
+    setProjects((prev) => upsertProject(prev, newProject));
+  }, []);
+
+  const updateProject = useCallback(
+    async (id: string, payload: TUpdateProjectDTO) => {
+      const updated = await projectService.updateProject(id, payload);
+
+      setProjects((prev) => upsertProject(prev, updated));
+
+      return updated;
+    },
+    []
+  );
+
+  const deleteProject = useCallback(async (id: string) => {
+    await projectService.deleteProject(id);
+
     setProjects((prev) => prev.filter((p) => p.id !== id));
-  };
+  }, []);
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [fetchProjects]);
 
   return (
     <ProjectsContext.Provider
@@ -52,6 +108,7 @@ export const ProjectsProvider = ({
         projects,
         loading,
         fetchProjects,
+        getProjectById,
         createProject,
         updateProject,
         deleteProject,

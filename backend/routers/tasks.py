@@ -6,21 +6,24 @@ from backend.models.task import PostTask, PatchTask
 from backend.dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
+
 def format_time(t):
     if not t:
         return None
 
     try:
         if "T" in t:
-            dt = datetime.fromisoformat(t.replace("Z", ""))
-        else:
-            # caso venha só hora com milissegundo
-            dt = datetime.strptime(t, "%H:%M:%S.%f")
+            t = t.replace("Z", "")
+            dt = datetime.fromisoformat(t)
+            return dt.strftime("%H:%M")
 
-        return dt.strftime("%H:%M")
+        if len(t) >= 8:
+            return t[:5]
+
+        return None
 
     except Exception:
-        return t 
+        return None
 
 @router.post("/")
 def post_task(data: PostTask, current_user = Depends(get_current_user), supabase = Depends(get_db)):
@@ -50,6 +53,47 @@ def post_task(data: PostTask, current_user = Depends(get_current_user), supabase
             "Message": "Tarefa criada com sucesso.",
             "data": filtered_response
         }
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/{task_id}")
+def get_task_by_id(
+    task_id: str,
+    current_user=Depends(get_current_user),
+    supabase=Depends(get_db)
+):
+    try:
+        response = supabase.table("tasks") \
+            .select("*") \
+            .eq("id", task_id) \
+            .eq("user_id", current_user.id) \
+            .single() \
+            .execute()
+
+        if not response.data:
+            raise HTTPException(
+                status_code=404,
+                detail="Tarefa não encontrada"
+            )
+
+        task = response.data
+
+        filtered_response = {
+            "id": task["id"],
+            "title": task["title"],
+            "description": task["description"],
+            "start_time": format_time(task["start_time"]),
+            "due_date": task["due_date"],
+            "start_date": task["start_date"],
+            "due_time": format_time(task["due_time"]),
+            "priority": task["priority"],
+            "status": task["status"],
+            "project_id": task["project_id"]
+        }
+
+        return filtered_response
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

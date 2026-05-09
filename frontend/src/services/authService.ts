@@ -15,17 +15,19 @@ type LoginResponse = {
 export async function loginUser(payload: LoginPayload) {
   const response = await api.post<LoginResponse>("/auth/login", payload);
   resetAuthState();
+  console.log(response)
 
   setTokens(response.data.access_token, response.data.refresh_token);
   localStorage.setItem("user_id", response.data.user_id);
 
-  return response.data;
+  return response;
 }
 
 export async function signUpUser(payload: {
-  username: string;
+  name: string;
   email: string;
   password: string;
 }) {
-  await api.post("/auth/signup", payload);
+  const response = await api.post("/auth/signup", payload);
+  return response;
 }

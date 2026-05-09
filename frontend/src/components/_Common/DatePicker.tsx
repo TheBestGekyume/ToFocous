@@ -6,10 +6,26 @@ import "react-day-picker/dist/style.css";
 type DatePickerProps = {
   value?: string | null;
   onChange: (date: string | null) => void;
-  onBlur?: () => void; 
+  onBlur?: () => void;
   placeholder?: string;
   title: string;
   icon: LucideIcon;
+};
+
+const parseLocalDate = (date?: string | null) => {
+  if (!date) return undefined;
+
+  const [year, month, day] = date.split("-").map(Number);
+
+  return new Date(year, month - 1, day);
+};
+
+const formatDateToKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 };
 
 export const DatePicker = ({
@@ -23,7 +39,7 @@ export const DatePicker = ({
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const selectedDate = value ? new Date(value) : undefined;
+  const selectedDate = parseLocalDate(value);
 
   const handleSelect = (date?: Date) => {
     if (!date) {
@@ -32,9 +48,10 @@ export const DatePicker = ({
       return;
     }
 
-    const formatted = date.toLocaleDateString("en-CA");
+    const formatted = formatDateToKey(date);
+
     onChange(formatted);
-    //  onBlur?.();
+    // onBlur?.();
     setOpen(false);
   };
 
@@ -63,7 +80,6 @@ export const DatePicker = ({
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Trigger */}
       <button
         type="button"
         title={title}
@@ -75,12 +91,11 @@ export const DatePicker = ({
         bg-zinc-800 hover:bg-zinc-700 duration-300 focus:border-accent focus:bg-zinc-900"
       >
         {Icon && <Icon size={16} />}
-        <span className={` ${value ? "text-wrap" : "text-wrap"}`}>
+        <span className="text-wrap">
           {value ? formatDisplayDate(value) : placeholder}
         </span>
       </button>
 
-      {/* Calendar */}
       {open && (
         <div className="absolute z-50 mt-2 bg-zinc-900 p-3 rounded-lg shadow-lg border border-zinc-700">
           <DayPicker

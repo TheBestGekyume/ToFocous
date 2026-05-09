@@ -1,18 +1,38 @@
 import { CheckCircle, Clock, AlertCircle } from "lucide-react";
-import type { TTask } from "../types/TTask";
-import type { TStatus, TPriority } from "../types/TTask";
+import type { TTask, TStatus, TPriority } from "../types/TTask";
 import type { JSX } from "react";
 
+export const PRIORITY_ORDER: Record<TPriority, number> = {
+  high: 1,
+  medium: 2,
+  low: 3,
+};
 
-export const PRIORITY_ORDER = { high: 1, medium: 2, low: 3 } as const;
-export const STATUS_ORDER = {
+export const STATUS_ORDER: Record<TStatus, number> = {
   unstarted: 1,
   inProgress: 2,
   concluded: 3,
-} as const;
+};
 
-export const priorityMap = {
-  high: { label: "Alta", color: "text-red-300", border: "border-red-400" },
+type PriorityMapItem = {
+  label: string;
+  color: string;
+  border: string;
+};
+
+type StatusMapItem = {
+  label: string;
+  color: string;
+  bg: string;
+  icon: JSX.Element;
+};
+
+export const priorityMap: Record<TPriority, PriorityMapItem> = {
+  high: {
+    label: "Alta",
+    color: "text-red-300",
+    border: "border-red-400",
+  },
   medium: {
     label: "Média",
     color: "text-yellow-200",
@@ -25,7 +45,7 @@ export const priorityMap = {
   },
 };
 
-export const statusMap = {
+export const statusMap: Record<TStatus, StatusMapItem> = {
   concluded: {
     label: "Concluída",
     color: "text-green-200",
@@ -46,10 +66,14 @@ export const statusMap = {
   },
 };
 
-export const statusOptions: { value: TStatus; label: string; icon: JSX.Element }[] = [
+export const statusOptions: {
+  value: TStatus;
+  label: string;
+  icon: JSX.Element;
+}[] = [
   {
     value: "unstarted",
-    label: "Não Iniciada",
+    label: "Não iniciada",
     icon: statusMap.unstarted.icon,
   },
   {
@@ -64,15 +88,15 @@ export const statusOptions: { value: TStatus; label: string; icon: JSX.Element }
   },
 ];
 
-export const priorityOptions: { value: TPriority; label: string }[] = [
+export const priorityOptions: {
+  value: TPriority;
+  label: string;
+}[] = [
   { value: "low", label: "Baixa" },
   { value: "medium", label: "Média" },
   { value: "high", label: "Alta" },
 ];
 
-/**
- * Função central de ordenação, isolada e reutilizável
- */
 export function sortTaskList(
   tasks: TTask[],
   sortConfig: {
@@ -105,30 +129,35 @@ export function sortTaskList(
   });
 }
 
-/**
- * Mensagem baseada na data da tarefa
- */
 export function getTimeMessage(date: Date) {
   const today = new Date();
+
   const diff = Math.ceil(
     (date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  if (diff > 1)
+  if (diff > 1) {
     return { msg: `${diff} dias restantes!`, color: "text-blue-300" };
-  if (diff === 1) return { msg: "Para amanhã!", color: "text-blue-400" };
-  if (diff === 0) return { msg: "Para hoje!", color: "text-yellow-400" };
+  }
+
+  if (diff === 1) {
+    return { msg: "Para amanhã!", color: "text-blue-400" };
+  }
+
+  if (diff === 0) {
+    return { msg: "Para hoje!", color: "text-yellow-400" };
+  }
+
   return {
     msg: `Atrasada há ${Math.abs(diff)} dias!`,
     color: "text-red-400",
   };
 }
 
-export const formatDateBR = (dateString: string) => {
+export const formatDateBR = (dateString: string): string => {
   if (!dateString) return "";
 
   const [year, month, day] = dateString.split("-");
 
   return `${day}/${month}/${year}`;
 };
-

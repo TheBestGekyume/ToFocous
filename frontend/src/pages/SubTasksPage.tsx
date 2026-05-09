@@ -5,10 +5,10 @@ import { Modal } from "../components/Tasks/Modal";
 import { priorityMap } from "../utils/taskUtils";
 import { useParams } from "react-router-dom";
 import { LoadingOverlay } from "../components/_Common/LoadingOverlay";
-import { SubTaskList } from "../components/SingleTaskView/SubTaskList";
-import { TaskHeader } from "../components/SingleTaskView/TaskHeader";
+import { SubTaskList } from "../components/SubTasks/SubTaskList";
+import { TaskHeader } from "../components/SubTasks/TaskHeader";
 
-export const SingleTaskPage = () => {
+export const SubTasksPage = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const { tasks, getSubTasks } = useTasks();
 

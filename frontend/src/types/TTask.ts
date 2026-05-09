@@ -12,6 +12,7 @@ export type TTask = {
     start_time?: string | null;
     priority: TPriority;
     status: TStatus;
+    project_id: string;
     subtasks: TSubTask[];
 };
 
@@ -37,7 +38,7 @@ export type TCreateTaskDTO = {
     start_date?: string | null;
     start_time?: string | null;
     due_time?: string | null;
-    project_id:string;
+    project_id: string;
 };
 
 export type TCreateSubTaskDTO = {

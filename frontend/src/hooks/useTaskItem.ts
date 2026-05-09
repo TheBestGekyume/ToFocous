@@ -1,55 +1,99 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEditableItem } from "./useEditableItem";
 import { useTasks } from "./useTasks";
-import { useTaskSettings } from "./useTaskSettings";
+import { useTaskVisibilitySettings } from "./useTaskVisibilitySettings";
+import { confirmDelete } from "../utils/confirmDelete";
 import type { TTask } from "../types/TTask";
 
 export const useTaskItem = (task: TTask) => {
-    const navigate = useNavigate();
-    const { taskId } = useParams<{ taskId?: string }>();
-    const isDetailsPage = !!taskId;
-    const { projectId } = useParams();
+  const navigate = useNavigate();
 
-    const { updateTask, deleteTask } = useTasks();
-    const { settings } = useTaskSettings();
+  const { taskId, projectId } = useParams<{
+    taskId?: string;
+    projectId?: string;
+  }>();
 
-    const editable = useEditableItem<TTask>({
-        initialData: task,
-        onUpdate: (updated) => updateTask(task.id, updated),
-        onDelete: () => deleteTask(task.id),
-        validate: (t) => !!t.title.trim() && !!t.due_date,
-        hasChanged: (a, b) =>
-            a.title !== b.title ||
-            a.description !== b.description ||
-            a.due_date !== b.due_date ||
-            a.start_date !== b.start_date ||
-            a.due_time !== b.due_time ||
-            a.start_time !== b.start_time ||
-            a.priority !== b.priority ||
-            a.status !== b.status,
-    });
+  const isDetailsPage = Boolean(taskId);
 
-    const changeStatus = (status: TTask["status"]) =>
-        editable.handleImmediateChange("status", status);
+  const { updateTask, deleteTask } = useTasks();
 
-    const changePriority = (priority: TTask["priority"]) =>
-        editable.handleImmediateChange("priority", priority);
+  const {
+    settings,
+    showStartDate,
+    showTime,
+    showStartTime,
+  } = useTaskVisibilitySettings();
 
-    const navigateToDetails = () => navigate(`/projects/${projectId}/tasks/${task.id}`);
+  const editable = useEditableItem<TTask>({
+    initialData: task,
 
-    return {
-        ...editable,
+    onUpdate: async (updated) => {
+      await updateTask(task.id, updated);
+    },
 
-        settings,
-        isDetailsPage,
+    onDelete: async () => {
+      if (task.status !== "concluded" && !confirmDelete("tarefa")) return;
 
-        showStartDate: settings?.use_start_date ?? false,
-        showTime: settings?.use_time ?? false,
-        showStartTime:
-            (settings?.use_time && settings?.use_start_date) ?? false,
+      await deleteTask(task.id);
+    },
 
-        changeStatus,
-        changePriority,
-        navigateToDetails,
-    };
+    validate: (currentTask) =>
+      Boolean(currentTask.title.trim()) && Boolean(currentTask.due_date),
+
+    hasChanged: (currentTask, previousTask) =>
+      currentTask.title !== previousTask.title ||
+      currentTask.description !== previousTask.description ||
+      currentTask.due_date !== previousTask.due_date ||
+      currentTask.start_date !== previousTask.start_date ||
+      currentTask.due_time !== previousTask.due_time ||
+      currentTask.start_time !== previousTask.start_time ||
+      currentTask.priority !== previousTask.priority ||
+      currentTask.status !== previousTask.status,
+  });
+
+  const isDone = editable.localData.status === "concluded";
+
+  const toggleStatus = () => {
+    editable.handleImmediateChange(
+      "status",
+      isDone ? "unstarted" : "concluded"
+    );
+  };
+
+  const changeStatus = (status: TTask["status"]) => {
+    editable.handleImmediateChange("status", status);
+  };
+
+  const changePriority = (priority: TTask["priority"]) => {
+    editable.handleImmediateChange("priority", priority);
+  };
+
+  const navigateToDetails = () => {
+    if (!projectId) return;
+
+    navigate(`/projects/${projectId}/tasks/${task.id}`);
+  };
+
+  const handleDescriptionKeyDown =
+    editable.handleTextareaKeyDown("description");
+
+  return {
+    ...editable,
+
+    settings,
+
+    isDone,
+    isDetailsPage,
+
+    showStartDate,
+    showTime,
+    showStartTime,
+
+    toggleStatus,
+    changeStatus,
+    changePriority,
+
+    navigateToDetails,
+    handleDescriptionKeyDown,
+  };
 };
