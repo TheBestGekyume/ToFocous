@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { TProject } from "../../types/TProject";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, UserRoundPlus } from "lucide-react";
 import { useProjects } from "../../hooks/useProjects";
 import { ProjectUsersModal } from "./ProjectUsersModal";
 

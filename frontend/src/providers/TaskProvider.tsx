@@ -39,31 +39,40 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     });
   }, []);
 
-  const getTasks = useCallback(async () => {
+  const getTasks = useCallback(async (): Promise<TTask[]> => {
     try {
       setLoading(true);
 
       const data = await taskService.getTasks();
       setTasks(data);
+
+      return data;
     } catch (err) {
       console.error("Erro ao buscar tasks do usuário", err);
+      throw err;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const getTasksByProject = useCallback(async (projectId: string) => {
-    try {
-      setLoading(true);
+  const getTasksByProject = useCallback(
+    async (projectId: string): Promise<TTask[]> => {
+      try {
+        setLoading(true);
 
-      const data = await taskService.getTasksByProject(projectId);
-      setTasks(data);
-    } catch (err) {
-      console.error(`Erro ao buscar task no projeto ${projectId}:`, err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+        const data = await taskService.getTasksByProject(projectId);
+        setTasks(data);
+
+        return data;
+      } catch (err) {
+        console.error(`Erro ao buscar task no projeto ${projectId}:`, err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   const createTask = useCallback(async (payload: TCreateTaskDTO) => {
     try {

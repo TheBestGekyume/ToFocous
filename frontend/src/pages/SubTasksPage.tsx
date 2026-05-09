@@ -10,19 +10,42 @@ import { TaskHeader } from "../components/SubTasks/TaskHeader";
 
 export const SubTasksPage = () => {
   const { taskId } = useParams<{ taskId: string }>();
-  const { tasks, getSubTasks } = useTasks();
+  const { tasks, getTasks, getSubTasks } = useTasks();
 
   const [isCreatingSubTask, setIsCreatingSubTask] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
 
   const task = tasks.find((t) => t.id === taskId);
 
   useEffect(() => {
     if (!taskId) return;
-    getSubTasks(taskId);
-  }, [taskId, getSubTasks]);
 
-  if (!tasks.length) {
+    let isMounted = true;
+
+    const loadPageData = async () => {
+      setPageLoading(true);
+
+      try {
+        await getTasks();
+        await getSubTasks(taskId);
+      } catch (err) {
+        console.error("Erro ao carregar página de subtarefas", err);
+      } finally {
+        if (isMounted) {
+          setPageLoading(false);
+        }
+      }
+    };
+
+    loadPageData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [taskId, getTasks, getSubTasks]);
+
+  if (pageLoading) {
     return <LoadingOverlay show />;
   }
 
