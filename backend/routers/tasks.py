@@ -152,13 +152,12 @@ def patch_task(task_id: str, data: PatchTask, current_user = Depends(get_current
         response = supabase.table("tasks") \
             .update(patchdata) \
             .eq("id", task_id) \
-            .eq("user_id", current_user.id) \
             .execute()
 
         if not response.data:
             raise HTTPException(
                 status_code=404,
-                detail="Tarefa não encontrada"
+                detail="Tarefa não encontrada ou sem permissão para editar"
             )
 
         task = response.data[0]
@@ -181,23 +180,30 @@ def patch_task(task_id: str, data: PatchTask, current_user = Depends(get_current
             "data": filtered_response
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.delete("/{task_id}")
-def delete_task(task_id: str, current_user = Depends(get_current_user),supabase = Depends(get_db)):
+def delete_task(task_id: str, current_user = Depends(get_current_user), supabase = Depends(get_db)):
     try:
-        response = supabase.table("tasks").delete().eq("id", task_id).eq("user_id", current_user.id).execute()
+        response = supabase.table("tasks") \
+            .delete() \
+            .eq("id", task_id) \
+            .execute()
 
         if not response.data:
             raise HTTPException(
                 status_code=404,
-                detail="Tarefa não encontrada"
+                detail="Tarefa não encontrada ou sem permissão para deletar"
             )
 
         return {
             "message": "Tarefa deletada com sucesso."
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
