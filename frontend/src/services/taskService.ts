@@ -10,6 +10,7 @@ export const taskService = {
     const res = await api.get(`/tasks`, {
       params: { project_id: projectId },
     });
+    // console.log("teste123", res.data)
     return res.data;
   },
 
