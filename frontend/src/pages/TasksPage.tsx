@@ -12,7 +12,7 @@ import type { TProject } from "../types/TProject";
 import { ProjectItem } from "../components/Projects/ProjectItem";
 
 export const TaskPage = () => {
-  const { setTasks } = useTasks();
+  const { setTasks, subscribeToProjectRealtime } = useTasks();
   const { getProjectById } = useProjects();
 
   const { projectId } = useParams();
@@ -34,6 +34,16 @@ export const TaskPage = () => {
 
     loadProject();
   }, [projectId, getProjectById]);
+
+  useEffect(() => {
+  if (!projectId) return;
+
+  const unsubscribe = subscribeToProjectRealtime(projectId);
+
+  return () => {
+    unsubscribe();
+  };
+}, [projectId, subscribeToProjectRealtime]);
 
   const clearCompleted = () => {
     setTasks((prev) => prev.filter((task) => task.status !== "concluded"));

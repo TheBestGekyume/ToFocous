@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { TasksContext, type SortType } from "../contexts/TasksContext";
 import { taskService } from "../services/taskService";
 import { sortTaskList } from "../utils/taskUtils";
@@ -8,10 +8,19 @@ import type {
   TSubTask,
   TTask,
 } from "../types/TTask";
+import type {
+  RealtimeChannel,
+  RealtimePostgresChangesPayload,
+} from "@supabase/supabase-js";
+import { supabaseRealtimeClient } from "../services/supabaseRealtimeClient";
+
+type TaskRealtimePayload = RealtimePostgresChangesPayload<TTask>;
+type SubTaskRealtimePayload = RealtimePostgresChangesPayload<TSubTask>;
 
 export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   const [tasks, setTasks] = useState<TTask[]>([]);
   const [loading, setLoading] = useState(false);
+  const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
 
   const [sortConfig, setSortConfig] = useState<{
     type: SortType;
@@ -215,6 +224,155 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     []
   );
 
+  const upsertTaskFromRealtime = useCallback((incomingTask: TTask) => {
+    setTasks((prev) => {
+      const alreadyExists = prev.some((task) => task.id === incomingTask.id);
+
+      if (!alreadyExists) {
+        return [
+          { ...incomingTask, subtasks: incomingTask.subtasks ?? [] },
+          ...prev,
+        ];
+      }
+
+      return prev.map((task) =>
+        task.id === incomingTask.id
+          ? {
+              ...task,
+              ...incomingTask,
+              subtasks: task.subtasks ?? incomingTask.subtasks ?? [],
+            }
+          : task
+      );
+    });
+  }, []);
+
+  const removeTaskFromRealtime = useCallback((taskId: string) => {
+    setTasks((prev) => prev.filter((task) => task.id !== taskId));
+  }, []);
+
+  const upsertSubTaskFromRealtime = useCallback((incomingSubTask: TSubTask) => {
+    setTasks((prev) =>
+      prev.map((task) => {
+        if (task.id !== incomingSubTask.task_id) return task;
+
+        const currentSubTasks = task.subtasks ?? [];
+        const alreadyExists = currentSubTasks.some(
+          (subtask) => subtask.id === incomingSubTask.id
+        );
+
+        if (!alreadyExists) {
+          return {
+            ...task,
+            subtasks: [...currentSubTasks, incomingSubTask],
+          };
+        }
+
+        return {
+          ...task,
+          subtasks: currentSubTasks.map((subtask) =>
+            subtask.id === incomingSubTask.id
+              ? { ...subtask, ...incomingSubTask }
+              : subtask
+          ),
+        };
+      })
+    );
+  }, []);
+
+  const removeSubTaskFromRealtime = useCallback((subtaskId: string) => {
+    setTasks((prev) =>
+      prev.map((task) => ({
+        ...task,
+        subtasks: (task.subtasks ?? []).filter(
+          (subtask) => subtask.id !== subtaskId
+        ),
+      }))
+    );
+  }, []);
+
+  const subscribeToProjectRealtime = useCallback(
+    (projectId: string) => {
+      const token = localStorage.getItem("access_token");
+
+      if (token) {
+        supabaseRealtimeClient.realtime.setAuth(token);
+      }
+
+      if (realtimeChannelRef.current) {
+        supabaseRealtimeClient.removeChannel(realtimeChannelRef.current);
+        realtimeChannelRef.current = null;
+      }
+
+      const channel = supabaseRealtimeClient
+        .channel(`project-realtime-${projectId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "tasks",
+            filter: `project_id=eq.${projectId}`,
+          },
+          (payload: TaskRealtimePayload) => {
+            if (payload.eventType === "DELETE") {
+              const deletedTaskId = payload.old.id;
+
+              if (deletedTaskId) {
+                removeTaskFromRealtime(deletedTaskId);
+              }
+
+              return;
+            }
+
+            upsertTaskFromRealtime(payload.new);
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "subtasks",
+          },
+          (payload: SubTaskRealtimePayload) => {
+            if (payload.eventType === "DELETE") {
+              const deletedSubTaskId = payload.old.id;
+
+              if (deletedSubTaskId) {
+                removeSubTaskFromRealtime(deletedSubTaskId);
+              }
+
+              return;
+            }
+
+            upsertSubTaskFromRealtime(payload.new);
+          }
+        )
+        .subscribe((status) => {
+          if (status === "CHANNEL_ERROR") {
+            console.error("Erro no canal realtime do projeto:", projectId);
+          }
+        });
+
+      realtimeChannelRef.current = channel;
+
+      return () => {
+        supabaseRealtimeClient.removeChannel(channel);
+
+        if (realtimeChannelRef.current === channel) {
+          realtimeChannelRef.current = null;
+        }
+      };
+    },
+    [
+      removeSubTaskFromRealtime,
+      removeTaskFromRealtime,
+      upsertSubTaskFromRealtime,
+      upsertTaskFromRealtime,
+    ]
+  );
+
   const value = useMemo(
     () => ({
       tasks: sortedTasks,
@@ -236,6 +394,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       createSubTask,
       updateSubTask,
       deleteSubTask,
+      subscribeToProjectRealtime,
     }),
     [
       sortedTasks,
@@ -252,6 +411,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       createSubTask,
       updateSubTask,
       deleteSubTask,
+      subscribeToProjectRealtime,
     ]
   );
 
