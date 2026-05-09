@@ -30,7 +30,7 @@ def get_project_users(
         if not is_owner and not is_member:
             raise HTTPException(status_code=403, detail="Você não tem acesso a este projeto.")
 
-        users_response = supabase.table("project_users").select("*").eq("project_id", project_id).execute()
+        users_response = (supabase.table("project_users").select("""id,project_id,user_id,usuarios (id,name)""").eq("project_id", project_id).execute())
 
         return {
             "message": "Usuários do projeto listados com sucesso.",
