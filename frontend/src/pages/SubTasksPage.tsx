@@ -14,8 +14,8 @@ export const SubTasksPage = () => {
     taskId: string;
   }>();
 
-  const { tasks, getTasksByProject, getSubTasks } = useTasks();
-
+  const { tasks, getTasksByProject, getSubTasks, subscribeToProjectRealtime } =
+    useTasks();
   const [isCreatingSubTask, setIsCreatingSubTask] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
@@ -88,9 +88,15 @@ export const SubTasksPage = () => {
     };
   }, [taskId, taskExists, getSubTasks]);
 
-  // useEffect(() => {
-  //   console.log("task atual:", task);
-  // }, [task]);
+  useEffect(() => {
+    if (!projectId) return;
+
+    const unsubscribe = subscribeToProjectRealtime(projectId);
+
+    return () => {
+      unsubscribe();
+    };
+  }, [projectId, subscribeToProjectRealtime]);
 
   if (pageLoading) {
     return <LoadingOverlay show />;

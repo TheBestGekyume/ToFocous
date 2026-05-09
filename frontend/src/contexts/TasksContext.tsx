@@ -40,6 +40,7 @@ export type TasksContextType = {
     payload: Partial<TSubTask>
   ) => Promise<TSubTask>;
   deleteSubTask: (taskId: string, subtaskId: string) => Promise<void>;
+  subscribeToProjectRealtime: (projectId: string) => () => void;
 };
 
 export const TasksContext = createContext<TasksContextType | null>(null);
