@@ -74,7 +74,7 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
         />
 
         <textarea
-          value={localData.description}
+          value={localData.description || ""}
           onChange={(e) => handleChange("description", e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleDescriptionKeyDown}

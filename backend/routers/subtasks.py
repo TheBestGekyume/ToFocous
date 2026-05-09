@@ -12,7 +12,7 @@ def format_time(t):
 @router.get("/{task_id}")
 def get_subtasks(task_id: str, current_user=Depends(get_current_user), supabase=Depends(get_db)):
     try:
-        task = supabase.table("tasks").select("id").eq("id", task_id).eq("user_id", current_user.id).execute()
+        task = supabase.table("tasks").select("id").eq("id", task_id).execute()
 
         if not task.data:
             raise HTTPException(status_code=404, detail="Tarefa não encontrada")
@@ -39,6 +39,8 @@ def get_subtasks(task_id: str, current_user=Depends(get_current_user), supabase=
 
         return filtered_response
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -46,7 +48,7 @@ def get_subtasks(task_id: str, current_user=Depends(get_current_user), supabase=
 @router.post("/{task_id}")
 def post_subtask(data: PostSubTask, task_id: str, current_user= Depends(get_current_user),supabase = Depends(get_db)):
     try:
-        task = supabase.table("tasks").select("id").eq("id", task_id).eq("user_id", current_user.id).execute()
+        task = supabase.table("tasks").select("id").eq("id", task_id).execute()
         if not task.data:
             raise HTTPException(status_code=404, detail= "Tarefa não encontrada")
         
@@ -83,6 +85,8 @@ def post_subtask(data: PostSubTask, task_id: str, current_user= Depends(get_curr
             "data": filtered_response
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -91,7 +95,7 @@ def post_subtask(data: PostSubTask, task_id: str, current_user= Depends(get_curr
 @router.patch("/{subtask_id}")
 def patch_subtask(task_id: str,subtask_id: str,data: PatchSubTask,current_user=Depends(get_current_user),supabase=Depends(get_db)):
     try:
-        task = supabase.table("tasks").select("id").eq("id", task_id).eq("user_id", current_user.id).execute()
+        task = supabase.table("tasks").select("id").eq("id", task_id).execute()
 
         if not task.data:
             raise HTTPException(status_code=404, detail="Tarefa não encontrada")
@@ -125,6 +129,8 @@ def patch_subtask(task_id: str,subtask_id: str,data: PatchSubTask,current_user=D
             "data": filtered_response
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -132,7 +138,7 @@ def patch_subtask(task_id: str,subtask_id: str,data: PatchSubTask,current_user=D
 @router.delete("/{subtask_id}")
 def delete_subtask(task_id: str,subtask_id: str,current_user=Depends(get_current_user),supabase=Depends(get_db)):
     try:
-        task = supabase.table("tasks").select("id").eq("id", task_id).eq("user_id", current_user.id).execute()
+        task = supabase.table("tasks").select("id").eq("id", task_id).execute()
 
         if not task.data:
             raise HTTPException(status_code=404, detail="Tarefa não encontrada")
@@ -146,5 +152,7 @@ def delete_subtask(task_id: str,subtask_id: str,current_user=Depends(get_current
             "message": "Sub-Tarefa deletada com sucesso"
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

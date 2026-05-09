@@ -9,24 +9,94 @@ import { SubTaskList } from "../components/SubTasks/SubTaskList";
 import { TaskHeader } from "../components/SubTasks/TaskHeader";
 
 export const SubTasksPage = () => {
-  const { taskId } = useParams<{ taskId: string }>();
-  const { tasks, getSubTasks } = useTasks();
+  const { projectId, taskId } = useParams<{
+    projectId: string;
+    taskId: string;
+  }>();
+
+  const { tasks, getTasksByProject, getSubTasks } = useTasks();
 
   const [isCreatingSubTask, setIsCreatingSubTask] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const [pageLoading, setPageLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const task = tasks.find((t) => t.id === taskId);
+  const taskExists = Boolean(task);
 
   useEffect(() => {
-    if (!taskId) return;
-    getSubTasks(taskId);
-  }, [taskId, getSubTasks]);
+    if (!projectId || !taskId) {
+      setPageLoading(false);
+      setNotFound(true);
+      return;
+    }
 
-  if (!tasks.length) {
+    let isMounted = true;
+
+    const loadTasks = async () => {
+      setPageLoading(true);
+      setNotFound(false);
+
+      try {
+        const projectTasks = await getTasksByProject(projectId);
+
+        const taskExistsInProject = projectTasks.some(
+          (projectTask) => projectTask.id === taskId
+        );
+
+        if (!taskExistsInProject && isMounted) {
+          setNotFound(true);
+          setPageLoading(false);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar tarefas do projeto", err);
+
+        if (isMounted) {
+          setNotFound(true);
+          setPageLoading(false);
+        }
+      }
+    };
+
+    loadTasks();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [projectId, taskId, getTasksByProject]);
+
+  useEffect(() => {
+    if (!taskId || !taskExists) return;
+
+    let isMounted = true;
+
+    const loadSubTasks = async () => {
+      try {
+        await getSubTasks(taskId);
+      } catch (err) {
+        console.error("Erro ao carregar subtarefas", err);
+      } finally {
+        if (isMounted) {
+          setPageLoading(false);
+        }
+      }
+    };
+
+    loadSubTasks();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [taskId, taskExists, getSubTasks]);
+
+  // useEffect(() => {
+  //   console.log("task atual:", task);
+  // }, [task]);
+
+  if (pageLoading) {
     return <LoadingOverlay show />;
   }
 
-  if (!task) {
+  if (notFound || !task) {
     return <p className="text-center mt-10">Tarefa não encontrada</p>;
   }
 

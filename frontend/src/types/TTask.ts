@@ -20,7 +20,7 @@ export type TSubTask = {
     id: string;
     task_id: string;
     title: string;
-    description: string;
+    description?: string | null;
     due_date: string;
     due_time?: string | null;
     start_date?: string | null;

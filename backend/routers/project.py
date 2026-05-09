@@ -24,7 +24,8 @@ def post_project(
             "id": project["id"],
             "title": project["title"],
             "description": project["description"],
-            "color": project["color"]
+            "color": project["color"],
+            "is_owner": project["user_id"] == current_user.id
         }
 
 
@@ -80,7 +81,8 @@ def get_projects(
                 "id": p["id"],
                 "title": p["title"],
                 "description": p["description"],
-                "color": p["color"]
+                "color": p["color"],
+                "is_owner": p["user_id"] == current_user.id
             }
             for p in response.data
         ]
@@ -122,7 +124,8 @@ def patch_project(
                 "id": project["id"],
                 "title": project["title"],
                 "description": project["description"],
-                "color": project["color"]
+                "color": project["color"],
+                "is_owner": project["user_id"] == current_user.id
             }
         }
 
