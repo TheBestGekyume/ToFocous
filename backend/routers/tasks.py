@@ -68,8 +68,6 @@ def get_task_by_id(
         response = supabase.table("tasks") \
             .select("*") \
             .eq("id", task_id) \
-            .eq("user_id", current_user.id) \
-            .single() \
             .execute()
 
         if not response.data:
@@ -78,7 +76,7 @@ def get_task_by_id(
                 detail="Tarefa não encontrada"
             )
 
-        task = response.data
+        task = response.data[0]
 
         filtered_response = {
             "id": task["id"],
@@ -95,6 +93,8 @@ def get_task_by_id(
 
         return filtered_response
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
