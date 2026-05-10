@@ -36,14 +36,16 @@ export const TaskPage = () => {
   }, [projectId, getProjectById]);
 
   useEffect(() => {
-  if (!projectId) return;
+    console.log("[TasksPage] useEffect realtime rodou. projectId:", projectId);
 
-  const unsubscribe = subscribeToProjectRealtime(projectId);
+    if (!projectId) return;
 
-  return () => {
-    unsubscribe();
-  };
-}, [projectId, subscribeToProjectRealtime]);
+    const unsubscribe = subscribeToProjectRealtime(projectId);
+
+    return () => {
+      unsubscribe();
+    };
+  }, [projectId, subscribeToProjectRealtime]);
 
   const clearCompleted = () => {
     setTasks((prev) => prev.filter((task) => task.status !== "concluded"));
