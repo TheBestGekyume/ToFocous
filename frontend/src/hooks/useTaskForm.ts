@@ -5,6 +5,8 @@ import type {
     TSubTask,
     TCreateTaskDTO,
     TCreateSubTaskDTO,
+    TUpdateTaskDTO,
+    TUpdateSubTaskDTO,
 } from "../types/TTask";
 import { useParams } from "react-router-dom";
 
@@ -93,21 +95,51 @@ export const useTaskForm = ({
             ? { kind: "subtask", data: emptySubTaskForm }
             : { kind: "task", data: emptyTaskForm };
 
-    const normalizeTaskPayload = (data: TaskFormData): TCreateTaskDTO => ({
+    const normalizeCreateTaskPayload = (data: TaskFormData): TCreateTaskDTO => ({
         title: data.title,
-        description: data.description ?? "",
         due_date: data.due_date,
-        priority: data.priority,
-        status: data.status || null,
+        project_id: projectId!,
+        status: "unstarted",
+
+        description: data.description.trim() || undefined,
+        priority: data.priority || undefined,
         start_date: data.start_date || null,
         start_time: data.start_time || null,
         due_time: data.due_time || null,
-        project_id: projectId!
     });
 
-    const normalizeSubTaskPayload = (data: TSubTask): TCreateSubTaskDTO => ({
+    const normalizeCreateSubTaskPayload = (
+        data: TSubTask
+    ): TCreateSubTaskDTO => ({
         title: data.title,
-        description: data.description || null,
+        due_date: data.due_date,
+        status: "unstarted",
+
+        description: data.description.trim() || undefined,
+        priority: data.priority || undefined,
+        start_date: data.start_date || null,
+        start_time: data.start_time || null,
+        due_time: data.due_time || null,
+    });
+
+    const normalizeUpdateTaskPayload = (
+        data: TaskFormData
+    ): TUpdateTaskDTO => ({
+        title: data.title,
+        description: data.description.trim(),
+        due_date: data.due_date,
+        priority: data.priority,
+        status: data.status,
+        start_date: data.start_date || null,
+        start_time: data.start_time || null,
+        due_time: data.due_time || null,
+    });
+
+    const normalizeUpdateSubTaskPayload = (
+        data: TSubTask
+    ): TUpdateSubTaskDTO => ({
+        title: data.title,
+        description: data.description.trim(),
         due_date: data.due_date,
         priority: data.priority,
         status: data.status,
@@ -148,42 +180,40 @@ export const useTaskForm = ({
         e.preventDefault();
 
         try {
-            if (isCreatingSubTask) {
-
+            if (formData.kind === "subtask") {
                 if (!parentTask) return;
 
                 if (isCreating) {
                     await createSubTask(
                         parentTask.id,
-                        normalizeSubTaskPayload(formData.data as TSubTask)
+                        normalizeCreateSubTaskPayload(formData.data)
                     );
                 } else {
                     await updateSubTask(
                         parentTask.id,
-                        (initialTask as TSubTask).id,
-                        formData.data
+                        formData.data.id,
+                        normalizeUpdateSubTaskPayload(formData.data)
                     );
                 }
+            }
 
-            } else {
-
+            if (formData.kind === "task") {
                 if (isCreating) {
                     if (!projectId) {
                         throw new Error("Project ID não encontrado");
                     }
-                    await createTask(normalizeTaskPayload(formData.data as TaskFormData));
+
+                    await createTask(normalizeCreateTaskPayload(formData.data));
                 } else {
                     await updateTask(
-                        (initialTask as TTask).id,
-                        formData.data
+                        formData.data.id,
+                        normalizeUpdateTaskPayload(formData.data)
                     );
                 }
-
             }
 
             setFormData(getEmptyForm(isCreatingSubTask));
             onClose?.();
-
         } catch (err) {
             console.error("Erro ao salvar tarefa", err);
         }
