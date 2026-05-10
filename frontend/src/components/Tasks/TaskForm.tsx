@@ -108,7 +108,7 @@ export const TaskForm = ({
           <label className="font-semibold mb-1">Descrição</label>
           <textarea
             name="description"
-            value={formData.description}
+            value={formData.description || ""}
             onChange={handleChange}
             className="rounded-md bg-zinc-700 p-2 min-h-[60px]"
           />
