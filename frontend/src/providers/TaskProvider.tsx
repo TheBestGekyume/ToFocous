@@ -294,18 +294,18 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
 
   const subscribeToProjectRealtime = useCallback(
   (projectId: string) => {
-        console.log("[TaskProvider] subscribeToProjectRealtime chamado:", projectId);
+        // console.log("[TaskProvider] subscribeToProjectRealtime chamado:", projectId);
     const token = getAccessToken();
 
-    console.log("[Realtime] iniciando subscribe do projeto:", projectId);
-    console.log("[Realtime] token existe?", Boolean(token));
+    // console.log("[Realtime] iniciando subscribe do projeto:", projectId);
+    // console.log("[Realtime] token existe?", Boolean(token));
 
     if (token) {
       supabaseRealtimeClient.realtime.setAuth(token);
     }
 
     if (realtimeChannelRef.current) {
-      console.log("[Realtime] removendo canal anterior");
+      // console.log("[Realtime] removendo canal anterior");
       supabaseRealtimeClient.removeChannel(realtimeChannelRef.current);
       realtimeChannelRef.current = null;
     }
@@ -321,7 +321,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
           filter: `project_id=eq.${projectId}`,
         },
         (payload: TaskRealtimePayload) => {
-          console.log("[Realtime] evento em tasks:", payload);
+          // console.log("[Realtime] evento em tasks:", payload);
 
           if (payload.eventType === "DELETE") {
             const deletedTaskId = payload.old.id;
@@ -344,7 +344,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
           table: "subtasks",
         },
         (payload: SubTaskRealtimePayload) => {
-          console.log("[Realtime] evento em subtasks:", payload);
+          // console.log("[Realtime] evento em subtasks:", payload);
 
           if (payload.eventType === "DELETE") {
             const deletedSubTaskId = payload.old.id;
@@ -359,25 +359,25 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
           upsertSubTaskFromRealtime(payload.new);
         }
       )
-      .subscribe((status, err) => {
-        console.log("[Realtime] status:", status, err);
+      // .subscribe((status, err) => {
+      //   console.log("[Realtime] status:", status, err);
 
-        if (status === "SUBSCRIBED") {
-          console.log("[Realtime] conectado no projeto:", projectId);
-        }
+      //   if (status === "SUBSCRIBED") {
+      //     console.log("[Realtime] conectado no projeto:", projectId);
+      //   }
 
-        if (status === "CHANNEL_ERROR") {
-          console.error("[Realtime] erro no canal do projeto:", projectId, err);
-        }
+      //   if (status === "CHANNEL_ERROR") {
+      //     console.error("[Realtime] erro no canal do projeto:", projectId, err);
+      //   }
 
-        if (status === "TIMED_OUT") {
-          console.error("[Realtime] timeout no canal do projeto:", projectId);
-        }
+      //   if (status === "TIMED_OUT") {
+      //     console.error("[Realtime] timeout no canal do projeto:", projectId);
+      //   }
 
-        if (status === "CLOSED") {
-          console.warn("[Realtime] canal fechado:", projectId);
-        }
-      });
+      //   if (status === "CLOSED") {
+      //     console.warn("[Realtime] canal fechado:", projectId);
+      //   }
+      // });
 
     realtimeChannelRef.current = channel;
 

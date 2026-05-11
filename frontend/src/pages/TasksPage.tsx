@@ -36,7 +36,7 @@ export const TaskPage = () => {
   }, [projectId, getProjectById]);
 
   useEffect(() => {
-    console.log("[TasksPage] useEffect realtime rodou. projectId:", projectId);
+    // console.log("[TasksPage] useEffect realtime rodou. projectId:", projectId);
 
     if (!projectId) return;
 
