@@ -19,6 +19,7 @@ import { DatePicker } from "../_Common/DatePicker";
 import { TimeInput } from "../_Common/TimeInput";
 import { useTaskItem } from "../../hooks/useTaskItem";
 import type { TTask } from "../../types/TTask";
+import { useTextareaOverflow } from "../../hooks/useTextareaOverflow";
 
 type TaskProps = {
   task: TTask;
@@ -28,12 +29,9 @@ export const TaskItem = ({ task }: TaskProps) => {
   const {
     localData,
     loading,
-
     settings,
-
     isDone,
     isDetailsPage,
-
     showStartDate,
     showTime,
     showStartTime,
@@ -44,13 +42,10 @@ export const TaskItem = ({ task }: TaskProps) => {
     handleDescriptionKeyDown,
     handleDelete,
     handleImmediateChange,
-
     changeStatus,
     changePriority,
     navigateToDetails,
   } = useTaskItem(task);
-
-  if (!settings) return <LoadingOverlay show />;
 
   const { msg: timeMessage, color: timeColor } = getTimeMessage(
     new Date(localData.due_date)
@@ -58,6 +53,15 @@ export const TaskItem = ({ task }: TaskProps) => {
 
   const currentPriority = priorityMap[localData.priority];
   const currentStatus = statusMap[localData.status];
+
+  const {
+    textareaRef,
+    hasOverflow: descriptionOverflow,
+    checkOverflow: checkDescriptionOverflow,
+    startResizeTracking,
+  } = useTextareaOverflow(localData.description);
+
+  if (!settings) return <LoadingOverlay show />;
 
   return (
     <>
@@ -127,16 +131,34 @@ export const TaskItem = ({ task }: TaskProps) => {
               ${isDetailsPage ? "w-full" : "w-4/5"}`}
           />
 
-          <textarea
-            value={localData.description}
-            onChange={(e) => handleChange("description", e.target.value)}
-            onBlur={handleBlur}
-            onKeyDown={handleDescriptionKeyDown}
-            spellCheck={false}
-            className="outline-none resize-none rounded-sm border text-text
-              border-transparent px-1 m-0 duration-100 focus:bg-zinc-900 focus:border-accent 
-              focus:resize-y hover:bg-zinc-700 hover:resize-y w-9/10"
-          />
+          <div className="relative w-9/10">
+            <textarea
+              ref={textareaRef}
+              value={localData.description ?? ""}
+              onChange={(e) => {
+                handleChange("description", e.target.value);
+                requestAnimationFrame(checkDescriptionOverflow);
+              }}
+              onBlur={handleBlur}
+              onFocus={checkDescriptionOverflow}
+              onMouseEnter={checkDescriptionOverflow}
+              onMouseDown={startResizeTracking}
+              onKeyDown={handleDescriptionKeyDown}
+              spellCheck={false}
+              rows={2}
+              className="w-full resize-none overflow-hidden rounded-sm border border-transparent px-1 m-0 text-text outline-none duration-100
+      focus:bg-zinc-900 focus:border-accent focus:resize-y hover:resize-y
+      hover:bg-zinc-700"
+            />
+
+            {descriptionOverflow && (
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 flex h-7 items-center justify-end rounded-b-sm bg-linear-to-t from-zinc-800 via-zinc-800/50 to-transparent px-3 pb-0.5">
+                <span className="text-[10px] text-zinc-300">
+                  arraste para ver mais
+                </span>
+              </div>
+            )}
+          </div>
 
           {!isDone && (
             <p className={`px-1 text-xs ${timeColor}`}>{timeMessage}</p>

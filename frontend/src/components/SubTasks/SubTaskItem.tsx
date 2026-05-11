@@ -11,6 +11,7 @@ import { useSubTaskItem } from "../../hooks/useSubTaskItem";
 import type { TSubTask } from "../../types/TTask";
 import { priorityMap, priorityOptions } from "../../utils/taskUtils";
 import { Dropdown } from "../Tasks/Dropdown";
+import { useTextareaOverflow } from "../../hooks/useTextareaOverflow";
 
 type Props = {
   subtask: TSubTask;
@@ -41,6 +42,12 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
   } = useSubTaskItem({ subtask, taskId, setLoading });
 
   const currentPriority = priorityMap[localData.priority];
+  const {
+    textareaRef,
+    hasOverflow: descriptionOverflow,
+    checkOverflow: checkDescriptionOverflow,
+    startResizeTracking,
+  } = useTextareaOverflow(localData.description);
 
   return (
     <div className="flex items-center gap-5 p-3 bg-zinc-800 border border-zinc-600 rounded-md">
@@ -73,18 +80,36 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
           `}
         />
 
-        <textarea
-          value={localData.description || ""}
-          onChange={(e) => handleChange("description", e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleDescriptionKeyDown}
-          spellCheck={false}
-          placeholder="Descrição"
-          className={`resize-none outline-none border border-transparent duration-100
-            hover:bg-zinc-700 focus:bg-zinc-900 focus:border-accent rounded-md p-1
-            ${isDone ? "line-through text-zinc-500" : ""}
-          `}
-        />
+        <div className="relative">
+          <textarea
+            ref={textareaRef}
+            value={localData.description ?? ""}
+            onChange={(e) => {
+              handleChange("description", e.target.value);
+              requestAnimationFrame(checkDescriptionOverflow);
+            }}
+            onBlur={handleBlur}
+            onFocus={checkDescriptionOverflow}
+            onMouseEnter={checkDescriptionOverflow}
+            onMouseDown={startResizeTracking}
+            onKeyDown={handleDescriptionKeyDown}
+            spellCheck={false}
+            placeholder="Descrição"
+            rows={2}
+            className={`w-full resize-none overflow-hidden outline-none border border-transparent duration-100
+      hover:bg-zinc-700 focus:bg-zinc-900 focus:border-accent focus:resize-y hover:resize-y rounded-md p-1
+      ${isDone ? "line-through text-zinc-500" : ""}
+    `}
+          />
+
+          {descriptionOverflow && (
+            <div className="pointer-events-none absolute bottom-0 left-0 right-0 flex h-7 items-center justify-end rounded-b-md bg-linear-to-t from-zinc-800 via-zinc-800/50 to-transparent px-3 pb-0.5">
+              <span className="text-[10px] text-zinc-300">
+                arraste para ver mais
+              </span>
+            </div>
+          )}
+        </div>
 
         {!isDone && (
           <div className="flex justify-between">
