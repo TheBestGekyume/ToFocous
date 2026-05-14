@@ -95,6 +95,6 @@ Novas melhorias estão sendo implementadas gradualmente.
 - Adicionar novas visualizações de produtividade;
 - Refinar feedbacks visuais e tratamento de erros.
 
-## Autor
+## Autores
 
 Desenvolvido por **Gekyume Serna** e **Jonathan Bastos**.
