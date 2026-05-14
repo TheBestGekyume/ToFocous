@@ -38,7 +38,7 @@ export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
       }, 1500);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        console.log("ERRO BACK:", err.response?.data);
+        // console.log("ERRO BACK:", err.response?.data);
         setError(err.response?.data?.detail || "Erro ao criar conta");
       } else {
         setError("Erro inesperado");
