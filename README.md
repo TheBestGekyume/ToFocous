@@ -87,13 +87,6 @@ Atualmente, o sistema já possui funcionalidades essenciais de gerenciamento de 
 
 Novas melhorias estão sendo implementadas gradualmente.
 
-## Próximos passos
-
-- Melhorar a colaboração em tempo real;
-- Aperfeiçoar permissões entre usuários;
-- Melhorar a experiência mobile;
-- Adicionar novas visualizações de produtividade;
-- Refinar feedbacks visuais e tratamento de erros.
 
 ## Autores
 
