@@ -1,8 +1,9 @@
 import { useState, useMemo, useCallback, useRef } from "react";
-import { TasksContext, type SortType } from "../contexts/TasksContext";
+import { TasksContext } from "../contexts/TasksContext";
 import { taskService } from "../services/taskService";
 import { sortTaskList } from "../utils/taskUtils";
 import type {
+  SortType,
   TCreateSubTaskDTO,
   TCreateTaskDTO,
   TSubTask,
@@ -27,7 +28,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     type: SortType;
     isAscending: boolean;
   }>({
-    type: "",
+    type: "date",
     isAscending: true,
   });
 
