@@ -1,18 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
 import { SortTasks } from "../components/Tasks/SortTasks";
 import { TaskForm } from "../components/Tasks/TaskForm";
 import { TaskList } from "../components/Tasks/TaskList";
-
 import { useTasks } from "../hooks/useTasks";
 import { useProjects } from "../hooks/useProjects";
-
 import type { TProject } from "../types/TProject";
 import { ProjectItem } from "../components/Projects/ProjectItem";
 
 export const TaskPage = () => {
-  const { setTasks, subscribeToProjectRealtime } = useTasks();
+  const { subscribeToProjectRealtime } = useTasks();
   const { getProjectById } = useProjects();
 
   const { projectId } = useParams();
@@ -47,9 +44,9 @@ export const TaskPage = () => {
     };
   }, [projectId, subscribeToProjectRealtime]);
 
-  const clearCompleted = () => {
-    setTasks((prev) => prev.filter((task) => task.status !== "concluded"));
-  };
+  // const clearCompleted = () => {
+  //   setTasks((prev) => prev.filter((task) => task.status !== "concluded"));
+  // };
 
   return (
     <div className="flex flex-col w-full max-w-5xl mx-auto">
@@ -69,12 +66,12 @@ export const TaskPage = () => {
               <div className="flex flex-wrap gap-4">
                 <SortTasks />
 
-                <button
+                {/* <button
                   onClick={clearCompleted}
                   className="p-2 rounded-md text-red-200 bg-red-600 hover:bg-red-900 font-semibold transition-colors"
                 >
                   Limpar Concluídas
-                </button>
+                </button> */}
               </div>
               {currentProject && (
                 <h4 className="text-xl text-accent pe-2">

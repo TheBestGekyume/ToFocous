@@ -4,9 +4,9 @@ import type {
   TSubTask,
   TCreateTaskDTO,
   TCreateSubTaskDTO,
+  SortType,
 } from "../types/TTask";
 
-export type SortType = "date" | "priority" | "status" | "";
 
 export type TasksContextType = {
   tasks: TTask[];

@@ -1,3 +1,5 @@
+export type SortType = "date" | "priority" | "status" | "";
+
 export type TPriority = "low" | "medium" | "high";
 
 export type TStatus = "unstarted" | "inProgress" | "concluded";

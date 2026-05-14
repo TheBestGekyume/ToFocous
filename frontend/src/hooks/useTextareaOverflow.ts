@@ -1,5 +1,3 @@
-// src/hooks/useTextareaOverflow.ts
-
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export const useTextareaOverflow = (value: string | null | undefined) => {
