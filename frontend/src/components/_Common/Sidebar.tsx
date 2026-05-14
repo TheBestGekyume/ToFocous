@@ -62,7 +62,6 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
           </div>
 
           <nav className="flex flex-col gap-5">
-            {/* 🔥 PROJECTS */}
             <Link
               to="/projects"
               onClick={() => setOpen(false)}
