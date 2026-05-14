@@ -8,7 +8,7 @@ import type {
 export const projectUserService = {
   async getProjectUsers(projectId: string): Promise<TProjectUser[]> {
     const { data } = await api.get(`/project-users/${projectId}`);
-    // console.log(data.data)
+    console.log(data.data)
     return data.data;
   },
 
