@@ -20,6 +20,7 @@ import { TimeInput } from "../_Common/TimeInput";
 import { useTaskItem } from "../../hooks/useTaskItem";
 import type { TTask } from "../../types/TTask";
 import { useTextareaOverflow } from "../../hooks/useTextareaOverflow";
+import { useAutoResizeTextarea } from "../../hooks/useAutoResizeTextarea";
 
 type TaskProps = {
   task: TTask;
@@ -53,6 +54,10 @@ export const TaskItem = ({ task }: TaskProps) => {
 
   const currentPriority = priorityMap[localData.priority];
   const currentStatus = statusMap[localData.status];
+
+  const { ref: titleRef, resize: resizeTitle } = useAutoResizeTextarea(
+    localData.title
+  );
 
   const {
     textareaRef,
@@ -118,17 +123,23 @@ export const TaskItem = ({ task }: TaskProps) => {
             )}
           </div>
 
-          <input
+          <textarea
+            ref={titleRef}
             value={localData.title}
-            onChange={(e) => handleChange("title", e.target.value)}
+            onChange={(e) => {
+              handleChange("title", e.target.value);
+              requestAnimationFrame(resizeTitle);
+            }}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             placeholder="Insira o título"
+            rows={1}
+            spellCheck={false}
             className={`text-xl font-semibold outline-none border border-transparent
-              duration-100 focus:bg-zinc-900 focus:border-accent
-              hover:bg-zinc-700 rounded-md p-1 
-              ${isDone ? "line-through text-zinc-400" : ""}
-              ${isDetailsPage ? "w-full" : "w-4/5"}`}
+    duration-100 focus:bg-zinc-900 focus:border-accent
+    hover:bg-zinc-700 rounded-md p-1 resize-none overflow-hidden
+    ${isDone ? "line-through text-zinc-400" : ""}
+    ${isDetailsPage ? "w-full" : "w-4/5"}`}
           />
 
           <div className="relative w-9/10">
