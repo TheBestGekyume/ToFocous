@@ -1,4 +1,3 @@
-import "./App.css";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { TasksProvider } from "./providers/TaskProvider";
 import { TaskSettingsProvider } from "./providers/TaskSettingsProvider";
@@ -48,7 +47,6 @@ function App() {
           <Route path="/configuracoes" element={<TaskSettings />} />
           <Route path="/perfil" element={<Profile />} />
 
-          <Route path="/agenda" element={<Navigate to="/projects" replace />} />
         </Route>
       </Routes>
     </div>

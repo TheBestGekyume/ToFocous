@@ -110,7 +110,7 @@ export const ProjectUsersModal = ({
               >
                 <div className="min-w-0">
                   <p className="font-semibold text-white">
-                    {projectUser.name ?? "Usuário sem nome"}
+                    {projectUser.usuarios?.name ?? "Usuário sem nome"}
                   </p>
 
                   <p className="text-xs text-zinc-400 break-all">
