@@ -31,11 +31,11 @@ export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
         password,
       });
 
-      setSuccess("Conta criada com sucesso!");
+      setSuccess(`Conta criada com sucesso!\n Ative sua conta pelo email ${email}`);
 
       setTimeout(() => {
         onSwitch();
-      }, 1500);
+      }, 5000);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         // console.log("ERRO BACK:", err.response?.data);
