@@ -29,8 +29,8 @@ export const Header = () => {
             <div className="absolute top-5 right-8">{/* <ThemeToggle /> */}</div>
 
             <h1
-                className="w-fit text-4xl p-3 mb-3 bg-secondary rounded-xl
-                hover:bg-primary duration-150 cursor-default"
+                className="w-fit text-4xl p-3 mb-3 bg-secondary/50 rounded-xl
+                hover:bg-secondary/25 duration-300 cursor-default font-semibold hover:font-bold"
             >
                 To<span className="text-accent">Focous</span>
             </h1>
