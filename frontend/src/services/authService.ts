@@ -13,7 +13,7 @@ type LoginResponse = {
 };
 
 export async function loginUser(payload: LoginPayload) {
-  const response = await api.post<LoginResponse>("/auth/login", payload);
+  const response = await api.post<LoginResponse>("/auth/login/", payload);
   resetAuthState();
   // console.log(response)
 
@@ -28,6 +28,6 @@ export async function signUpUser(payload: {
   email: string;
   password: string;
 }) {
-  const response = await api.post("/auth/signup", payload);
+  const response = await api.post("/auth/signup/", payload);
   return response;
 }
