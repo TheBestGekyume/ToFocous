@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ProjectForm } from "../components/Projects/ProjectForm";
 import { ProjectList } from "../components/Projects/ProjectList";
-import { Header } from "../components/Tasks/Header";
+import { Header } from "../components/Projects/Header";
 import type { TProject } from "../types/TProject";
 import { Plus } from "lucide-react";
 

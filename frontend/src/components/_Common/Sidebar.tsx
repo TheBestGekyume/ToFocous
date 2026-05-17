@@ -49,7 +49,7 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
       >
         <div className="flex flex-col h-full px-3 pt-4 pb-6">
           <div className="flex justify-end relative mb-15">
-            <h4 className="text-4xl font-bold absolute left-1/2 -translate-x-1/2">
+            <h4 className="text-4xl absolute left-1/2 -translate-x-1/2 font-hewitt-bold">
               T<span className="text-accent">F</span>
             </h4>
 
