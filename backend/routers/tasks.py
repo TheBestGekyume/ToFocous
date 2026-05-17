@@ -58,7 +58,7 @@ def post_task(data: PostTask, current_user = Depends(get_current_user), supabase
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/{task_id}")
+@router.get("/{task_id}/")
 def get_task_by_id(
     task_id: str,
     current_user=Depends(get_current_user),
@@ -141,7 +141,7 @@ def get_tasks(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.patch("/{task_id}")
+@router.patch("/{task_id}/")
 def patch_task(task_id: str, data: PatchTask, current_user = Depends(get_current_user), supabase = Depends(get_db)):
     try:
         patchdata = data.model_dump(exclude_none=True, mode="json")
@@ -185,7 +185,7 @@ def patch_task(task_id: str, data: PatchTask, current_user = Depends(get_current
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.delete("/{task_id}")
+@router.delete("/{task_id}/")
 def delete_task(task_id: str, current_user = Depends(get_current_user), supabase = Depends(get_db)):
     try:
         response = supabase.table("tasks") \

@@ -37,7 +37,7 @@ def post_project(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/{project_id}")
+@router.get("/{project_id}/")
 def get_project_by_id(
     project_id: str,
     current_user=Depends(get_current_user),
@@ -92,7 +92,7 @@ def get_projects(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-@router.patch("/{project_id}")
+@router.patch("/{project_id}/")
 def patch_project(
     project_id: str,
     data: PatchProject,
@@ -132,7 +132,7 @@ def patch_project(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-@router.delete("/{project_id}")
+@router.delete("/{project_id}/")
 def delete_project(
     project_id: str,
     current_user=Depends(get_current_user),

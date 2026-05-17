@@ -45,7 +45,7 @@ def get_subtasks(task_id: str, current_user=Depends(get_current_user), supabase=
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/{task_id}")
+@router.post("/{task_id}/")
 def post_subtask(data: PostSubTask, task_id: str, current_user= Depends(get_current_user),supabase = Depends(get_db)):
     try:
         task = supabase.table("tasks").select("id").eq("id", task_id).execute()
@@ -92,7 +92,7 @@ def post_subtask(data: PostSubTask, task_id: str, current_user= Depends(get_curr
 
 
 
-@router.patch("/{subtask_id}")
+@router.patch("/{subtask_id}/")
 def patch_subtask(task_id: str,subtask_id: str,data: PatchSubTask,current_user=Depends(get_current_user),supabase=Depends(get_db)):
     try:
         task = supabase.table("tasks").select("id").eq("id", task_id).execute()
@@ -135,7 +135,7 @@ def patch_subtask(task_id: str,subtask_id: str,data: PatchSubTask,current_user=D
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete("/{subtask_id}")
+@router.delete("/{subtask_id}/")
 def delete_subtask(task_id: str,subtask_id: str,current_user=Depends(get_current_user),supabase=Depends(get_db)):
     try:
         task = supabase.table("tasks").select("id").eq("id", task_id).execute()
