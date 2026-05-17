@@ -7,7 +7,7 @@ from pydantic import BaseModel
 router = APIRouter(prefix="/project-users", tags=["Project Users"])
 
 
-@router.get("/{project_id}")
+@router.get("/{project_id}/")
 def get_project_users(
     project_id: str,
     current_user=Depends(get_current_user),

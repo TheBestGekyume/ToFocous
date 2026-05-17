@@ -6,7 +6,7 @@ from backend.models.usuarios import UpdateUsuario
 router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 
 
-@router.get("/me")
+@router.get("/me/")
 def get_my_user(
     current_user=Depends(get_current_user),
     supabase=Depends(get_db)
@@ -36,7 +36,7 @@ def get_my_user(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.patch("/me")
+@router.patch("/me/")
 def update_my_user(
     data: UpdateUsuario,
     current_user=Depends(get_current_user),
