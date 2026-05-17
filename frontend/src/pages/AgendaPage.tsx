@@ -9,7 +9,7 @@ export const AgendaPage = () => {
     currentMonth,
     agendaItemsByDate,
     activeDateKey,
-    pinnedDateKey,
+    selectedDateKey,
     selectedProjectId,
     projectOptions,
 
@@ -17,8 +17,8 @@ export const AgendaPage = () => {
     goToNextMonth,
     goToToday,
     handleHoverDate,
-    handlePinDate,
-    closePopover,
+    openDayModal,
+    closeDayModal,
     updateAgendaItemDate,
     navigateToAgendaItem,
     changeSelectedProjectId,
@@ -43,10 +43,10 @@ export const AgendaPage = () => {
           currentMonth={currentMonth}
           agendaItemsByDate={agendaItemsByDate}
           activeDateKey={activeDateKey}
-          pinnedDateKey={pinnedDateKey}
+          selectedDateKey={selectedDateKey}
           onHoverDate={handleHoverDate}
-          onPinDate={handlePinDate}
-          onClosePopover={closePopover}
+          onOpenModal={openDayModal}
+          onCloseModal={closeDayModal}
           onUpdateDate={updateAgendaItemDate}
           onNavigate={navigateToAgendaItem}
         />

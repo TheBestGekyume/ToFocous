@@ -1,4 +1,5 @@
 import { AgendaDayCell } from "./AgendaDayCell";
+import { AgendaDayModal } from "./AgendaDayModal";
 import {
   type AgendaItem,
   formatDateKey,
@@ -11,10 +12,10 @@ type AgendaCalendarProps = {
   currentMonth: Date;
   agendaItemsByDate: Record<string, AgendaItem[]>;
   activeDateKey: string | null;
-  pinnedDateKey: string | null;
+  selectedDateKey: string | null;
   onHoverDate: (dateKey: string | null) => void;
-  onPinDate: (dateKey: string) => void;
-  onClosePopover: () => void;
+  onOpenModal: (dateKey: string) => void;
+  onCloseModal: () => void;
   onUpdateDate: (item: AgendaItem, newDate: string) => Promise<void>;
   onNavigate: (item: AgendaItem) => void;
 };
@@ -23,15 +24,19 @@ export const AgendaCalendar = ({
   currentMonth,
   agendaItemsByDate,
   activeDateKey,
-  pinnedDateKey,
+  selectedDateKey,
   onHoverDate,
-  onPinDate,
-  onClosePopover,
+  onOpenModal,
+  onCloseModal,
   onUpdateDate,
   onNavigate,
 }: AgendaCalendarProps) => {
   const monthDays = getMonthCalendarDays(currentMonth);
   const todayKey = formatDateKey(new Date());
+
+  const selectedItems = selectedDateKey
+    ? agendaItemsByDate[selectedDateKey] ?? []
+    : [];
 
   return (
     <div className="rounded-xl border border-zinc-700 bg-zinc-900 p-4">
@@ -66,16 +71,22 @@ export const AgendaCalendar = ({
               items={items}
               isToday={dateKey === todayKey}
               isActive={activeDateKey === dateKey}
-              isPinned={pinnedDateKey === dateKey}
               onHoverDate={onHoverDate}
-              onPinDate={onPinDate}
-              onClosePopover={onClosePopover}
-              onUpdateDate={onUpdateDate}
-              onNavigate={onNavigate}
+              onOpenModal={onOpenModal}
             />
           );
         })}
       </div>
+
+      {selectedDateKey && selectedItems.length > 0 && (
+        <AgendaDayModal
+          dateKey={selectedDateKey}
+          items={selectedItems}
+          onClose={onCloseModal}
+          onUpdateDate={onUpdateDate}
+          onNavigate={onNavigate}
+        />
+      )}
     </div>
   );
 };

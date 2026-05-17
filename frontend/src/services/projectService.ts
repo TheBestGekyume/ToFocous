@@ -4,7 +4,7 @@ import type { TCreateProjectDTO, TProject, TUpdateProjectDTO } from "../types/TP
 export const projectService = {
 
   async getProjectById(id: string): Promise<TProject> {
-    const { data } = await api.get(`/projects/${id}`);
+    const { data } = await api.get(`/projects/${id}/`);
     return data;
   },
 
@@ -19,11 +19,11 @@ export const projectService = {
   },
 
   async updateProject(id: string, payload: TUpdateProjectDTO): Promise<TProject> {
-    const { data } = await api.patch(`/projects/${id}`, payload);
+    const { data } = await api.patch(`/projects/${id}/`, payload);
     return data.data;
   },
 
   async deleteProject(id: string): Promise<void> {
-    await api.delete(`/projects/${id}`);
+    await api.delete(`/projects/${id}/`);
   },
 };

@@ -14,7 +14,7 @@ export async function handleRefresh(): Promise<string> {
 
             if (!refresh_token) throw new Error("No refresh token");
 
-            const response = await apiRefresh.post("/auth/refresh", {
+            const response = await apiRefresh.post("/auth/refresh/", {
                 refresh_token,
             });
 
