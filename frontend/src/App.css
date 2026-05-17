@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Inter";
+  src: url("./assets/fonts/globalFont/Inter-VariableFont_opsz,wght.ttf")
+    format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("./assets/fonts/globalFont/Inter-Italic-VariableFont_opsz,wght.ttf")
+    format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Hewitt";
+  src: url("./assets/fonts/cooper-hewitt.bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --color-text: #120028;
   --color-background-header: #e9e3f3;
@@ -16,13 +42,6 @@
   --color-primary: #b893ff;
   --color-secondary: #3a3170;
   --color-accent: #a020f0;
-
-  /* --color-custom1: #f3e8ff;
-    --color-custom2: #0d0019;
-    --color-custom3: #18012b;
-    --color-custom4: #b893ff;
-    --color-custom4: #3a3170;
-    --color-custom5: #a020f0; */
 }
 
 @theme {
@@ -32,6 +51,10 @@
   --color-primary: var(--color-primary);
   --color-secondary: var(--color-secondary);
   --color-accent: var(--color-accent);
+
+  --font-sans: "Inter", sans-serif;
+  --font-inter: "Inter", sans-serif;
+  --font-hewitt: "Hewitt", sans-serif;
 }
 
 body {
@@ -39,10 +62,20 @@ body {
   max-height: 100%;
   background-color: var(--color-background-body);
   color: #fff;
+  font-family: "Inter", sans-serif;
 }
 
 button {
   cursor: pointer;
+}
+
+.font-hewitt-bold {
+  font-family: "Hewitt", sans-serif;
+  font-weight: 700;
+}
+
+.font-inter {
+  font-family: "Inter", sans-serif;
 }
 
 .hide-date-icon {
