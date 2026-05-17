@@ -1,6 +1,6 @@
+import { useRef, useState } from "react";
 import { AgendaPopover } from "./AgendaPopover";
 import { agendaPriorityStyle, type AgendaItem } from "../../utils/agendaUtils";
-import { useRef, useState } from "react";
 
 type AgendaDayCellProps = {
   day: Date;
@@ -8,12 +8,8 @@ type AgendaDayCellProps = {
   items: AgendaItem[];
   isToday: boolean;
   isActive: boolean;
-  isPinned: boolean;
   onHoverDate: (dateKey: string | null) => void;
-  onPinDate: (dateKey: string) => void;
-  onClosePopover: () => void;
-  onUpdateDate: (item: AgendaItem, newDate: string) => Promise<void>;
-  onNavigate: (item: AgendaItem) => void;
+  onOpenModal: (dateKey: string) => void;
 };
 
 type PopoverPosition = {
@@ -27,12 +23,8 @@ export const AgendaDayCell = ({
   items,
   isToday,
   isActive,
-  isPinned,
   onHoverDate,
-  onPinDate,
-  onClosePopover,
-  onUpdateDate,
-  onNavigate,
+  onOpenModal,
 }: AgendaDayCellProps) => {
   const hasItems = items.length > 0;
 
@@ -48,39 +40,39 @@ export const AgendaDayCell = ({
     const rect = cellRef.current.getBoundingClientRect();
 
     const popoverWidth = 320;
-    const estimatedPopoverHeight = 420;
+    const estimatedPopoverHeight = 360;
     const spacing = 8;
 
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    const pageScrollX = window.scrollX;
-    const pageScrollY = window.scrollY;
+    const hasSpaceOnRight = rect.right + spacing + popoverWidth <= viewportWidth;
+    const hasSpaceOnLeft = rect.left - spacing - popoverWidth >= 0;
 
-    const cellMiddleY = rect.top + rect.height / 2;
-    const shouldOpenAbove = cellMiddleY > viewportHeight / 2;
+    let left: number;
 
-    let top = shouldOpenAbove
-      ? rect.top + pageScrollY - estimatedPopoverHeight - spacing
-      : rect.bottom + pageScrollY + spacing;
-
-    let left = rect.left + pageScrollX;
-
-    const minLeft = pageScrollX + spacing;
-    const maxLeft = pageScrollX + viewportWidth - popoverWidth - spacing;
-
-    if (left > maxLeft) {
-      left = maxLeft;
+    if (hasSpaceOnRight) {
+      left = rect.right + spacing;
+    } else if (hasSpaceOnLeft) {
+      left = rect.left - popoverWidth - spacing;
+    } else {
+      left = rect.left + rect.width / 2 - popoverWidth / 2;
     }
 
-    if (left < minLeft) {
-      left = minLeft;
+    const minLeft = spacing;
+    const maxLeft = viewportWidth - popoverWidth - spacing;
+
+    left = Math.min(Math.max(left, minLeft), Math.max(minLeft, maxLeft));
+
+    let top = rect.top;
+    const maxTop = viewportHeight - estimatedPopoverHeight - spacing;
+
+    if (top > maxTop) {
+      top = Math.max(spacing, maxTop);
     }
 
-    const minTop = pageScrollY + spacing;
-
-    if (top < minTop) {
-      top = minTop;
+    if (top < spacing) {
+      top = spacing;
     }
 
     setPopoverPosition({
@@ -92,8 +84,8 @@ export const AgendaDayCell = ({
   const handleClick = () => {
     if (!hasItems) return;
 
-    updatePopoverPosition();
-    onPinDate(dateKey);
+    onHoverDate(null);
+    onOpenModal(dateKey);
   };
 
   const handleMouseEnter = () => {
@@ -166,11 +158,7 @@ export const AgendaDayCell = ({
         <AgendaPopover
           dateKey={dateKey}
           items={items}
-          isPinned={isPinned}
           position={popoverPosition}
-          onClose={onClosePopover}
-          onUpdateDate={onUpdateDate}
-          onNavigate={onNavigate}
         />
       )}
     </div>

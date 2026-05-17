@@ -12,7 +12,7 @@ supabase = create_client(
 )
 
 
-@router.post("/signup")
+@router.post("/signup/")
 def signup(data: SignUpData):
     try:
         response = supabase.auth.sign_up({
@@ -29,7 +29,7 @@ def signup(data: SignUpData):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/login")
+@router.post("/login/")
 def login(data: LoginData):
     try:
         response = supabase.auth.sign_in_with_password({

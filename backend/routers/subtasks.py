@@ -9,7 +9,7 @@ def format_time(t):
     return datetime.strptime(t, "%H:%M:%S").strftime("%H:%M") if t else None
 
 
-@router.get("/{task_id}")
+@router.get("/{task_id}/")
 def get_subtasks(task_id: str, current_user=Depends(get_current_user), supabase=Depends(get_db)):
     try:
         task = supabase.table("tasks").select("id").eq("id", task_id).execute()

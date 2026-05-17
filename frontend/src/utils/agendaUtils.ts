@@ -4,8 +4,10 @@ import type { TPriority, TStatus, TSubTask, TTask } from "../types/TTask";
 export type AgendaItemType = "task" | "subtask";
 export type AgendaDateType = "start_date" | "due_date";
 
+
 export type AgendaItem = {
   projectId: string;
+  projectTitle?: string;
   id: string;
   taskId: string;
   type: AgendaItemType;
@@ -15,6 +17,11 @@ export type AgendaItem = {
   date: string;
   priority: TPriority;
   status: TStatus;
+};
+
+type AgendaProject = {
+  id: string;
+  title: string;
 };
 
 export const agendaPriorityStyle: Record<
@@ -146,7 +153,8 @@ const shouldAvoidDuplicateDate = (
 
 const buildTaskDateItems = (
   task: TTask,
-  whichDateUseInCalendar: TWhichDateUseInCalendar
+  whichDateUseInCalendar: TWhichDateUseInCalendar,
+  projectTitle?: string
 ): AgendaItem[] => {
   if (isConcluded(task.status)) return [];
 
@@ -166,6 +174,7 @@ const buildTaskDateItems = (
       id: task.id,
       taskId: task.id,
       projectId: task.project_id,
+      projectTitle,
       type: "task",
       dateType: "start_date",
       title: task.title,
@@ -184,6 +193,7 @@ const buildTaskDateItems = (
       id: task.id,
       taskId: task.id,
       projectId: task.project_id,
+      projectTitle,
       type: "task",
       dateType: "due_date",
       title: task.title,
@@ -199,7 +209,8 @@ const buildTaskDateItems = (
 const buildSubTaskDateItems = (
   task: TTask,
   subtask: TSubTask,
-  whichDateUseInCalendar: TWhichDateUseInCalendar
+  whichDateUseInCalendar: TWhichDateUseInCalendar,
+  projectTitle?: string
 ): AgendaItem[] => {
   if (isConcluded(subtask.status)) return [];
   const items: AgendaItem[] = [];
@@ -215,17 +226,18 @@ const buildSubTaskDateItems = (
 
   if (shouldUseStartDate(whichDateUseInCalendar) && startDate) {
     items.push({
-      id: subtask.id,
-      taskId: task.id,
-      projectId: task.project_id,
-      type: "subtask",
-      dateType: "start_date",
-      title: subtask.title,
-      parentTitle: task.title,
-      date: startDate,
-      priority: subtask.priority,
-      status: subtask.status,
-    });
+  id: subtask.id,
+  taskId: task.id,
+  projectId: task.project_id,
+  projectTitle,
+  type: "subtask",
+  dateType: "start_date",
+  title: subtask.title,
+  parentTitle: task.title,
+  date: startDate,
+  priority: subtask.priority,
+  status: subtask.status,
+});
   }
 
   if (
@@ -234,17 +246,18 @@ const buildSubTaskDateItems = (
     !avoidDuplicateDate
   ) {
     items.push({
-      id: subtask.id,
-      taskId: task.id,
-      projectId: task.project_id,
-      type: "subtask",
-      dateType: "due_date",
-      title: subtask.title,
-      parentTitle: task.title,
-      date: dueDate,
-      priority: subtask.priority,
-      status: subtask.status,
-    });
+  id: subtask.id,
+  taskId: task.id,
+  projectId: task.project_id,
+  projectTitle,
+  type: "subtask",
+  dateType: "due_date",
+  title: subtask.title,
+  parentTitle: task.title,
+  date: dueDate,
+  priority: subtask.priority,
+  status: subtask.status,
+});
   }
 
   return items;
@@ -252,14 +265,28 @@ const buildSubTaskDateItems = (
 
 export const buildAgendaItems = (
   tasks: TTask[],
-  whichDateUseInCalendar: TWhichDateUseInCalendar = "UseBoth"
+  whichDateUseInCalendar: TWhichDateUseInCalendar = "UseBoth",
+  projects: AgendaProject[] = []
 ) => {
-  return tasks.flatMap((task) => [
-    ...buildTaskDateItems(task, whichDateUseInCalendar),
-    ...(task.subtasks ?? []).flatMap((subtask) =>
-      buildSubTaskDateItems(task, subtask, whichDateUseInCalendar)
-    ),
-  ]);
+  const projectTitleById = new Map(
+    projects.map((project) => [project.id, project.title])
+  );
+
+  return tasks.flatMap((task) => {
+    const projectTitle = projectTitleById.get(task.project_id);
+
+    return [
+      ...buildTaskDateItems(task, whichDateUseInCalendar, projectTitle),
+      ...(task.subtasks ?? []).flatMap((subtask) =>
+        buildSubTaskDateItems(
+          task,
+          subtask,
+          whichDateUseInCalendar,
+          projectTitle
+        )
+      ),
+    ];
+  });
 };
 
 export const groupAgendaItemsByDate = (items: AgendaItem[]) => {
