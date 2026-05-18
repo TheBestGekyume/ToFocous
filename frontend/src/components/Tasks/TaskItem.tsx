@@ -6,7 +6,7 @@ import {
   Play,
   Trash2,
 } from "lucide-react";
-import { Dropdown } from "./Dropdown";
+import { Dropdown } from "../_Common/Dropdown";
 import {
   priorityMap,
   statusMap,

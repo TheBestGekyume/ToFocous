@@ -10,7 +10,7 @@ import { TimeInput } from "../_Common/TimeInput";
 import { useSubTaskItem } from "../../hooks/useSubTaskItem";
 import type { TSubTask } from "../../types/TTask";
 import { priorityMap, priorityOptions } from "../../utils/taskUtils";
-import { Dropdown } from "../Tasks/Dropdown";
+import { Dropdown } from "../_Common/Dropdown";
 import { useTextareaOverflow } from "../../hooks/useTextareaOverflow";
 
 type Props = {
