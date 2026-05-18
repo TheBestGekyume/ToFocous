@@ -6,7 +6,7 @@ type Props = {
   onClose: () => void;
   mode: "create" | "edit";
   project?: TProject;
-};  
+};
 
 export const ProjectForm = ({ onClose, mode, project }: Props) => {
   const { createProject, updateProject } = useProjects();
@@ -22,6 +22,7 @@ export const ProjectForm = ({ onClose, mode, project }: Props) => {
     if (!title.trim()) return;
 
     setLoading(true);
+
     try {
       if (isEdit && project) {
         await updateProject(project.id, {
@@ -30,7 +31,11 @@ export const ProjectForm = ({ onClose, mode, project }: Props) => {
           color,
         });
       } else {
-        await createProject({ title, description, color });
+        await createProject({
+          title,
+          description,
+          color,
+        });
       }
 
       onClose();
@@ -40,55 +45,62 @@ export const ProjectForm = ({ onClose, mode, project }: Props) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-zinc-900 p-6 rounded-2xl w-full max-w-md flex flex-col gap-5 border border-zinc-700 shadow-xl">
-        <h2 className="text-2xl font-bold text-white">
-          {isEdit ? "Editar Projeto" : "Novo Projeto"}
-        </h2>
+    <div className="flex flex-col gap-5">
+      <input
+        placeholder="Título"
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
+        className="
+          rounded-md border border-secondary/30 bg-background-body p-2
+          text-text outline-none transition focus:border-accent
+        "
+      />
+
+      <input
+        placeholder="Descrição"
+        value={description}
+        onChange={(event) => setDescription(event.target.value)}
+        className="
+          rounded-md border border-secondary/30 bg-background-body p-2
+          text-text outline-none transition focus:border-accent
+        "
+      />
+
+      <div className="flex items-center justify-between gap-4">
+        <span className="font-semibold text-text">Cor do Projeto</span>
 
         <input
-          placeholder="Título"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="p-2 rounded-md bg-zinc-800 text-white border border-zinc-600 focus:border-accent outline-none"
+          type="color"
+          value={color}
+          onChange={(event) => setColor(event.target.value)}
+          className="h-10 w-10 cursor-pointer rounded border-none bg-transparent"
         />
+      </div>
 
-        <input
-          placeholder="Descrição"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="p-2 rounded-md bg-zinc-800 text-white border border-zinc-600 focus:border-accent outline-none"
-        />
+      <div className="mt-2 flex gap-4">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={loading}
+          className="
+            w-full rounded-md bg-background-body px-4 py-2 text-text
+            transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50
+          "
+        >
+          Cancelar
+        </button>
 
-        <div className="flex items-center justify-end gap-4">
-          <span className="font-semibold">Cor do Projeto</span>
-          <input
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            className="w-10 h-10 rounded cursor-pointer border-none"
-          />
-        </div>
-
-        <div className="flex justify-between mt-2">
-          <div className="flex gap-4 w-full">
-            <button
-              onClick={onClose}
-              disabled={loading}
-              className="bg-zinc-700 hover:bg-zinc-600 px-4 py-2 rounded-md w-full"
-            >
-              Cancelar
-            </button>
-
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="bg-accent hover:bg-purple-700 px-4 py-2 rounded-md font-semibold w-full"
-            >
-              {isEdit ? "Salvar" : "Criar"}
-            </button>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={loading || !title.trim()}
+          className="
+            w-full rounded-md bg-accent px-4 py-2 font-semibold text-white
+            transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50
+          "
+        >
+          {loading ? "Salvando..." : isEdit ? "Salvar" : "Criar"}
+        </button>
       </div>
     </div>
   );

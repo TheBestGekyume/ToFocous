@@ -4,21 +4,37 @@ import { ProjectList } from "../components/Projects/ProjectList";
 import { Header } from "../components/Projects/Header";
 import type { TProject } from "../types/TProject";
 import { Plus } from "lucide-react";
+import { useProjects } from "../hooks/useProjects";
+import { LoadingOverlay } from "../components/_Common/LoadingOverlay";
+import { Modal } from "../components/_Common/Modal";
 
 export const ProjectsPage = () => {
   const [openCreate, setOpenCreate] = useState(false);
   const [editingProject, setEditingProject] = useState<TProject | null>(null);
+
+  const { loading } = useProjects();
+
+  const closeCreateModal = () => {
+    setOpenCreate(false);
+  };
+
+  const closeEditModal = () => {
+    setEditingProject(null);
+  };
+
   return (
     <div>
+      <LoadingOverlay show={loading} />
       <Header />
 
       <div className="px-10">
         <div className="flex items-end justify-center gap-2">
-          <h1 className="text-2xl font-bold text-white">Projetos</h1>
+          <h1 className="text-2xl font-bold text-text">Projetos</h1>
 
           <button
+            type="button"
             onClick={() => setOpenCreate(true)}
-            className="bg-accent hover:bg-purple-700 p-1 rounded-md font-semibold transition"
+            className="rounded-md bg-green-600 p-1 font-semibold transition hover:bg-green-800"
           >
             <Plus size={22} />
           </button>
@@ -26,17 +42,29 @@ export const ProjectsPage = () => {
 
         <ProjectList onEdit={setEditingProject} />
 
-        {openCreate && (
-          <ProjectForm mode="create" onClose={() => setOpenCreate(false)} />
-        )}
+        <Modal
+          isOpen={openCreate}
+          onClose={closeCreateModal}
+          title="Novo Projeto"
+          size="md"
+        >
+          <ProjectForm mode="create" onClose={closeCreateModal} />
+        </Modal>
 
-        {editingProject && (
-          <ProjectForm
-            mode="edit"
-            project={editingProject}
-            onClose={() => setEditingProject(null)}
-          />
-        )}
+        <Modal
+          isOpen={!!editingProject}
+          onClose={closeEditModal}
+          title="Editar Projeto"
+          size="md"
+        >
+          {editingProject && (
+            <ProjectForm
+              mode="edit"
+              project={editingProject}
+              onClose={closeEditModal}
+            />
+          )}
+        </Modal>
       </div>
     </div>
   );

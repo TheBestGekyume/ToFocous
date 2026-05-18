@@ -92,3 +92,27 @@ button {
 .hide-date-icon::-webkit-clear-button {
   display: none;
 }
+
+.tofocous-day-picker {
+  --rdp-day-width: 2rem;
+  --rdp-day-height: 2rem;
+  --rdp-day_button-width: 2rem;
+  --rdp-day_button-height: 2rem;
+  --rdp-day_button-border-radius: 0.4rem;
+
+  font-size: 0.9rem;
+}
+
+.tofocous-day-picker .rdp-month_caption {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.tofocous-day-picker .rdp-weekday {
+  font-size: 0.8rem;
+}
+
+.tofocous-day-picker .rdp-nav {
+  transform: scale(0.85);
+  transform-origin: right center;
+}

@@ -10,20 +10,11 @@ import {
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
+import { LoadingDots } from "./LoadingDots";
 
 type SidebarProps = {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
-};
-
-const LoadingDots = () => {
-  return (
-    <span className="inline-flex items-center gap-0.5">
-      <span className="animate-bounce [animation-delay:-0.3s]">.</span>
-      <span className="animate-bounce [animation-delay:-0.15s]">.</span>
-      <span className="animate-bounce">.</span>
-    </span>
-  );
 };
 
 
@@ -45,7 +36,7 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
 const username = user?.name?.trim()
   ? user.name.trim().split(" ")[0]
   : "usuário";
-  
+
   return (
     <>
       <button
