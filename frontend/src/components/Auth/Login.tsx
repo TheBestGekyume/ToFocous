@@ -3,6 +3,7 @@ import { loginUser } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
 import { LoadingDots } from "../_Common/LoadingDots";
 import axios from "axios";
+import { LoadingOverlay } from "../_Common/LoadingOverlay";
 
 export const LoginForm = ({ onSwitch }: { onSwitch: () => void }) => {
   const [email, setEmail] = useState("");
@@ -30,52 +31,60 @@ export const LoginForm = ({ onSwitch }: { onSwitch: () => void }) => {
   };
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
-        required
+    <>
+      <LoadingOverlay
+        show={loading}
+        delayedMessage="Iniciando Servidor"
+        showOnlyAfterDelay
       />
 
-      <input
-        type="password"
-        placeholder="Senha"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
-        required
-      />
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
+          required
+        />
 
-      {error && <p className="text-red-400 text-sm">{error}</p>}
+        <input
+          type="password"
+          placeholder="Senha"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
+          required
+        />
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="mt-2 rounded-md bg-primary py-2 font-semibold text-background-body hover:brightness-110 transition disabled:opacity-60"
-      >
-        {loading ? (
-          <span className="inline-flex items-center justify-center gap-1">
-            Entrando
-            <LoadingDots />
-          </span>
-        ) : (
-          "Entrar"
-        )}
-      </button>
+        {error && <p className="text-red-400 text-sm">{error}</p>}
 
-      <p className="text-sm text-center text-text">
-        Não tem conta?{" "}
         <button
-          type="button"
-          onClick={onSwitch}
-          className="text-accent font-semibold hover:underline"
+          type="submit"
+          disabled={loading}
+          className="mt-2 rounded-md bg-primary py-2 font-semibold text-background-body hover:brightness-110 transition disabled:opacity-60"
         >
-          Criar agora
+          {loading ? (
+            <span className="inline-flex items-center justify-center gap-1">
+              Entrando
+              <LoadingDots />
+            </span>
+          ) : (
+            "Entrar"
+          )}
         </button>
-      </p>
-    </form>
+
+        <p className="text-sm text-center text-text">
+          Não tem conta?{" "}
+          <button
+            type="button"
+            onClick={onSwitch}
+            className="text-accent font-semibold hover:underline"
+          >
+            Criar agora
+          </button>
+        </p>
+      </form>
+    </>
   );
 };
