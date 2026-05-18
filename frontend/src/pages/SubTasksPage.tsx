@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTasks } from "../hooks/useTasks";
 import { TaskForm } from "../components/Tasks/TaskForm";
-import { Modal } from "../components/Tasks/Modal";
+import { Modal } from "../components/_Common/Modal";
 import { priorityMap } from "../utils/taskUtils";
 import { useParams } from "react-router-dom";
 import { LoadingOverlay } from "../components/_Common/LoadingOverlay";
@@ -131,11 +131,9 @@ export const SubTasksPage = () => {
         <Modal
           isOpen={isCreatingSubTask}
           onClose={() => setIsCreatingSubTask(false)}
+          title="Criar SubTarefa"
+          size="lg"
         >
-          <h4 className="font-bold mb-5 text-2xl text-center text-primary">
-            Criar SubTarefa
-          </h4>
-
           <TaskForm
             isCreating
             isCreatingSubTask

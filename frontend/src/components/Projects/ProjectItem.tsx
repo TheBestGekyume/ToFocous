@@ -108,13 +108,15 @@ export const ProjectItem = ({ project, onEdit, showActions = true }: Props) => {
         </div>
       </div>
 
-      {showUsersModal && (
+      
+
         <ProjectUsersModal
+          isOpen={showUsersModal}
           projectId={project.id}
           projectTitle={project.title}
           onClose={() => setShowUsersModal(false)}
         />
-      )}
+      
     </>
   );
 };

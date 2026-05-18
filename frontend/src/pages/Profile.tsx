@@ -1,5 +1,3 @@
-// src/pages/Profile.tsx
-
 import { useEffect, useState } from "react";
 import { Check, Pencil, UserRound, X } from "lucide-react";
 import { useUser } from "../hooks/useUser";
@@ -117,7 +115,7 @@ export const Profile = () => {
                       type="button"
                       onClick={handleUpdateUser}
                       disabled={updating}
-                      className="px-4 py-3 rounded-lg bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold transition flex items-center justify-center gap-2"
+                      className="px-4 py-3 rounded-lg bg-green-600 hover:bg-green-800 disabled:opacity-50 text-white font-semibold transition flex items-center justify-center gap-2"
                     >
                       <Check size={18} />
                       Salvar
