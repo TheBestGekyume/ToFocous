@@ -9,15 +9,13 @@ export const TaskSettings = () => {
     canUseStartTime,
     canShowCalendarOption,
     loading,
-    // updating,
+    updating
   } = useTaskSettings();
 
   return (
     <>
-      {/* Overlay sempre renderizado */}
-      <LoadingOverlay show={loading} />
+      <LoadingOverlay show={loading || updating} />
 
-      {/* Só renderiza conteúdo quando tiver settings */}
       {settings && (
         <div className="w-full flex justify-center px-4 py-8">
           <div className="w-full max-w-xl bg-background-header rounded-2xl p-6 shadow-md border border-secondary/20">
@@ -26,7 +24,6 @@ export const TaskSettings = () => {
             </h1>
 
             <div className="flex flex-col gap-5">
-              {/* Prioridade de subtarefas */}
               <label className="flex items-center justify-between bg-background-body p-4 rounded-xl border border-secondary/10">
                 <div>
                   <p className="font-medium text-text">
@@ -40,7 +37,6 @@ export const TaskSettings = () => {
                 <input
                   type="checkbox"
                   checked={settings.use_subtask_priority}
-                  // disabled={updating}
                   onChange={(e) =>
                     updateSettings({
                       use_subtask_priority: e.target.checked,
@@ -50,7 +46,6 @@ export const TaskSettings = () => {
                 />
               </label>
 
-              {/* Uso de horário */}
               <label className="flex items-center justify-between bg-background-body p-4 rounded-xl border border-secondary/10">
                 <div>
                   <p className="font-medium text-text">
@@ -64,7 +59,6 @@ export const TaskSettings = () => {
                 <input
                   type="checkbox"
                   checked={settings.use_time}
-                  // disabled={updating}
                   onChange={(e) =>
                     updateSettings({ use_time: e.target.checked })
                   }
@@ -72,7 +66,6 @@ export const TaskSettings = () => {
                 />
               </label>
 
-              {/* Data de início */}
               <label className="flex items-center justify-between bg-background-body p-4 rounded-xl border border-secondary/10">
                 <div>
                   <p className="font-medium text-text">
@@ -86,7 +79,6 @@ export const TaskSettings = () => {
                 <input
                   type="checkbox"
                   checked={settings.use_start_date}
-                  // disabled={updating}
                   onChange={(e) =>
                     updateSettings({
                       use_start_date: e.target.checked,
@@ -96,14 +88,12 @@ export const TaskSettings = () => {
                 />
               </label>
 
-              {/* Feedback */}
               {canUseStartTime && (
                 <div className="bg-primary/10 text-primary p-3 rounded-lg text-sm">
                   Horário de início habilitado (requer data de início + horário)
                 </div>
               )}
 
-              {/* Calendário */}
               {canShowCalendarOption && (
                 <div className="bg-background-body p-4 rounded-xl border border-secondary/10 flex flex-col gap-3">
                   <div>
@@ -117,7 +107,6 @@ export const TaskSettings = () => {
 
                   <select
                     value={settings.which_date_use_in_calendar}
-                    // disabled={updating}
                     onChange={(e) =>
                       updateSettings({
                         which_date_use_in_calendar:

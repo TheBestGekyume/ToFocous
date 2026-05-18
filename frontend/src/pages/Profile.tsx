@@ -1,8 +1,7 @@
-// src/pages/Profile.tsx
-
 import { useEffect, useState } from "react";
 import { Check, Pencil, UserRound, X } from "lucide-react";
 import { useUser } from "../hooks/useUser";
+import { LoadingDots } from "../components/_Common/LoadingDots";
 
 export const Profile = () => {
   const { user, loading, updating, fetchMyUser, updateUser } = useUser();
@@ -72,9 +71,9 @@ export const Profile = () => {
         </header>
 
         {loading ? (
-          <p className="text-sm text-primary/80">Carregando perfil...</p>
+          <p className="text-lg text-accent text-center">Carregando perfil <LoadingDots/></p>
         ) : !user ? (
-          <p className="text-sm text-red-400">
+          <p className="text-lg text-red-400 text-center">
             Não foi possível carregar os dados do usuário.
           </p>
         ) : (
@@ -116,7 +115,7 @@ export const Profile = () => {
                       type="button"
                       onClick={handleUpdateUser}
                       disabled={updating}
-                      className="px-4 py-3 rounded-lg bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-semibold transition flex items-center justify-center gap-2"
+                      className="px-4 py-3 rounded-lg bg-green-600 hover:bg-green-800 disabled:opacity-50 text-white font-semibold transition flex items-center justify-center gap-2"
                     >
                       <Check size={18} />
                       Salvar

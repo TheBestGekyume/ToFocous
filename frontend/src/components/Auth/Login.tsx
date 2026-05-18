@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { loginUser } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
+import { LoadingDots } from "../_Common/LoadingDots";
 import axios from "axios";
 
 export const LoginForm = ({ onSwitch }: { onSwitch: () => void }) => {
@@ -55,7 +56,14 @@ export const LoginForm = ({ onSwitch }: { onSwitch: () => void }) => {
         disabled={loading}
         className="mt-2 rounded-md bg-primary py-2 font-semibold text-background-body hover:brightness-110 transition disabled:opacity-60"
       >
-        {loading ? "Entrando..." : "Entrar"}
+        {loading ? (
+          <span className="inline-flex items-center justify-center gap-1">
+            Entrando
+            <LoadingDots />
+          </span>
+        ) : (
+          "Entrar"
+        )}
       </button>
 
       <p className="text-sm text-center text-text">

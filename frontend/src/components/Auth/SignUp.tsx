@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { signUpUser } from "../../services/authService";
 import axios from "axios";
+import { LoadingDots } from "../_Common/LoadingDots";
 
 export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
   const [name, setName] = useState("");
@@ -31,7 +32,9 @@ export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
         password,
       });
 
-      setSuccess(`Conta criada com sucesso!\n Ative sua conta pelo email ${email}`);
+      setSuccess(
+        `Conta criada com sucesso!\n Ative sua conta pelo email ${email}`
+      );
 
       setTimeout(() => {
         onSwitch();
@@ -87,14 +90,21 @@ export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
       />
 
       {error && <p className="text-red-400 text-sm">{error}</p>}
-      {success && <p className="text-green-400 text-sm">{success}</p>}
+      {success && <p className="whitespace-pre-line text-sm text-green-400">{success}</p>}
 
       <button
         type="submit"
         disabled={loading}
         className="mt-2 rounded-md bg-primary py-2 font-semibold text-background-body hover:brightness-110 transition disabled:opacity-60"
       >
-        {loading ? "Criando..." : "Criar conta"}
+        {loading ? (
+          <span className="inline-flex items-center justify-center gap-1">
+            Criando conta
+            <LoadingDots />
+          </span>
+        ) : (
+          "Criar conta"
+        )}
       </button>
 
       <p className="text-sm text-center text-text">

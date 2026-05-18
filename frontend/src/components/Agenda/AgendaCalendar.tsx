@@ -35,7 +35,7 @@ export const AgendaCalendar = ({
   const todayKey = formatDateKey(new Date());
 
   const selectedItems = selectedDateKey
-    ? agendaItemsByDate[selectedDateKey] ?? []
+    ? (agendaItemsByDate[selectedDateKey] ?? [])
     : [];
 
   return (
@@ -80,6 +80,7 @@ export const AgendaCalendar = ({
 
       {selectedDateKey && selectedItems.length > 0 && (
         <AgendaDayModal
+          isOpen={!!selectedDateKey}
           dateKey={selectedDateKey}
           items={selectedItems}
           onClose={onCloseModal}
