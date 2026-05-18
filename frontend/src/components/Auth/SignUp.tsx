@@ -2,6 +2,7 @@ import { useState } from "react";
 import { signUpUser } from "../../services/authService";
 import axios from "axios";
 import { LoadingDots } from "../_Common/LoadingDots";
+import { LoadingOverlay } from "../_Common/LoadingOverlay";
 
 export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
   const [name, setName] = useState("");
@@ -52,71 +53,83 @@ export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
   };
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-      <input
-        type="text"
-        placeholder="Nome de usuário"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
-        required
+    <>
+      <LoadingOverlay
+        show={loading}
+        delayedMessage="Iniciando Servidor"
+        showOnlyAfterDelay
       />
 
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
-        required
-      />
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Nome de usuário"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
+          required
+        />
 
-      <input
-        type="password"
-        placeholder="Senha"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
-        required
-      />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
+          required
+        />
 
-      <input
-        type="password"
-        placeholder="Confirmar senha"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
-        required
-      />
+        <input
+          type="password"
+          placeholder="Senha"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
+          required
+        />
 
-      {error && <p className="text-red-400 text-sm">{error}</p>}
-      {success && <p className="whitespace-pre-line text-sm text-green-400">{success}</p>}
+        <input
+          type="password"
+          placeholder="Confirmar senha"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
+          required
+        />
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="mt-2 rounded-md bg-primary py-2 font-semibold text-background-body hover:brightness-110 transition disabled:opacity-60"
-      >
-        {loading ? (
-          <span className="inline-flex items-center justify-center gap-1">
-            Criando conta
-            <LoadingDots />
-          </span>
-        ) : (
-          "Criar conta"
+        {error && <p className="text-red-400 text-sm">{error}</p>}
+        {success && (
+          <p className="whitespace-pre-line text-sm text-green-400">
+            {success}
+          </p>
         )}
-      </button>
 
-      <p className="text-sm text-center text-text">
-        Já tem conta?{" "}
         <button
-          type="button"
-          onClick={onSwitch}
-          className="text-accent font-semibold hover:underline"
+          type="submit"
+          disabled={loading}
+          className="mt-2 rounded-md bg-primary py-2 font-semibold text-background-body hover:brightness-110 transition disabled:opacity-60"
         >
-          Entrar
+          {loading ? (
+            <span className="inline-flex items-center justify-center gap-1">
+              Criando conta
+              <LoadingDots />
+            </span>
+          ) : (
+            "Criar conta"
+          )}
         </button>
-      </p>
-    </form>
+
+        <p className="text-sm text-center text-text">
+          Já tem conta?{" "}
+          <button
+            type="button"
+            onClick={onSwitch}
+            className="text-accent font-semibold hover:underline"
+          >
+            Entrar
+          </button>
+        </p>
+      </form>
+    </>
   );
 };

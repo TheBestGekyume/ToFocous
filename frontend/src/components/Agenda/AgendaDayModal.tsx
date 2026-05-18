@@ -47,7 +47,7 @@ export const AgendaDayModal = ({
 
   return (
     <>
-      <LoadingOverlay show={isUpdating} />
+      <LoadingOverlay show={isUpdating} delayMs={7500}/>
 
       <Modal
         isOpen={isOpen}

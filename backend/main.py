@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from backend.routers import auth, project_users, settings, tasks, subtasks, project, usuarios
+from backend.routers import auth, project_users, settings, tasks, subtasks, project, usuarios, health
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -7,7 +7,7 @@ app = FastAPI()
 origins = [
     "http://localhost:5173",  # Vite
     "http://127.0.0.1:5173",
-    "https://tofocousapi.onrender.com",
+    # "https://tofocousapi.onrender.com",
     "https://tofocous.netlify.app"
 ]
 
@@ -26,3 +26,4 @@ app.include_router(subtasks.router)
 app.include_router(project.router)
 app.include_router(project_users.router)
 app.include_router(usuarios.router)
+app.include_router(health.router)

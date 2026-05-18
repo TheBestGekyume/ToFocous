@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { TasksProvider } from "./providers/TaskProvider";
 import { TaskSettingsProvider } from "./providers/TaskSettingsProvider";
@@ -11,8 +12,15 @@ import { SubTasksPage } from "./pages/SubTasksPage";
 import { ProjectsPage } from "./pages/ProjectPage";
 import { ProjectsProvider } from "./providers/ProjectsProvider";
 import { AgendaPage } from "./pages/AgendaPage";
+import { wakeUpApi } from "./services/wakeUpApi";
 
 function App() {
+  useEffect(() => {
+    wakeUpApi().catch((err) => {
+      console.error("Erro ao verificar API:", err);
+    });
+  }, []);
+
   return (
     <div id="app" className="d-flex bg-background-task-section min-h-full">
       <Routes>
@@ -32,21 +40,15 @@ function App() {
           }
         >
           <Route path="/" element={<Navigate to="/projects" replace />} />
-
           <Route path="/projects" element={<ProjectsPage />} />
-
           <Route path="/projects/:projectId" element={<TaskPage />} />
-
           <Route
             path="/projects/:projectId/tasks/:taskId"
             element={<SubTasksPage />}
           />
-
           <Route path="/agenda" element={<AgendaPage />} />
-
           <Route path="/configuracoes" element={<TaskSettings />} />
           <Route path="/perfil" element={<Profile />} />
-
         </Route>
       </Routes>
     </div>
