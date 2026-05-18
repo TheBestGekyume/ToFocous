@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Trash2, UserRoundPlus, X } from "lucide-react";
 import { useProjectUsers } from "../../hooks/useProjectUsers";
+import { LoadingDots } from "../_Common/LoadingDots";
 
 type Props = {
   projectId: string;
@@ -97,7 +98,7 @@ export const ProjectUsersModal = ({
 
         <div className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
           {loading ? (
-            <p className="text-sm text-zinc-400">Carregando usuários...</p>
+            <p className="text-sm text-zinc-400">Carregando usuários <LoadingDots/></p>
           ) : projectUsers.length === 0 ? (
             <p className="text-sm text-zinc-400">
               Nenhum usuário adicionado a este projeto.

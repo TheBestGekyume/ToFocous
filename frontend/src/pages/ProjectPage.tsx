@@ -4,12 +4,16 @@ import { ProjectList } from "../components/Projects/ProjectList";
 import { Header } from "../components/Projects/Header";
 import type { TProject } from "../types/TProject";
 import { Plus } from "lucide-react";
+import { useProjects } from "../hooks/useProjects";
+import { LoadingOverlay } from "../components/_Common/LoadingOverlay";
 
 export const ProjectsPage = () => {
   const [openCreate, setOpenCreate] = useState(false);
   const [editingProject, setEditingProject] = useState<TProject | null>(null);
+  const { loading } = useProjects();
   return (
     <div>
+      <LoadingOverlay show={loading} />
       <Header />
 
       <div className="px-10">

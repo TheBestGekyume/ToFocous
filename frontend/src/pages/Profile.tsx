@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, Pencil, UserRound, X } from "lucide-react";
 import { useUser } from "../hooks/useUser";
+import { LoadingDots } from "../components/_Common/LoadingDots";
 
 export const Profile = () => {
   const { user, loading, updating, fetchMyUser, updateUser } = useUser();
@@ -72,9 +73,9 @@ export const Profile = () => {
         </header>
 
         {loading ? (
-          <p className="text-sm text-primary/80">Carregando perfil...</p>
+          <p className="text-lg text-accent text-center">Carregando perfil <LoadingDots/></p>
         ) : !user ? (
-          <p className="text-sm text-red-400">
+          <p className="text-lg text-red-400 text-center">
             Não foi possível carregar os dados do usuário.
           </p>
         ) : (
