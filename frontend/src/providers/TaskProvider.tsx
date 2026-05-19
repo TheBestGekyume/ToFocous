@@ -15,6 +15,7 @@ import type {
 } from "@supabase/supabase-js";
 import { supabaseRealtimeClient } from "../services/supabaseRealtimeClient";
 import { getAccessToken } from "../utils/tokenUtils";
+import axios from "axios";
 
 type TaskRealtimePayload = RealtimePostgresChangesPayload<TTask>;
 type SubTaskRealtimePayload = RealtimePostgresChangesPayload<TSubTask>;
@@ -129,19 +130,27 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const getSubTasks = useCallback(async (taskId: string) => {
-    try {
-      const subtasks = await taskService.getSubTasks(taskId);
+  try {
+    const subtasks = await taskService.getSubTasks(taskId);
 
-      setTasks((prev) =>
-        prev.map((task) => (task.id === taskId ? { ...task, subtasks } : task))
-      );
+    setTasks((prev) =>
+      prev.map((task) => (task.id === taskId ? { ...task, subtasks } : task))
+    );
 
-      return subtasks;
-    } catch (err) {
-      console.error("Erro ao buscar subtasks", err);
-      throw err;
+    return subtasks;
+  } catch (err) {
+    const isCanceledRequest =
+      axios.isCancel(err) ||
+      (axios.isAxiosError(err) && err.code === "ERR_CANCELED");
+
+    if (isCanceledRequest) {
+      return [];
     }
-  }, []);
+
+    console.error("Erro ao buscar subtasks", err);
+    throw err;
+  }
+}, []);
 
   const createSubTask = useCallback(
     async (taskId: string, payload: TCreateSubTaskDTO) => {
