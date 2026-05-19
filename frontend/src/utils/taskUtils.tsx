@@ -129,11 +129,29 @@ export function sortTaskList(
   });
 }
 
-export function getTimeMessage(date: Date) {
-  const today = new Date();
+export function getTimeMessage(date: string | Date) {
+  const now = new Date();
 
-  const diff = Math.ceil(
-    (date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  const today = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+
+  const target =
+    typeof date === "string"
+      ? (() => {
+          const [year, month, day] = date.split("-").map(Number);
+          return new Date(year, month - 1, day);
+        })()
+      : new Date(
+          date.getFullYear(),
+          date.getMonth(),
+          date.getDate()
+        );
+
+  const diff = Math.round(
+    (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
   );
 
   if (diff > 1) {

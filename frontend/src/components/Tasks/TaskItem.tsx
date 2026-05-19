@@ -49,7 +49,7 @@ export const TaskItem = ({ task }: TaskProps) => {
   } = useTaskItem(task);
 
   const { msg: timeMessage, color: timeColor } = getTimeMessage(
-    new Date(localData.due_date)
+    localData.due_date
   );
 
   const currentPriority = priorityMap[localData.priority];
