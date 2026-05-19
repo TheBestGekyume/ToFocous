@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { signUpUser } from "../../services/authService";
-import axios from "axios";
 import { LoadingDots } from "../_Common/LoadingDots";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
+import { getApiErrorMessage } from "../../utils/apiError";
 
-export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
+export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,11 +27,7 @@ export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
     setLoading(true);
 
     try {
-      await signUpUser({
-        name,
-        email,
-        password,
-      });
+      await signUpUser({ name, email, password });
 
       setSuccess(
         `Conta criada com sucesso!\n Ative sua conta pelo email ${email}`
@@ -41,17 +37,12 @@ export const SignUpForm = ({ onSwitch }: { onSwitch: () => void }) => {
         onSwitch();
       }, 5000);
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        // console.log("ERRO BACK:", err.response?.data);
-        setError(err.response?.data?.detail || "Erro ao criar conta");
-      } else {
-        setError("Erro inesperado");
-      }
+      setError(getApiErrorMessage(err, "Erro ao criar conta"));
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <>
       <LoadingOverlay

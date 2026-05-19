@@ -2,10 +2,10 @@ import { useState } from "react";
 import { loginUser } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
 import { LoadingDots } from "../_Common/LoadingDots";
-import axios from "axios";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
+import { getApiErrorMessage } from "../../utils/apiError";
 
-export const LoginForm = ({ onSwitch }: { onSwitch: () => void }) => {
+export const Login = ({ onSwitch }: { onSwitch: () => void }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,9 +21,7 @@ export const LoginForm = ({ onSwitch }: { onSwitch: () => void }) => {
       await loginUser({ email, password });
       navigate("/");
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.detail || "Erro ao entrar na conta");
-      }
+      setError(getApiErrorMessage(err, "Erro ao entrar na conta"));
       console.error(err);
     } finally {
       setLoading(false);
