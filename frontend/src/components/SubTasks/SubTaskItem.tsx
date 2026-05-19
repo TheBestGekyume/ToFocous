@@ -16,6 +16,7 @@ import {
 } from "../../utils/taskUtils";
 import { Dropdown } from "../_Common/Dropdown";
 import { useTextareaOverflow } from "../../hooks/useTextareaOverflow";
+import { useAutoResizeTextarea } from "../../hooks/useAutoResizeTextarea";
 
 type Props = {
   subtask: TSubTask;
@@ -53,6 +54,10 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
     startResizeTracking,
   } = useTextareaOverflow(localData.description);
 
+  const { ref: titleRef, resize: resizeTitle } = useAutoResizeTextarea(
+    localData.title
+  );
+
   const { msg: timeMessage, color: timeColor } = getTimeMessage(
     localData.due_date
   );
@@ -75,15 +80,21 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
       </button>
 
       <div className="flex flex-1 flex-col gap-2">
-        <input
+        <textarea
           value={localData.title}
-          onChange={(e) => handleChange("title", e.target.value)}
+          ref={titleRef}
+          onChange={(e) => {
+            handleChange("title", e.target.value);
+            requestAnimationFrame(resizeTitle);
+          }}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           placeholder="Título da subtarefa"
+          rows={1}
+          spellCheck={false}
           className={`outline-none border border-transparent
             duration-100 hover:bg-zinc-700 focus:bg-zinc-900
-            focus:border-accent rounded-md p-1
+            focus:border-accent rounded-md p-1 resize-none overflow-hidden
             ${isDone ? "line-through text-zinc-400" : ""}
           `}
         />
@@ -102,7 +113,7 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
             onMouseDown={startResizeTracking}
             onKeyDown={handleDescriptionKeyDown}
             spellCheck={false}
-            placeholder="Descrição"
+            // placeholder="Descrição"
             rows={2}
             className={`w-full resize-none overflow-hidden outline-none border border-transparent duration-100
       hover:bg-zinc-700 focus:bg-zinc-900 focus:border-accent focus:resize-y hover:resize-y rounded-md p-1

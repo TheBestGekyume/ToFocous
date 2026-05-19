@@ -135,11 +135,11 @@ export const TaskItem = ({ task }: TaskProps) => {
             placeholder="Insira o título"
             rows={1}
             spellCheck={false}
-            className={`text-xl font-semibold outline-none border border-transparent
+            className={`w-9/10 text-xl font-semibold outline-none border border-transparent
     duration-100 focus:bg-zinc-900 focus:border-accent
     hover:bg-zinc-700 rounded-md p-1 resize-none overflow-hidden
     ${isDone ? "line-through text-zinc-400" : ""}
-    ${isDetailsPage ? "w-full" : "w-4/5"}`}
+    "`}
           />
 
           <div className="relative w-9/10">

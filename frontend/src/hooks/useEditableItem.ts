@@ -84,17 +84,22 @@ export function useEditableItem<T>({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  if (e.key === "Enter") {
+    e.preventDefault();
+
+    if (!e.shiftKey) {
       (e.currentTarget as HTMLElement).blur();
     }
 
-    if (e.key === "Escape") {
-      cancelEditRef.current = true;
-      setLocalData(lastSavedRef.current);
-      (e.currentTarget as HTMLElement).blur();
-    }
-  };
+    return;
+  }
+
+  if (e.key === "Escape") {
+    cancelEditRef.current = true;
+    setLocalData(lastSavedRef.current);
+    (e.currentTarget as HTMLElement).blur();
+  }
+};
 
   const handleTextareaKeyDown =
   <K extends StringField<T>>(field: K) =>
