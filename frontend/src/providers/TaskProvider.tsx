@@ -130,27 +130,27 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const getSubTasks = useCallback(async (taskId: string) => {
-  try {
-    const subtasks = await taskService.getSubTasks(taskId);
+    try {
+      const subtasks = await taskService.getSubTasks(taskId);
 
-    setTasks((prev) =>
-      prev.map((task) => (task.id === taskId ? { ...task, subtasks } : task))
-    );
+      setTasks((prev) =>
+        prev.map((task) => (task.id === taskId ? { ...task, subtasks } : task))
+      );
 
-    return subtasks;
-  } catch (err) {
-    const isCanceledRequest =
-      axios.isCancel(err) ||
-      (axios.isAxiosError(err) && err.code === "ERR_CANCELED");
+      return subtasks;
+    } catch (err) {
+      const isCanceledRequest =
+        axios.isCancel(err) ||
+        (axios.isAxiosError(err) && err.code === "ERR_CANCELED");
 
-    if (isCanceledRequest) {
-      return [];
+      if (isCanceledRequest) {
+        return [];
+      }
+
+      console.error("Erro ao buscar subtasks", err);
+      throw err;
     }
-
-    console.error("Erro ao buscar subtasks", err);
-    throw err;
-  }
-}, []);
+  }, []);
 
   const createSubTask = useCallback(
     async (taskId: string, payload: TCreateSubTaskDTO) => {
@@ -303,110 +303,114 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const subscribeToProjectRealtime = useCallback(
-  (projectId: string) => {
-        // console.log("[TaskProvider] subscribeToProjectRealtime chamado:", projectId);
-    const token = getAccessToken();
+    (projectId: string) => {
+      // console.log("[TaskProvider] subscribeToProjectRealtime chamado:", projectId);
+      const token = getAccessToken();
 
-    // console.log("[Realtime] iniciando subscribe do projeto:", projectId);
-    // console.log("[Realtime] token existe?", Boolean(token));
+      // console.log("[Realtime] iniciando subscribe do projeto:", projectId);
+      // console.log("[Realtime] token existe?", Boolean(token));
 
-    if (token) {
-      supabaseRealtimeClient.realtime.setAuth(token);
-    }
+      if (token) {
+        supabaseRealtimeClient.realtime.setAuth(token);
+      }
 
-    if (realtimeChannelRef.current) {
-      // console.log("[Realtime] removendo canal anterior");
-      supabaseRealtimeClient.removeChannel(realtimeChannelRef.current);
-      realtimeChannelRef.current = null;
-    }
-
-    const channel = supabaseRealtimeClient
-      .channel(`project-realtime-${projectId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "tasks",
-          filter: `project_id=eq.${projectId}`,
-        },
-        (payload: TaskRealtimePayload) => {
-          // console.log("[Realtime] evento em tasks:", payload);
-
-          if (payload.eventType === "DELETE") {
-            const deletedTaskId = payload.old.id;
-
-            if (deletedTaskId) {
-              removeTaskFromRealtime(deletedTaskId);
-            }
-
-            return;
-          }
-
-          upsertTaskFromRealtime(payload.new);
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "subtasks",
-        },
-        (payload: SubTaskRealtimePayload) => {
-          // console.log("[Realtime] evento em subtasks:", payload);
-
-          if (payload.eventType === "DELETE") {
-            const deletedSubTaskId = payload.old.id;
-
-            if (deletedSubTaskId) {
-              removeSubTaskFromRealtime(deletedSubTaskId);
-            }
-
-            return;
-          }
-
-          upsertSubTaskFromRealtime(payload.new);
-        }
-      )
-      // .subscribe((status, err) => {
-      //   console.log("[Realtime] status:", status, err);
-
-      //   if (status === "SUBSCRIBED") {
-      //     console.log("[Realtime] conectado no projeto:", projectId);
-      //   }
-
-      //   if (status === "CHANNEL_ERROR") {
-      //     console.error("[Realtime] erro no canal do projeto:", projectId, err);
-      //   }
-
-      //   if (status === "TIMED_OUT") {
-      //     console.error("[Realtime] timeout no canal do projeto:", projectId);
-      //   }
-
-      //   if (status === "CLOSED") {
-      //     console.warn("[Realtime] canal fechado:", projectId);
-      //   }
-      // });
-
-    realtimeChannelRef.current = channel;
-
-    return () => {
-      console.log("[Realtime] removendo canal do projeto:", projectId);
-      supabaseRealtimeClient.removeChannel(channel);
-
-      if (realtimeChannelRef.current === channel) {
+      if (realtimeChannelRef.current) {
+        // console.log("[Realtime] removendo canal anterior");
+        supabaseRealtimeClient.removeChannel(realtimeChannelRef.current);
         realtimeChannelRef.current = null;
       }
-    };
-  },
-  [
-    removeSubTaskFromRealtime,
-    removeTaskFromRealtime,
-    upsertSubTaskFromRealtime,
-    upsertTaskFromRealtime,
-  ]
-);
+
+      const channel = supabaseRealtimeClient
+        .channel(`project-realtime-${projectId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "tasks",
+            filter: `project_id=eq.${projectId}`,
+          },
+          (payload: TaskRealtimePayload) => {
+            // console.log("[Realtime] evento em tasks:", payload);
+
+            if (payload.eventType === "DELETE") {
+              const deletedTaskId = payload.old.id;
+
+              if (deletedTaskId) {
+                removeTaskFromRealtime(deletedTaskId);
+              }
+
+              return;
+            }
+
+            upsertTaskFromRealtime(payload.new);
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "subtasks",
+          },
+          (payload: SubTaskRealtimePayload) => {
+            // console.log("[Realtime] evento em subtasks:", payload);
+
+            if (payload.eventType === "DELETE") {
+              const deletedSubTaskId = payload.old.id;
+
+              if (deletedSubTaskId) {
+                removeSubTaskFromRealtime(deletedSubTaskId);
+              }
+
+              return;
+            }
+
+            upsertSubTaskFromRealtime(payload.new);
+          }
+        )
+        .subscribe((status, err) => {
+          // console.log("[Realtime] status:", status, (err || "Nenhum erro detectado"));
+
+          if (status === "SUBSCRIBED") {
+            console.log("[Realtime] conectado no projeto:", projectId);
+          }
+
+          if (status === "CHANNEL_ERROR") {
+            console.error(
+              "[Realtime] erro no canal do projeto:",
+              projectId,
+              err
+            );
+          }
+
+          if (status === "TIMED_OUT") {
+            console.error("[Realtime] timeout no canal do projeto:", projectId);
+          }
+
+          if (status === "CLOSED") {
+            console.log("[Realtime] canal fechado:", projectId);
+          }
+        });
+
+      realtimeChannelRef.current = channel;
+
+      return () => {
+        console.log("[Realtime] removendo canal do projeto:", projectId);
+        supabaseRealtimeClient.removeChannel(channel);
+
+        if (realtimeChannelRef.current === channel) {
+          realtimeChannelRef.current = null;
+        }
+      };
+    },
+    [
+      removeSubTaskFromRealtime,
+      removeTaskFromRealtime,
+      upsertSubTaskFromRealtime,
+      upsertTaskFromRealtime,
+    ]
+  );
 
   const value = useMemo(
     () => ({
