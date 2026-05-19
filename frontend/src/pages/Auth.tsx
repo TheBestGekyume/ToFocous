@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Variants } from "framer-motion";
-import { LoginForm } from "../components/Auth/Login";
-import { SignUpForm } from "../components/Auth/SignUp";
+import { Login } from "../components/Auth/Login";
+import { SignUp } from "../components/Auth/SignUp";
 import { useNavigate } from "react-router-dom";
 import { getAccessToken, getTokenExpiration } from "../utils/tokenUtils";
 
@@ -64,9 +64,9 @@ export const Auth = () => {
           </h1>
 
           {mode === "login" ? (
-            <LoginForm onSwitch={() => setMode("signUp")} />
+            <Login onSwitch={() => setMode("signUp")} />
           ) : (
-            <SignUpForm onSwitch={() => setMode("login")} />
+            <SignUp onSwitch={() => setMode("login")} />
           )}
         </motion.div>
       </AnimatePresence>
