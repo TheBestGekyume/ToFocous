@@ -1,7 +1,7 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 import { handleRefresh } from "./refreshService";
-import { clearTokens, getAccessToken, getTokenExpiration } from "../utils/tokenUtils";
-import { supabaseRealtimeClient } from "./supabaseRealtimeClient";
+import { clearTokens, getAccessToken, getTokenExpiration } from "../../utils/tokenUtils";
+import { supabaseRealtimeClient } from "../realtime/supabaseRealtimeClient";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -39,7 +39,7 @@ api.interceptors.request.use(async (config) => {
       if (exp - now < 45) {
         try {
           token = await handleRefresh();
-          supabaseRealtimeClient.realtime.setAuth(token); 
+          supabaseRealtimeClient.realtime.setAuth(token);
         } catch (error) {
           if (!isLoggingOut) {
             isLoggingOut = true;

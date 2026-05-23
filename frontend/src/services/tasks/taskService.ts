@@ -1,6 +1,6 @@
-import { api } from "./api";
+import { api } from "../api/api";
 
-import type { TTask, TCreateTaskDTO, TSubTask, TCreateSubTaskDTO } from "../types/TTask";
+import type { TTask, TCreateTaskDTO, TSubTask, TCreateSubTaskDTO } from "../../types/TTask";
 
 export const taskService = {
 

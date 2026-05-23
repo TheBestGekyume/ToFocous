@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getRefreshToken, setTokens } from "../utils/tokenUtils";
+import { getRefreshToken, setTokens } from "../../utils/tokenUtils";
 
 const apiRefresh = axios.create({
     baseURL: "http://127.0.0.1:8000",

@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useRef } from "react";
 import { TasksContext } from "../contexts/TasksContext";
-import { taskService } from "../services/taskService";
+import { taskService } from "../services/tasks/taskService";
 import { sortTaskList } from "../utils/taskUtils";
 import type {
   SortType,
@@ -13,7 +13,7 @@ import type {
   RealtimeChannel,
   RealtimePostgresChangesPayload,
 } from "@supabase/supabase-js";
-import { supabaseRealtimeClient } from "../services/supabaseRealtimeClient";
+import { supabaseRealtimeClient } from "../services/realtime/supabaseRealtimeClient";
 import { getAccessToken } from "../utils/tokenUtils";
 import axios from "axios";
 

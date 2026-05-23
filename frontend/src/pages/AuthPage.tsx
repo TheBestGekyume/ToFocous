@@ -31,7 +31,7 @@ const formVariants: Variants = {
   },
 };
 
-export const Auth = () => {
+export const AuthPage = () => {
   const [mode, setMode] = useState<AuthMode>("login");
   const navigate = useNavigate();
 
@@ -57,7 +57,7 @@ export const Auth = () => {
           initial="initial"
           animate="animate"
           exit="exit"
-          className="w-full max-w-md bg-secondary rounded-xl shadow-xl p-6"
+          className="w-full max-w-md bg-secondary rounded-xl shadow-lg shadow-background-header px-6 py-4"
         >
           <h1 className="text-2xl font-bold text-center mb-6 text-text">
             {mode === "login" ? "Entrar" : "Criar conta"}
