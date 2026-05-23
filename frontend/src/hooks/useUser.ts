@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import type { TUpdateUserDTO, TUser } from "../types/TUser";
-import { getMyUser, updateMyUser } from "../services/userService";
+import { getMyUser, updateMyUser } from "../services/users/userService";
 
 export const useUser = () => {
   const [user, setUser] = useState<TUser | null>(null);

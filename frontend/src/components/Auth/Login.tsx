@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { loginUser } from "../../services/authService";
+import { loginUser } from "../../services/auth/authService";
 import { useNavigate } from "react-router-dom";
 import { LoadingDots } from "../_Common/LoadingDots";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
 import { getApiErrorMessage } from "../../utils/apiError";
+import { GoogleLoginButton } from "./GoogleLoginButton";
 
 export const Login = ({ onSwitch }: { onSwitch: () => void }) => {
   const [email, setEmail] = useState("");
@@ -83,6 +84,9 @@ export const Login = ({ onSwitch }: { onSwitch: () => void }) => {
           </button>
         </p>
       </form>
+      <div className="flex justify-center mt-5">
+        <GoogleLoginButton />
+      </div>
     </>
   );
 };

@@ -1,5 +1,5 @@
-import { api, resetAuthState } from "./api";
-import { setTokens } from "../utils/tokenUtils";
+import { api, resetAuthState } from "../api/api";
+import { setTokens } from "../../utils/tokenUtils";
 
 type LoginPayload = {
   email: string;

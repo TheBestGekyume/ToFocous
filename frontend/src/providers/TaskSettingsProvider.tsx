@@ -4,17 +4,12 @@ import type { ITaskSettings } from "../types/TSettings";
 import {
   getTaskSettings,
   updateTaskSettings,
-} from "../services/taskSettingsService";
+} from "../services/tasks/taskSettingsService";
 
-export const TaskSettingsProvider = ({
-  children,
-}: {
-  children: ReactNode;
-}) => {
+export const TaskSettingsProvider = ({ children }: { children: ReactNode }) => {
   const [settings, setSettings] = useState<ITaskSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,11 +48,9 @@ export const TaskSettingsProvider = ({
     }
   };
 
-  const canUseStartTime =
-    settings?.use_time && settings?.use_start_date;
+  const canUseStartTime = settings?.use_time && settings?.use_start_date;
 
-  const canShowCalendarOption =
-    settings?.use_start_date;
+  const canShowCalendarOption = settings?.use_start_date;
 
   return (
     <TaskSettingsContext.Provider

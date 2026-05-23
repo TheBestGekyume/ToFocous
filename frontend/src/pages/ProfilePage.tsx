@@ -3,7 +3,7 @@ import { Check, Pencil, UserRound, X } from "lucide-react";
 import { useUser } from "../hooks/useUser";
 import { LoadingDots } from "../components/_Common/LoadingDots";
 
-export const Profile = () => {
+export const ProfilePage = () => {
   const { user, loading, updating, fetchMyUser, updateUser } = useUser();
 
   const [name, setName] = useState("");

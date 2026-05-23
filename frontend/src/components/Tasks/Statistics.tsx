@@ -19,7 +19,6 @@ export const Statistics = () => {
 
   const total = tasks.length;
 
-  // NOVO: contagem por status completo
   const notStarted = tasks.filter((t) => t.status === "unstarted").length;
   const inProgress = tasks.filter((t) => t.status === "inProgress").length;
   const concluded = tasks.filter((t) => t.status === "concluded").length;

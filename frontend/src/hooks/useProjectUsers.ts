@@ -1,7 +1,6 @@
-// src/hooks/useProjectUsers.ts
 
 import { useCallback, useState } from "react";
-import { projectUserService } from "../services/projectUserService";
+import { projectUserService } from "../services/projects/projectUserService";
 import type { TProjectUser } from "../types/TProjectUser";
 
 export const useProjectUsers = (projectId: string) => {

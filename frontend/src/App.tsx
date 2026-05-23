@@ -2,21 +2,22 @@ import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { TasksProvider } from "./providers/TaskProvider";
 import { TaskSettingsProvider } from "./providers/TaskSettingsProvider";
-import { Auth } from "./pages/Auth";
-import { TaskSettings } from "./pages/TaskSettings";
+import { AuthPage } from "./pages/AuthPage";
+import { TaskSettingsPage } from "./pages/TaskSettingsPage";
 import { AppLayout } from "./AppLayout";
-import { Profile } from "./pages/Profile";
+import { ProfilePage } from "./pages/ProfilePage";
 import { ProtectedRoute } from "./components/_Common/ProtectedRoute";
 import { TaskPage } from "./pages/TasksPage";
 import { SubTasksPage } from "./pages/SubTasksPage";
 import { ProjectsPage } from "./pages/ProjectPage";
 import { ProjectsProvider } from "./providers/ProjectsProvider";
 import { AgendaPage } from "./pages/AgendaPage";
-import { wakeUpApi } from "./services/wakeUpApi";
+import { health } from "./services/api/healthService";
+import { AuthCallback } from "./pages/AuthCallback";
 
 function App() {
   useEffect(() => {
-    wakeUpApi().catch((err) => {
+    health().catch((err) => {
       console.error("Erro ao verificar API:", err);
     });
   }, []);
@@ -24,7 +25,8 @@ function App() {
   return (
     <div id="app" className="d-flex bg-background-task-section min-h-full">
       <Routes>
-        <Route path="/acesso" element={<Auth />} />
+        <Route path="/acesso" element={<AuthPage />} />
+        <Route path="/acesso/callback" element={<AuthCallback />} />
 
         <Route
           element={
@@ -47,8 +49,8 @@ function App() {
             element={<SubTasksPage />}
           />
           <Route path="/agenda" element={<AgendaPage />} />
-          <Route path="/configuracoes" element={<TaskSettings />} />
-          <Route path="/perfil" element={<Profile />} />
+          <Route path="/configuracoes" element={<TaskSettingsPage />} />
+          <Route path="/perfil" element={<ProfilePage />} />
         </Route>
       </Routes>
     </div>

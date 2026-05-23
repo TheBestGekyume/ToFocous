@@ -1,5 +1,3 @@
-// src/components/Projects/ProjectItem.tsx
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { TProject } from "../../types/TProject";

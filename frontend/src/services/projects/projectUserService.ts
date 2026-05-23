@@ -1,9 +1,9 @@
-import { api } from "./api";
+import { api } from "../api/api";
 import type {
   TAddProjectUserDTO,
   TProjectUser,
   TRemoveProjectUserDTO,
-} from "../types/TProjectUser";
+} from "../../types/TProjectUser";
 
 export const projectUserService = {
   async getProjectUsers(projectId: string): Promise<TProjectUser[]> {

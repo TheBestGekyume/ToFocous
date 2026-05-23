@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { ProjectsContext } from "../contexts/ProjectsContext";
-import { projectService } from "../services/projectService";
+import { projectService } from "../services/projects/projectService";
 import type {
   TCreateProjectDTO,
   TProject,
@@ -11,9 +11,7 @@ const upsertProject = (list: TProject[], project: TProject): TProject[] => {
   const alreadyExists = list.some((item) => item.id === project.id);
 
   if (alreadyExists) {
-    return list.map((item) =>
-      item.id === project.id ? project : item
-    );
+    return list.map((item) => (item.id === project.id ? project : item));
   }
 
   return [...list, project];
