@@ -1,5 +1,5 @@
 import { api } from "./api";
 
-export const wakeUpApi = async (): Promise<void> => {
+export const health = async (): Promise<void> => {
   await api.get("/health/");
 };

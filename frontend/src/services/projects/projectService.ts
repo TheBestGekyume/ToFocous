@@ -1,5 +1,5 @@
-import { api } from "./api";
-import type { TCreateProjectDTO, TProject, TUpdateProjectDTO } from "../types/TProject";
+import { api } from "../api/api";
+import type { TCreateProjectDTO, TProject, TUpdateProjectDTO } from "../../types/TProject";
 
 export const projectService = {
 
@@ -9,7 +9,7 @@ export const projectService = {
   },
 
   async getAllProjects(): Promise<TProject[]> {
-    const { data } = await api.get("/projects/"); 
+    const { data } = await api.get("/projects/");
     return data;
   },
 

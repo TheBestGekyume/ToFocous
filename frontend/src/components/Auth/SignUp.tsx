@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { signUpUser } from "../../services/authService";
+import { signUpUser } from "../../services/auth/authService";
 import { LoadingDots } from "../_Common/LoadingDots";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
 import { getApiErrorMessage } from "../../utils/apiError";

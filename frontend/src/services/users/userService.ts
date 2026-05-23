@@ -1,5 +1,5 @@
-import { api } from "./api";
-import type { TUpdateUserDTO, TUser, TUserResponse } from "../types/TUser";
+import { api } from "../api/api";
+import type { TUpdateUserDTO, TUser, TUserResponse } from "../../types/TUser";
 
 export const getMyUser = async (): Promise<TUser> => {
   const response = await api.get<TUserResponse>("/usuarios/me/");

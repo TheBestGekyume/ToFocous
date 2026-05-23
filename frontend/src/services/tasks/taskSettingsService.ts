@@ -1,5 +1,5 @@
-import { api } from "../services/api";
-import type { ITaskSettings } from "../types/TSettings";
+import { api } from "../api/api";
+import type { ITaskSettings } from "../../types/TSettings";
 
 export async function getTaskSettings(): Promise<ITaskSettings> {
   const res = await api.get("/settings/");

@@ -2,7 +2,7 @@ import { useTaskSettings } from "../hooks/useTaskSettings";
 import type { ITaskSettings } from "../types/TSettings";
 import { LoadingOverlay } from "../components/_Common/LoadingOverlay";
 
-export const TaskSettings = () => {
+export const TaskSettingsPage = () => {
   const {
     settings,
     updateSettings,
