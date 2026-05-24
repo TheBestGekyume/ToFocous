@@ -63,7 +63,12 @@ export const TaskForm = ({
       <LoadingOverlay show={loading} />
       <form
         onSubmit={async (e) => {
+          if (!e.currentTarget.checkValidity()) {
+            return;
+          }
+
           setLoading(true);
+
           try {
             await handleSubmit(e);
           } finally {
@@ -86,7 +91,8 @@ export const TaskForm = ({
             value={formData.title}
             onChange={handleChange}
             autoComplete="off"
-            className="rounded-md bg-zinc-700 p-2 h-10"
+            className="rounded-md bg-zinc-700 p-2 h-10 outline-none duration-100
+            hover:bg-zinc-800 focus:bg-zinc-900 focus:border-accent "
             required
           />
         </fieldset>
@@ -111,13 +117,26 @@ export const TaskForm = ({
           <label className="font-semibold mb-1">Data</label>
 
           <div className={datePickerInputClass}>
-            <DatePicker
-              value={formData.due_date}
-              onChange={handleDateChange}
-              title="Selecionar data"
-              placeholder="dd / mm / aaaa"
-              icon={Calendar}
-            />
+            <div className={`relative ${datePickerInputClass}`}>
+              <DatePicker
+                value={formData.due_date}
+                onChange={handleDateChange}
+                title="Selecionar data"
+                placeholder="dd / mm / aaaa"
+                icon={Calendar}
+                required
+              />
+
+              <input
+                type="text"
+                value={formData.due_date ?? ""}
+                onChange={() => undefined}
+                required
+                tabIndex={-1}
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 h-10 w-full opacity-0"
+              />
+            </div>
           </div>
         </fieldset>
 
@@ -143,7 +162,8 @@ export const TaskForm = ({
             name="description"
             value={formData.description || ""}
             onChange={handleChange}
-            className="rounded-md bg-zinc-700 p-2 min-h-[60px]"
+            className="rounded-md bg-zinc-700 border border-transparent p-2 min-h-[60px] duration-100 outline-none
+            hover:bg-zinc-800 focus:bg-zinc-900 focus:border-accent"
           />
         </fieldset>
         <div className=" w-full flex justify-between">
