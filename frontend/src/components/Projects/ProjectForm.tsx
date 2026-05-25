@@ -51,8 +51,9 @@ export const ProjectForm = ({ onClose, mode, project }: Props) => {
         value={title}
         onChange={(event) => setTitle(event.target.value)}
         className="
-          rounded-md border border-secondary/30 bg-background-body p-2
-          text-text outline-none transition focus:border-accent
+          rounded-md border border-transparent bg-zinc-800 p-2
+          text-text outline-none transition hover:bg-zinc-700 
+          focus:bg-zinc-900 focus:border-accent
         "
       />
 
@@ -61,8 +62,9 @@ export const ProjectForm = ({ onClose, mode, project }: Props) => {
         value={description}
         onChange={(event) => setDescription(event.target.value)}
         className="
-          rounded-md border border-secondary/30 bg-background-body p-2
-          text-text outline-none transition focus:border-accent
+          rounded-md border border-transparent bg-zinc-800 p-2
+          text-text outline-none transition hover:bg-zinc-700 
+          focus:bg-zinc-900 focus:border-accent
         "
       />
 

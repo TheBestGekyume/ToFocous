@@ -57,7 +57,7 @@ export const TaskPage = () => {
       )}
       <div className="flex flex-col bg-background-header/40 border border-zinc-500 rounded-xl p-5 gap-8">
         <div className="w-full transition-all duration-300">
-          <TaskForm isCreating={true} />
+          <TaskForm />
 
           <hr className="text-zinc-700 my-10" />
 

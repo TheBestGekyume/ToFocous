@@ -12,6 +12,7 @@ type DatePickerProps = {
   placeholder?: string;
   title: string;
   icon: LucideIcon;
+required?: boolean;
 };
 
 type CalendarCoords = {
@@ -43,11 +44,33 @@ const clamp = (value: number, min: number, max: number) => {
 export const DatePicker = ({
   value,
   onChange,
+  onBlur,
   placeholder = "Selecionar data",
   title = "",
   icon: Icon,
+  required = false,
 }: DatePickerProps) => {
   const [open, setOpen] = useState(false);
+
+  const isInvalid = required && !value;
+
+  const handleSelect = (date?: Date) => {
+    if (!date) {
+      if (!required) {
+        onChange(null);
+      }
+
+      onBlur?.();
+      return;
+    }
+
+    const formatted = formatDateToKey(date);
+
+    onChange(formatted);
+    onBlur?.();
+    setOpen(false);
+  };
+
   const [calendarCoords, setCalendarCoords] = useState<CalendarCoords>({
     top: 0,
     left: 0,
@@ -57,18 +80,6 @@ export const DatePicker = ({
   const calendarRef = useRef<HTMLDivElement | null>(null);
 
   const selectedDate = parseLocalDate(value);
-
-  const handleSelect = (date?: Date) => {
-    if (!date) {
-      onChange(null);
-      return;
-    }
-
-    const formatted = formatDateToKey(date);
-
-    onChange(formatted);
-    setOpen(false);
-  };
 
   const formatDisplayDate = (date?: string | null) => {
     if (!date) return null;
@@ -174,15 +185,19 @@ export const DatePicker = ({
         <button
           type="button"
           title={title}
+          aria-required={required}
+          aria-invalid={isInvalid}
           onClick={(event) => {
             event.stopPropagation();
             setOpen((prev) => !prev);
           }}
-          className="
-            flex items-center gap-2 rounded-sm border bg-zinc-800 px-2 py-1
-            text-sm text-text duration-300 hover:bg-zinc-700
-            focus:border-accent focus:bg-zinc-900
-          "
+          onBlur={onBlur}
+          className={`
+    flex items-center gap-2 rounded-sm border bg-zinc-800 px-2 py-1
+    text-sm text-text duration-300 hover:bg-zinc-700
+    focus:border-accent focus:bg-zinc-900
+    ${isInvalid ? "border-red-500" : "border-zinc-700"}
+  `}
         >
           {Icon && <Icon size={16} />}
 
