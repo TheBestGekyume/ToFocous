@@ -116,37 +116,3 @@ button {
   transform: scale(0.85);
   transform-origin: right center;
 }
-
-/* @layer base {
-  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]),
-  select,
-  textarea {
-    @apply rounded-md border border-transparent bg-transparent px-2 py-1 text-text duration-100;
-    @apply hover:bg-zinc-700;
-    @apply focus:bg-zinc-900 focus:border-accent;
-    @apply placeholder:text-zinc-400;
-    @apply disabled:opacity-60 disabled:cursor-not-allowed;
-
-    outline: none;
-    box-shadow: none;
-  }
-
-  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):focus,
-  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):focus-visible,
-  select:focus,
-  select:focus-visible,
-  textarea:focus,
-  textarea:focus-visible {
-    outline: none;
-    box-shadow: none;
-  }
-
-  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]),
-  select {
-    @apply h-10;
-  }
-
-  textarea {
-    @apply w-full min-h-[60px] resize-none;
-  }
-} */

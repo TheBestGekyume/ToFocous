@@ -97,6 +97,7 @@ export const TaskItem = ({ task }: TaskProps) => {
                 }
                 icon={Check}
                 title="Data de prazo"
+                required
               />
             )}
 
