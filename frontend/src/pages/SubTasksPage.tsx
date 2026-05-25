@@ -135,10 +135,9 @@ export const SubTasksPage = () => {
           size="lg"
         >
           <TaskForm
-            isCreating
             isCreatingSubTask
             parentTask={task}
-            onClose={() => setIsCreatingSubTask(false)}
+            onSuccess={() => setIsCreatingSubTask(false)}
           />
         </Modal>
       </div>

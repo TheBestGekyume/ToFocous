@@ -48,14 +48,14 @@ export const Modal = ({
       <div
         className={`
     w-full ${sizeClasses[size]}
-    rounded-2xl border border-secondary/20 bg-background-header shadow-2xl
+    rounded-2xl border border-secondary bg-background-header shadow-2xl
     ${scrollable ? "overflow-hidden" : "overflow-visible"}
     ${className}
   `}
         onMouseDown={(event) => event.stopPropagation()}
       >
         {(title || subtitle || showCloseButton) && (
-          <header className="flex items-start justify-between gap-4 border-b border-secondary/20 p-5">
+          <header className="flex items-start justify-between gap-4 border-b border-secondary/30 p-5">
             <div>
               {title && (
                 <h2 className="text-2xl font-bold text-primary">{title}</h2>

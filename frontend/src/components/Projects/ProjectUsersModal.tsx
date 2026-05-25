@@ -81,8 +81,9 @@ export const ProjectUsersModal = ({
               onChange={(event) => setUserId(event.target.value)}
               placeholder="ID do usuário"
               className="
-              w-full rounded-md border border-secondary/30 bg-background-body
+              w-full rounded-md border border-transparent bg-zinc-800
               p-2 text-text outline-none transition focus:border-accent
+              hover:bg-zinc-700 focus:bg-zinc-900
             "
             />
 
