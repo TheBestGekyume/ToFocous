@@ -23,7 +23,7 @@ export const TaskList = () => {
   return (
     <>
       <LoadingOverlay show={loading} />
-      <section id="tasks" className="">
+      <section id="tasks">
           
             <div className="flex flex-col gap-3">
               {tasks.length > 0 ? (
