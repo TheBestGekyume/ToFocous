@@ -73,7 +73,7 @@ export const ProjectItem = ({ project, onEdit, showActions = true }: Props) => {
             </div>
           </div>
 
-          {showActions && (
+          {/* {showActions && ( */}
             <div className="flex flex-col gap-2 ps-2">
               <button
                 className="p-2 rounded-full bg-yellow-400 hover:bg-yellow-600 transition shadow-md"
@@ -102,7 +102,7 @@ export const ProjectItem = ({ project, onEdit, showActions = true }: Props) => {
                 <Trash2 size={16} className="text-white" />
               </button>
             </div>
-          )}
+          {/* )} */}
         </div>
       </div>
 

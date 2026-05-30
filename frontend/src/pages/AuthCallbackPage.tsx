@@ -4,7 +4,7 @@ import { supabaseAuthClient } from "../services/auth/supabaseAuthClient";
 import { clearTokens, setTokens, setUserId } from "../utils/tokenUtils";
 import { LoadingDots } from "../components/_Common/LoadingDots";
 
-export const AuthCallback = () => {
+export const AuthCallbackPage = () => {
   const navigate = useNavigate();
   const alreadyHandled = useRef(false);
 
