@@ -1,115 +1,108 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTasks } from "./useTasks";
+
 import { useProjects } from "./useProjects";
+import { useTasks } from "./useTasks";
+
 import type { TSubTask, TTask } from "../types/TTask";
 import {
   type AgendaItem,
-  buildAgendaItems,
   formatDateKey,
   groupAgendaItemsByDate,
 } from "../utils/agendaUtils";
 import type { AgendaProjectOption } from "../components/Agenda/AgendaHeader";
-import { useTaskSettings } from "./useTaskSettings";
+import {
+  getAgendaItems,
+  type AgendaItemResponse,
+} from "../services/agenda/agendaService";
 
-type TTaskWithSubtasks = TTask & {
-  subtasks?: TSubTask[];
+const getAgendaCacheKey = (
+  year: number,
+  month: number,
+  projectId: string
+): string => {
+  return `${year}-${String(month).padStart(2, "0")}-${projectId}`;
 };
 
-const isSubTaskArray = (value: unknown): value is TSubTask[] => {
-  return Array.isArray(value);
+const mapAgendaResponseToItem = (item: AgendaItemResponse): AgendaItem => {
+  return {
+    id: item.id,
+    type: item.type,
+    taskId: item.taskId,
+    projectId: item.projectId,
+    projectTitle: item.projectTitle ?? undefined,
+    parentTitle: item.parentTitle ?? undefined,
+    title: item.title,
+    status: item.status,
+    priority: item.priority,
+    date: item.date,
+    dateType: item.dateType,
+  };
 };
 
 export const useAgenda = () => {
   const navigate = useNavigate();
 
-  const {
-    tasks,
-    loading,
-    getTasks,
-    getSubTasks,
-    updateTask,
-    updateSubTask,
-  } = useTasks();
-
+  const { updateTask, updateSubTask } = useTasks();
   const { projects } = useProjects();
-  const { settings } = useTaskSettings();
 
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [hoveredDateKey, setHoveredDateKey] = useState<string | null>(null);
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState("all");
-  const [tasksWithSubtasks, setTasksWithSubtasks] = useState<
-    TTaskWithSubtasks[]
-  >([]);
+  const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const didFetchInitialDataRef = useRef(false);
-  const hydratedTasksSignatureRef = useRef("");
+  const agendaCacheRef = useRef<Record<string, AgendaItem[]>>({});
 
-  useEffect(() => {
-    if (didFetchInitialDataRef.current) return;
-
-    didFetchInitialDataRef.current = true;
-
-    getTasks();
-  }, [getTasks]);
+  const currentYear = currentMonth.getFullYear();
+  const currentMonthNumber = currentMonth.getMonth() + 1;
 
   useEffect(() => {
-    if (tasks.length === 0) {
-      setTasksWithSubtasks([]);
-      hydratedTasksSignatureRef.current = "";
-      return;
-    }
-
-    const baseTasks: TTaskWithSubtasks[] = tasks.map((task) => ({
-      ...task,
-      subtasks: task.subtasks ?? [],
-    }));
-
-    setTasksWithSubtasks(baseTasks);
-
-    const tasksSignature = baseTasks.map((task) => task.id).join("|");
-
-    if (hydratedTasksSignatureRef.current === tasksSignature) return;
-
-    hydratedTasksSignatureRef.current = tasksSignature;
-
     let isMounted = true;
 
-    const loadSubtasks = async () => {
-      const hydratedTasks = await Promise.all(
-        baseTasks.map(async (task) => {
-          try {
-            const subtasksResponse = await getSubTasks(task.id);
-
-            const subtasks = isSubTaskArray(subtasksResponse)
-              ? subtasksResponse
-              : task.subtasks ?? [];
-
-            return {
-              ...task,
-              subtasks,
-            };
-          } catch {
-            return {
-              ...task,
-              subtasks: task.subtasks ?? [],
-            };
-          }
-        })
+    const loadAgendaItems = async () => {
+      const cacheKey = getAgendaCacheKey(
+        currentYear,
+        currentMonthNumber,
+        selectedProjectId
       );
 
-      if (!isMounted) return;
+      const cachedItems = agendaCacheRef.current[cacheKey];
 
-      setTasksWithSubtasks(hydratedTasks);
+      if (cachedItems) {
+        setAgendaItems(cachedItems);
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        const response = await getAgendaItems({
+          year: currentYear,
+          month: currentMonthNumber,
+          projectId: selectedProjectId !== "all" ? selectedProjectId : undefined,
+        });
+
+        if (!isMounted) return;
+
+        const mappedItems = response.map(mapAgendaResponseToItem);
+
+        agendaCacheRef.current[cacheKey] = mappedItems;
+        setAgendaItems(mappedItems);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     };
 
-    loadSubtasks();
+    void loadAgendaItems();
 
     return () => {
       isMounted = false;
     };
-  }, [getSubTasks, tasks]);
+  }, [currentYear, currentMonthNumber, selectedProjectId]);
 
   const projectOptions = useMemo<AgendaProjectOption[]>(() => {
     return projects.map((project) => ({
@@ -117,22 +110,6 @@ export const useAgenda = () => {
       title: project.title,
     }));
   }, [projects]);
-
-  const filteredTasks = useMemo(() => {
-    if (selectedProjectId === "all") return tasksWithSubtasks;
-
-    return tasksWithSubtasks.filter(
-      (task) => task.project_id === selectedProjectId
-    );
-  }, [tasksWithSubtasks, selectedProjectId]);
-
-  const agendaItems = useMemo(() => {
-    return buildAgendaItems(
-      filteredTasks,
-      settings?.which_date_use_in_calendar ?? "UseBoth",
-      projectOptions
-    );
-  }, [filteredTasks, settings?.which_date_use_in_calendar, projectOptions]);
 
   const agendaItemsByDate = useMemo(() => {
     return groupAgendaItemsByDate(agendaItems);
@@ -194,14 +171,31 @@ export const useAgenda = () => {
       };
 
       await updateTask(item.id, payload);
-      return;
+    } else {
+      const payload: Partial<Pick<TSubTask, "start_date" | "due_date">> = {
+        [item.dateType]: newDate,
+      };
+
+      await updateSubTask(item.taskId, item.id, payload);
     }
 
-    const payload: Partial<Pick<TSubTask, "start_date" | "due_date">> = {
-      [item.dateType]: newDate,
-    };
+    setAgendaItems((prevItems) => {
+      return prevItems.map((agendaItem) => {
+        const isSameItem =
+          agendaItem.id === item.id &&
+          agendaItem.type === item.type &&
+          agendaItem.dateType === item.dateType;
 
-    await updateSubTask(item.taskId, item.id, payload);
+        if (!isSameItem) return agendaItem;
+
+        return {
+          ...agendaItem,
+          date: newDate,
+        };
+      });
+    });
+
+    agendaCacheRef.current = {};
   };
 
   const navigateToAgendaItem = (item: AgendaItem) => {
