@@ -16,7 +16,7 @@ export const AppLayout = () => {
           ${open ? "sm:ml-48" : "sm:ml-0"}
         `}
       >
-        <main className="flex-1 mb-10">
+        <main className="flex-1">
           <Outlet />
         </main>
 

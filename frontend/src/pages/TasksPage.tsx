@@ -49,13 +49,13 @@ export const TaskPage = () => {
   // };
 
   return (
-    <div className="flex flex-col w-full max-w-5xl mx-auto">
+    <div className="flex flex-col w-full max-w-5xl mx-auto pb-8">
       {currentProject && (
         <div className="py-10">
           <ProjectItem project={currentProject} showActions={false} />
         </div>
       )}
-      <div className="flex flex-col bg-background-header/40 border border-zinc-500 rounded-xl p-5 gap-8">
+      <div className="flex flex-col bg-background-header/40 border border-zinc-500 rounded-xl p-5 pb-8 gap-8">
         <div className="w-full transition-all duration-300">
           <TaskForm />
 
