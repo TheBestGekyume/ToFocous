@@ -1,9 +1,10 @@
 import {
   CalendarDays,
   CircleX,
-  FolderKanban,
+  Folder,
   LogOut,
   Settings,
+  SquareKanban,
   TextAlignJustify,
   UserRound,
 } from "lucide-react";
@@ -16,7 +17,6 @@ type SidebarProps = {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
 };
-
 
 export const Sidebar = ({ open, setOpen }: SidebarProps) => {
   const navigate = useNavigate();
@@ -33,9 +33,9 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
     navigate("/acesso", { replace: true });
   };
 
-const username = user?.name?.trim()
-  ? user.name.trim().split(" ")[0]
-  : "usuário";
+  const username = user?.name?.trim()
+    ? user.name.trim().split(" ")[0]
+    : "usuário";
 
   return (
     <>
@@ -79,7 +79,7 @@ const username = user?.name?.trim()
               onClick={() => setOpen(false)}
               className="flex items-center duration-150 hover:text-purple-500"
             >
-              <FolderKanban />
+              <Folder />
               <span className="px-3">Projects</span>
             </Link>
 
@@ -90,6 +90,15 @@ const username = user?.name?.trim()
             >
               <CalendarDays />
               <span className="px-3">Agenda</span>
+            </Link>
+
+            <Link
+              to="/kanban"
+              onClick={() => setOpen(false)}
+              className="flex items-center duration-150 hover:text-purple-500"
+            >
+              <SquareKanban />
+              <span className="px-3">Kanban</span>
             </Link>
 
             <Link
@@ -115,7 +124,7 @@ const username = user?.name?.trim()
             <p className="mb-4 border-t border-zinc-800 pt-4 text-md text-text">
               Olá,{" "}
               <span className="font-medium text-accent/90">
-                {loading ? <LoadingDots/> : username}
+                {loading ? <LoadingDots /> : username}
               </span>
               !
             </p>

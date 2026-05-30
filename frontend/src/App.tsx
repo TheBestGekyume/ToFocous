@@ -13,20 +13,29 @@ import { ProjectsPage } from "./pages/ProjectPage";
 import { ProjectsProvider } from "./providers/ProjectsProvider";
 import { AgendaPage } from "./pages/AgendaPage";
 import { health } from "./services/api/healthService";
-import { AuthCallback } from "./pages/AuthCallback";
+import { AuthCallbackPage } from "./pages/AuthCallbackPage";
+import { KanbanPage } from "./pages/KanbanPage";
 
 function App() {
   useEffect(() => {
-    health().catch((err) => {
+  const alreadyCheckedApi = sessionStorage.getItem("api_health_checked");
+
+  if (alreadyCheckedApi) return;
+
+  health()
+    .then(() => {
+      sessionStorage.setItem("api_health_checked", "true");
+    })
+    .catch((err) => {
       console.error("Erro ao verificar API:", err);
     });
-  }, []);
+}, []);
 
   return (
     <div id="app" className="d-flex bg-background-task-section min-h-full">
       <Routes>
         <Route path="/acesso" element={<AuthPage />} />
-        <Route path="/acesso/callback" element={<AuthCallback />} />
+        <Route path="/acesso/callback" element={<AuthCallbackPage />} />
 
         <Route
           element={
@@ -51,6 +60,7 @@ function App() {
           <Route path="/agenda" element={<AgendaPage />} />
           <Route path="/configuracoes" element={<TaskSettingsPage />} />
           <Route path="/perfil" element={<ProfilePage />} />
+          <Route path="/kanban" element={<KanbanPage />} />
         </Route>
       </Routes>
     </div>
