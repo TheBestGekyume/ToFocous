@@ -28,8 +28,8 @@ export const KanbanColumn = ({
       ref={setNodeRef}
       className={`
         flex min-h-[420px] w-full min-w-[280px] flex-col rounded-2xl
-        border bg-background-header/70 p-4 duration-150
-        ${isOver ? "border-accent bg-background-header" : "border-secondary/20"}
+        border-2 bg-background-header/50 p-4 duration-150
+        ${isOver ? "border-accent bg-background-header" : "border-secondary"}
       `}
     >
       <header className="mb-4 flex items-center justify-between gap-3">

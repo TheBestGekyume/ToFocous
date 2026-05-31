@@ -114,10 +114,10 @@ export const AgendaDayCell = ({
         }
       }}
       className={`relative flex min-h-28 cursor-pointer flex-col rounded-lg border p-2
-      text-left outline-none duration-150 ${
+      text-left outline-none hover:bg-black transition ${
         isActive
           ? "border-accent bg-zinc-800"
-          : "border-zinc-700 bg-zinc-950 hover:bg-zinc-800"
+          : "border-zinc-700 bg-background-header "
       }`}
     >
       <div className="mb-2 flex items-center justify-between">

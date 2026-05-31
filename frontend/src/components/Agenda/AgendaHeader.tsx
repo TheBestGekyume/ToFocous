@@ -28,13 +28,13 @@ export const AgendaHeader = ({
 }: AgendaHeaderProps) => {
   return (
     <header
-      className="flex flex-col gap-4 rounded-xl border border-zinc-700
-      bg-zinc-900 p-4 lg:flex-row lg:items-center lg:justify-between"
+      className="flex flex-col gap-4 rounded-2xl shadow-md
+      bg-background-header p-6 md:flex-row md:items-center md:justify-between"
     >
       <div>
-        <h2 className="text-2xl font-bold text-zinc-100">Agenda</h2>
+        <h2 className="text-2xl font-bold text-text">Agenda</h2>
 
-        <p className="mt-1 text-sm font-semibold text-zinc-200">
+        <p className="mt-1 text-sm font-medium text-zinc-300">
           {getMonthTitle(currentMonth)}
         </p>
       </div>
@@ -50,7 +50,7 @@ export const AgendaHeader = ({
           <button
             type="button"
             onClick={onPreviousMonth}
-            className="rounded-md bg-zinc-800 p-2 text-zinc-100 duration-150 hover:bg-zinc-700"
+            className="rounded-md bg-accent/25 p-2 text-zinc-100  hover:bg-accent/75 duration-300"
             title="Mês anterior"
           >
             <ChevronLeft size={20} />
@@ -59,8 +59,8 @@ export const AgendaHeader = ({
           <button
             type="button"
             onClick={onToday}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white
-            duration-150 hover:bg-accent"
+            className="rounded-md bg-accent/50 px-4 py-2 text-sm font-semibold 
+            text-white duration-300 hover:bg-accent"
           >
             Hoje
           </button>
@@ -68,7 +68,7 @@ export const AgendaHeader = ({
           <button
             type="button"
             onClick={onNextMonth}
-            className="rounded-md bg-zinc-800 p-2 text-zinc-100 duration-150 hover:bg-zinc-700"
+            className="rounded-md bg-accent/25 p-2 text-zinc-100 hover:bg-accent/75 duration-300"
             title="Próximo mês"
           >
             <ChevronRight size={20} />

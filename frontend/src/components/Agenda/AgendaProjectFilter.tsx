@@ -12,14 +12,14 @@ export const AgendaProjectFilter = ({
   onChangeProject,
 }: AgendaProjectFilterProps) => {
   return (
-    <label className="flex min-w-56 flex-col gap-1 text-sm text-zinc-400">
+    <label className="flex min-w-56 flex-col gap-1 text-sm text-zinc-300">
       Filtrar por projeto
 
       <select
         value={selectedProjectId}
         onChange={(e) => onChangeProject(e.target.value)}
         className="rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2
-        text-sm text-zinc-100 outline-none duration-150 focus:border-accent"
+        text-sm text-text outline-none duration-150 focus:border-accent"
       >
         <option value="all">Todos os projetos</option>
 
