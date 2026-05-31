@@ -25,7 +25,7 @@ export const KanbanPage = () => {
       <LoadingOverlay show={loading} />
 
       <section className="w-full mx-auto flex max-w-6xl flex-col px-4 py-8 gap-6">
-          <header className="flex flex-col gap-4 rounded-2xl border border-secondary/20 bg-background-header p-6 shadow-md md:flex-row md:items-center md:justify-between">
+          <header className="flex flex-col gap-4 rounded-2xl bg-background-header p-6 shadow-md md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-2xl font-semibold text-text">Kanban</h1>
 
