@@ -39,7 +39,7 @@ export const AgendaCalendar = ({
     : [];
 
   return (
-    <div className="rounded-xl border border-zinc-700 bg-zinc-900 p-4">
+    <div className="rounded-xl bg-background-header/50 border-2 border-secondary shadow-md p-4">
       <div className="grid grid-cols-7 gap-2">
         {weekDays.map((day) => (
           <div
