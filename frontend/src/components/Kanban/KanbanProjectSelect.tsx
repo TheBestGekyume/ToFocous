@@ -15,7 +15,7 @@ export const KanbanProjectSelect = ({
     <div className="flex flex-col gap-2">
       <label
         htmlFor="kanban-project"
-        className="font-bold   text-primary text-sm"
+        className="font-bold text-primary text-sm"
       >
         Projeto
       </label>
