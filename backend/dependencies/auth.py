@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from backend.services.supabase_client import get_supabase_client
 
@@ -15,3 +15,13 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         return user_response.user  
     except Exception:
         raise HTTPException(status_code=401, detail="Usuário não autenticado")
+    
+
+def get_bearer_token(authorization: str = Header(...)):
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401,
+            detail="Token inválido ou ausente."
+        )
+
+    return authorization.replace("Bearer ", "")
