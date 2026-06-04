@@ -188,13 +188,21 @@ async def request_password_reset(
             "Content-Type": "application/json",
         }
 
+        params = {
+            "redirect_to": f"{FRONTEND_URL}/reset-password",
+        }
+
         payload = {
             "email": data.email,
-            "redirect_to": f"{FRONTEND_URL}/reset-password"
         }
 
         async with httpx.AsyncClient(timeout=20) as client:
-            response = await client.post(url, headers=headers, json=payload)
+            response = await client.post(
+                url,
+                headers=headers,
+                params=params,
+                json=payload,
+            )
 
         if response.status_code >= 400:
             raise HTTPException(
