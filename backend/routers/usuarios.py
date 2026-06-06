@@ -53,10 +53,9 @@ def get_my_user(
 
 
 @router.patch("/me/")
-def update_my_user(
+async def update_my_user(
     data: UpdateUsuario,
-    current_user=Depends(get_current_user),
-    supabase=Depends(get_db)
+    access_token: str = Depends(get_bearer_token),
 ):
     try:
         name = data.name.strip()
@@ -67,22 +66,38 @@ def update_my_user(
                 detail="O nome não pode ser vazio."
             )
 
-        response = (
-            supabase.table("usuarios")
-            .update({"name": name})
-            .eq("id", current_user.id)
-            .execute()
-        )
+        url = f"{SUPABASE_URL}/auth/v1/user"
 
-        if not response.data:
+        headers = {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+        }
+
+        payload = {
+            "data": {
+                "display_name": name,
+                "name": name,
+                "full_name": name,
+            }
+        }
+
+        async with httpx.AsyncClient(timeout=20) as client:
+            response = await client.put(
+                url,
+                headers=headers,
+                json=payload
+            )
+
+        if response.status_code >= 400:
             raise HTTPException(
-                status_code=404,
-                detail="Usuário não encontrado na tabela usuarios."
+                status_code=response.status_code,
+                detail=response.json()
             )
 
         return {
-            "message": "Nome atualizado com sucesso.",
-            "data": response.data[0]
+            "message": "Display Name atualizado com sucesso.",
+            "data": response.json()
         }
 
     except HTTPException:
@@ -222,7 +237,6 @@ async def request_password_reset(
 @router.patch("/me/email")
 async def update_my_email(
     data: UpdateEmail,
-    current_user=Depends(get_current_user),
     access_token: str = Depends(get_bearer_token),
 ):
     try:
@@ -248,7 +262,9 @@ async def update_my_email(
             )
 
         return {
-            "message": "Solicitação de troca de email enviada. Verifique o novo email para confirmar a alteração."
+            "message": "Solicitação de troca de email enviada. Verifique o novo email para confirmar a alteração.",
+            "new_email": data.email,
+            "data": response.json()
         }
 
     except HTTPException:
