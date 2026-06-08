@@ -41,15 +41,26 @@ def get_my_user(
                 detail="Usuário não encontrado na tabela usuarios."
             )
 
+        usuario = response.data[0]
+
         return {
             "message": "Usuário encontrado com sucesso.",
-            "data": response.data[0]
+            "data": {
+                "id": usuario.get("id"),
+                "name": usuario.get("name"),
+                "created_at": usuario.get("created_at"),
+                "email": current_user.email
+            }
         }
 
     except HTTPException:
         raise
+
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
 
 
 @router.patch("/me/")
