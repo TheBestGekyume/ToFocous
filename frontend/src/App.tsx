@@ -15,7 +15,6 @@ import { AgendaPage } from "./pages/AgendaPage";
 import { health } from "./services/api/healthService";
 import { AuthCallbackPage } from "./pages/AuthCallbackPage";
 import { KanbanPage } from "./pages/KanbanPage";
-import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 
 function App() {
   useEffect(() => {
@@ -62,7 +61,6 @@ function App() {
           <Route path="/configuracoes" element={<TaskSettingsPage />} />
           <Route path="/perfil" element={<ProfilePage />} />
           <Route path="/kanban" element={<KanbanPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
         </Route>
       </Routes>
     </div>
