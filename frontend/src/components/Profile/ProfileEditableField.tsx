@@ -62,45 +62,48 @@ export const ProfileEditableField = ({
           placeholder={placeholder}
           className={inputClass}
         />
+        {canEdit && (
+          <>
+            {!isEditing ? (
+              <button
+                type="button"
+                onClick={onStartEdit}
+                // disabled={!canEdit}
+                className={`${buttonBaseClass} bg-accent hover:bg-purple-700`}
+              >
+                <Pencil size={18} />
+                Editar
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={onSave}
+                  disabled={isLoading}
+                  className={`${buttonBaseClass} bg-green-600 hover:bg-green-800`}
+                >
+                  {isLoading ? (
+                    <LoadingDots />
+                  ) : (
+                    <>
+                      <Check size={18} />
+                      Salvar
+                    </>
+                  )}
+                </button>
 
-        {!isEditing ? (
-          <button
-            type="button"
-            onClick={onStartEdit}
-            disabled={!canEdit}
-            className={`${buttonBaseClass} bg-accent hover:bg-purple-700`}
-          >
-            <Pencil size={18} />
-            Editar
-          </button>
-        ) : (
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={onSave}
-              disabled={isLoading}
-              className={`${buttonBaseClass} bg-green-600 hover:bg-green-800`}
-            >
-              {isLoading ? (
-                <LoadingDots />
-              ) : (
-                <>
-                  <Check size={18} />
-                  Salvar
-                </>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={onCancelEdit}
-              disabled={isLoading}
-              className={`${buttonBaseClass} bg-zinc-700 hover:bg-zinc-600`}
-            >
-              <X size={18} />
-              Cancelar
-            </button>
-          </div>
+                <button
+                  type="button"
+                  onClick={onCancelEdit}
+                  disabled={isLoading}
+                  className={`${buttonBaseClass} bg-zinc-700 hover:bg-zinc-600`}
+                >
+                  <X size={18} />
+                  Cancelar
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 

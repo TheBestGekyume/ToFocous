@@ -7,6 +7,8 @@ export const useUser = () => {
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
 
+  console.log("User", user);
+
   const fetchMyUser = useCallback(async () => {
     setLoading(true);
 

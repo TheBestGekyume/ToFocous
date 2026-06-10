@@ -69,6 +69,8 @@ export const ProfilePage = () => {
     handleRequestPasswordReset,
   } = resetPasswordState;
 
+console.log(email)
+  
   return (
     <main className="w-full min-h-full p-4 md:p-8 text-text">
       <section className="max-w-4xl mx-auto bg-background-header border border-secondary/40 rounded-2xl shadow-xl p-5 md:p-7 flex flex-col gap-6">
@@ -141,7 +143,7 @@ export const ProfilePage = () => {
               helperText="A alteração pode exigir confirmação no novo e-mail."
               isEditing={isEditingEmail}
               isLoading={isUpdatingEmail}
-              canEdit={Boolean(email)}
+              canEdit={false}
               onChange={setNewEmail}
               onStartEdit={() => setIsEditingEmail(true)}
               onCancelEdit={handleCancelEmailEdit}
