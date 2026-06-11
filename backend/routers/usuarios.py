@@ -248,9 +248,16 @@ async def request_password_reset(
 @router.patch("/me/email")
 async def update_my_email(
     data: UpdateEmail,
+    current_user=Depends(get_current_user),
     access_token: str = Depends(get_bearer_token),
 ):
     try:
+        if current_user.email == data.email:
+            raise HTTPException(
+                status_code=400,
+                detail="O novo email deve ser diferente do email atual."
+            )
+
         url = f"{SUPABASE_URL}/auth/v1/user"
 
         headers = {
@@ -259,12 +266,21 @@ async def update_my_email(
             "Content-Type": "application/json",
         }
 
+        params = {
+            "redirect_to": f"{FRONTEND_URL}/"
+        }
+
         payload = {
             "email": data.email
         }
 
         async with httpx.AsyncClient(timeout=20) as client:
-            response = await client.put(url, headers=headers, json=payload)
+            response = await client.put(
+                url,
+                headers=headers,
+                params=params,
+                json=payload
+            )
 
         if response.status_code >= 400:
             raise HTTPException(
@@ -273,7 +289,7 @@ async def update_my_email(
             )
 
         return {
-            "message": "Solicitação de troca de email enviada. Verifique o novo email para confirmar a alteração.",
+            "message": "Solicitação de troca de email enviada. Verifique o email para confirmar a alteração.",
             "new_email": data.email,
             "data": response.json()
         }
