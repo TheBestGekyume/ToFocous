@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { KeyRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { LoadingDots } from "../components/_Common/LoadingDots";
@@ -6,7 +6,7 @@ import { supabaseAuthClient } from "../services/auth/supabaseAuthClient";
 
 type Feedback = {
   type: "success" | "error";
-  message: string;
+  message: ReactNode | string;
 };
 
 const inputClass = `
@@ -40,9 +40,8 @@ export const ResetPasswordPage = () => {
         const code = url.searchParams.get("code");
 
         if (code) {
-          const { error } = await supabaseAuthClient.auth.exchangeCodeForSession(
-            code
-          );
+          const { error } =
+            await supabaseAuthClient.auth.exchangeCodeForSession(code);
 
           if (error) {
             setFeedback({
@@ -62,8 +61,9 @@ export const ResetPasswordPage = () => {
 
         const accessToken = hashParams.get("access_token");
         const refreshToken = hashParams.get("refresh_token");
+        const type = hashParams.get("type");
 
-        if (accessToken && refreshToken) {
+        if (accessToken && refreshToken && type === "recovery") {
           const { error } = await supabaseAuthClient.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
@@ -81,25 +81,22 @@ export const ResetPasswordPage = () => {
           return;
         }
 
-        const { data } = await supabaseAuthClient.auth.getSession();
-
-        if (data.session) {
-          setCanResetPassword(true);
-          return;
-        }
-
         setFeedback({
           type: "error",
           message:
-            "Não foi possível validar o link de redefinição. Solicite um novo reset de senha.",
+            "Acesse esta página pelo link enviado no e-mail de redefinição de senha.",
         });
+
+        window.setTimeout(() => {
+          navigate("/");
+        }, 2000);
       } finally {
         setLoadingSession(false);
       }
     };
 
     loadRecoverySession();
-  }, []);
+  }, [navigate]);
 
   const handleUpdatePassword = async () => {
     const trimmedPassword = password.trim();
@@ -147,11 +144,20 @@ export const ResetPasswordPage = () => {
 
       setFeedback({
         type: "success",
-        message: "Senha atualizada com sucesso. Redirecionando para o login...",
+        message: (
+          <>
+            <span>
+              Senha atualizada com sucesso. Redirecionando para o login
+            </span>{" "}
+            <LoadingDots />
+          </>
+        ),
       });
 
       setPassword("");
       setConfirmPassword("");
+
+      await supabaseAuthClient.auth.signOut();
 
       window.setTimeout(() => {
         navigate("/acesso");
@@ -179,7 +185,7 @@ export const ResetPasswordPage = () => {
 
         {loadingSession ? (
           <p className="text-lg text-accent text-center">
-            <span className="text-text">Validando link</span> <LoadingDots />
+            <span className="text-text">Validando link</span> <LoadingDots  />
           </p>
         ) : (
           <div className="flex flex-col gap-4">
@@ -239,13 +245,7 @@ export const ResetPasswordPage = () => {
               disabled={!canResetPassword || updatingPassword}
               className={buttonClass}
             >
-              {updatingPassword ? (
-                <LoadingDots />
-              ) : (
-                <>
-                  Atualizar senha
-                </>
-              )}
+              {updatingPassword ? <LoadingDots /> : <>Atualizar senha</>}
             </button>
           </div>
         )}
