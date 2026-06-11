@@ -19,7 +19,7 @@ export const updateMyUser = async (
   payload: TUpdateUserDTO
 ): Promise<TUser> => {
   const response = await api.patch<TUserResponse>("/usuarios/me/", payload);
-
+  // console.log("updateMyUser -> ",response.data.data)
   return response.data.data;
 };
 

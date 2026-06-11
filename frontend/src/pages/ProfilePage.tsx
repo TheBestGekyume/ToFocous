@@ -143,7 +143,7 @@ console.log(email)
               helperText="A alteração pode exigir confirmação no novo e-mail."
               isEditing={isEditingEmail}
               isLoading={isUpdatingEmail}
-              canEdit={false}
+              // canEdit={false}
               onChange={setNewEmail}
               onStartEdit={() => setIsEditingEmail(true)}
               onCancelEdit={handleCancelEmailEdit}

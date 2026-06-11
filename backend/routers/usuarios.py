@@ -106,15 +106,28 @@ async def update_my_user(
                 detail=response.json()
             )
 
+        supabase_user = response.json()
+        user_metadata = supabase_user.get("user_metadata") or {}
+
         return {
             "message": "Display Name atualizado com sucesso.",
-            "data": response.json()
+            "data": {
+                "id": supabase_user.get("id"),
+                "name": (
+                    user_metadata.get("name")
+                    or user_metadata.get("display_name")
+                    or user_metadata.get("full_name")
+                    or name
+                ),
+                "email": supabase_user.get("email"),
+            }
         }
 
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+        
     
 @router.patch("/me/password")
 async def update_my_password(
