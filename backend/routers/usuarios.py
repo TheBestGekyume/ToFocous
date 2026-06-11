@@ -4,7 +4,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from backend.core.config import settings
 from backend.dependencies.auth import get_current_user
-from backend.dependencies.supabase import get_db
+# from backend.dependencies.supabase import get_db
 from backend.dependencies.auth import get_bearer_token
 from backend.models.usuarios import (
     UpdateUsuario,
@@ -15,46 +15,34 @@ from backend.models.usuarios import (
 
 router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 
-
 SUPABASE_URL = settings.SUPABASE_URL
 SUPABASE_ANON_KEY = settings.SUPABASE_ANON_KEY
 FRONTEND_URL = settings.FRONTEND_URL    
 
 
-
 @router.get("/me/")
 def get_my_user(
     current_user=Depends(get_current_user),
-    supabase=Depends(get_db)
 ):
     try:
-        response = (
-            supabase.table("usuarios")
-            .select("id, name, created_at")
-            .eq("id", current_user.id)
-            .execute()
+        user_metadata = current_user.user_metadata or {}
+
+        name = (
+            user_metadata.get("name")
+            or user_metadata.get("display_name")
+            or user_metadata.get("full_name")
+            or current_user.email
         )
-
-        if not response.data:
-            raise HTTPException(
-                status_code=404,
-                detail="Usuário não encontrado na tabela usuarios."
-            )
-
-        usuario = response.data[0]
 
         return {
             "message": "Usuário encontrado com sucesso.",
             "data": {
-                "id": usuario.get("id"),
-                "name": usuario.get("name"),
-                "created_at": usuario.get("created_at"),
-                "email": current_user.email
+                "id": current_user.id,
+                "name": name,
+                "email": current_user.email,
+                "created_at": current_user.created_at,
             }
         }
-
-    except HTTPException:
-        raise
 
     except Exception as e:
         raise HTTPException(
