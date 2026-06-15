@@ -2,11 +2,12 @@ import { useEffect, useState, type ReactNode } from "react";
 import { KeyRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { LoadingDots } from "../components/_Common/LoadingDots";
+import { FeedbackToast } from "../components/_Common/FeedbackToast";
 import { supabaseAuthClient } from "../services/auth/supabaseAuthClient";
 
 type Feedback = {
   type: "success" | "error";
-  message: ReactNode | string;
+  message: ReactNode;
 };
 
 const inputClass = `
@@ -34,7 +35,7 @@ export const ResetPasswordPage = () => {
   const [canResetPassword, setCanResetPassword] = useState(false);
 
   useEffect(() => {
-    const loadRecoverySession = async () => {
+    const loadRecoverySession = async (): Promise<void> => {
       try {
         const url = new URL(window.location.href);
         const code = url.searchParams.get("code");
@@ -95,10 +96,10 @@ export const ResetPasswordPage = () => {
       }
     };
 
-    loadRecoverySession();
+    void loadRecoverySession();
   }, [navigate]);
 
-  const handleUpdatePassword = async () => {
+  const handleUpdatePassword = async (): Promise<void> => {
     const trimmedPassword = password.trim();
     const trimmedConfirmPassword = confirmPassword.trim();
 
@@ -145,12 +146,10 @@ export const ResetPasswordPage = () => {
       setFeedback({
         type: "success",
         message: (
-          <>
-            <span>
-              Senha atualizada com sucesso. Redirecionando para o login
-            </span>{" "}
+          <span className="flex items-center gap-1.5">
+            Senha atualizada com sucesso. Redirecionando para o login
             <LoadingDots />
-          </>
+          </span>
         ),
       });
 
@@ -169,6 +168,13 @@ export const ResetPasswordPage = () => {
 
   return (
     <main className="w-full min-h-screen p-4 md:p-8 text-text flex items-center justify-center">
+      {feedback && (
+        <FeedbackToast
+          type={feedback.type}
+          message={feedback.message}
+        />
+      )}
+
       <section className="w-full max-w-md bg-background-header border border-secondary/40 rounded-2xl shadow-xl p-5 md:p-7 flex flex-col gap-6">
         <header className="flex items-center gap-3">
           <div className="p-3 rounded-full bg-accent/20 text-primary">
@@ -185,22 +191,10 @@ export const ResetPasswordPage = () => {
 
         {loadingSession ? (
           <p className="text-lg text-accent text-center">
-            <span className="text-text">Validando link</span> <LoadingDots  />
+            <span className="text-text">Validando link</span> <LoadingDots />
           </p>
         ) : (
           <div className="flex flex-col gap-4">
-            {feedback && (
-              <p
-                className={`text-sm rounded-lg p-3 border ${
-                  feedback.type === "success"
-                    ? "text-green-300 bg-green-950/30 border-green-700/40"
-                    : "text-red-300 bg-red-950/30 border-red-700/40"
-                }`}
-              >
-                {feedback.message}
-              </p>
-            )}
-
             <div className="flex flex-col gap-2">
               <label
                 htmlFor="reset-password"

@@ -43,6 +43,18 @@ export const useProfile = () => {
   }, [fetchMyUser]);
 
   useEffect(() => {
+    if (!feedback) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setFeedback(null);
+    }, 4000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [feedback]);
+
+  useEffect(() => {
     if (!user) return;
 
     setName(user.name);
@@ -218,54 +230,54 @@ export const useProfile = () => {
   };
 
   return {
-  userState: {
-    user,
-    loading,
-    updating,
-  },
+    userState: {
+      user,
+      loading,
+      updating,
+    },
 
-  nameState: {
-    name,
-    setName,
-    isEditingName,
-    setIsEditingName,
-    nameError,
-    handleCancelNameEdit,
-    handleUpdateUser,
-  },
+    nameState: {
+      name,
+      setName,
+      isEditingName,
+      setIsEditingName,
+      nameError,
+      handleCancelNameEdit,
+      handleUpdateUser,
+    },
 
-  emailState: {
-    email,
-    newEmail,
-    setNewEmail,
-    isEditingEmail,
-    setIsEditingEmail,
-    isUpdatingEmail,
-    emailError,
-    handleCancelEmailEdit,
-    handleUpdateEmail,
-  },
+    emailState: {
+      email,
+      newEmail,
+      setNewEmail,
+      isEditingEmail,
+      setIsEditingEmail,
+      isUpdatingEmail,
+      emailError,
+      handleCancelEmailEdit,
+      handleUpdateEmail,
+    },
 
-  passwordState: {
-    currentPassword,
-    setCurrentPassword,
-    newPassword,
-    setNewPassword,
-    confirmNewPassword,
-    setConfirmNewPassword,
-    isUpdatingPassword,
-    passwordError,
-    handleUpdatePassword,
-  },
+    passwordState: {
+      currentPassword,
+      setCurrentPassword,
+      newPassword,
+      setNewPassword,
+      confirmNewPassword,
+      setConfirmNewPassword,
+      isUpdatingPassword,
+      passwordError,
+      handleUpdatePassword,
+    },
 
-  resetPasswordState: {
-    resetEmail,
-    setResetEmail,
-    isSendingReset,
-    resetError,
-    handleRequestPasswordReset,
-  },
+    resetPasswordState: {
+      resetEmail,
+      setResetEmail,
+      isSendingReset,
+      resetError,
+      handleRequestPasswordReset,
+    },
 
-  feedback,
-};
+    feedback,
+  };
 };
