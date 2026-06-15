@@ -34,7 +34,7 @@ export const AgendaHeader = ({
       <div>
         <h2 className="text-2xl font-bold text-text">Agenda</h2>
 
-        <p className="mt-1 text-sm font-medium text-zinc-300">
+        <p className="mt-1 text-sm text-primary font-semibold">
           {getMonthTitle(currentMonth)}
         </p>
       </div>
