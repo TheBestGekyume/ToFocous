@@ -1,8 +1,8 @@
 import { Check, KeyRound, RotateCcwKey, UserRound } from "lucide-react";
 import { LoadingDots } from "../components/_Common/LoadingDots";
-
 import { ProfileEditableField } from "../components/Profile/ProfileEditableField";
 import { useProfile } from "../hooks/useProfile";
+import { FeedbackToast } from "../components/_Common/FeedbackToast";
 
 const inputClass = `
   w-full p-3 rounded-lg bg-zinc-800 border border-transparent text-text
@@ -38,7 +38,7 @@ export const ProfilePage = () => {
   } = nameState;
 
   const {
-    email,
+    // email,
     newEmail,
     setNewEmail,
     isEditingEmail,
@@ -69,10 +69,14 @@ export const ProfilePage = () => {
     handleRequestPasswordReset,
   } = resetPasswordState;
 
-console.log(email)
-  
+  // console.log(email);
+
   return (
     <main className="w-full min-h-full p-4 md:p-8 text-text">
+      {feedback && (
+        <FeedbackToast type={feedback.type} message={feedback.message} />
+      )}
+
       <section className="max-w-4xl mx-auto bg-background-header border border-secondary/40 rounded-2xl shadow-xl p-5 md:p-7 flex flex-col gap-6">
         <header className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -99,18 +103,6 @@ console.log(email)
           </p>
         ) : (
           <div className="flex flex-col gap-6">
-            {feedback && (
-              <p
-                className={`text-sm rounded-lg p-3 border ${
-                  feedback.type === "success"
-                    ? "text-green-300 bg-green-950/30 border-green-700/40"
-                    : "text-red-300 bg-red-950/30 border-red-700/40"
-                }`}
-              >
-                {feedback.message}
-              </p>
-            )}
-
             <div className="flex bg-background-body border border-secondary/40 rounded-xl p-4">
               <p className="text-sm text-primary">
                 ID do usuário:{" "}
@@ -140,7 +132,7 @@ console.log(email)
               value={newEmail}
               placeholder="Ainda não retornado pelo backend"
               error={emailError}
-              helperText="A alteração pode exigir confirmação no novo e-mail."
+              helperText="A alteração vai exigir confirmação no e-mail atual."
               isEditing={isEditingEmail}
               isLoading={isUpdatingEmail}
               // canEdit={false}
@@ -153,36 +145,66 @@ console.log(email)
             <div className="flex flex-col gap-3 border-t border-secondary/30 pt-5">
               <div className="flex items-center gap-2 text-primary">
                 <KeyRound size={20} />
-                <h2 className="text-lg font-semibold">Trocar senha</h2>
+                <h2 className="text-lg text-text font-semibold">
+                  Trocar senha
+                </h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  disabled={isUpdatingPassword}
-                  placeholder="Senha atual"
-                  className={inputClass}
-                />
+                <fieldset>
+                  <label
+                    htmlFor="currentPassword"
+                    className="text-sm font-semibold text-primary"
+                  >
+                    Senha atual
+                  </label>
+                  <input
+                    id="currentPassword"
+                    name="currentPassword"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    disabled={isUpdatingPassword}
+                    className={inputClass}
+                  />
+                </fieldset>
 
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  disabled={isUpdatingPassword}
-                  placeholder="Nova senha"
-                  className={inputClass}
-                />
+                <fieldset>
+                  <label
+                    htmlFor="newPassword"
+                    className="text-sm font-semibold text-primary"
+                  >
+                    Nova senha
+                  </label>
+                  <input
+                    id="newPassword"
+                    name="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    disabled={isUpdatingPassword}
+                    className={inputClass}
+                  />
+                </fieldset>
 
-                <input
-                  type="password"
-                  value={confirmNewPassword}
-                  onChange={(e) => setConfirmNewPassword(e.target.value)}
-                  disabled={isUpdatingPassword}
-                  placeholder="Confirmar nova senha"
-                  className={inputClass}
-                />
+                <fieldset>
+                  <label
+                    htmlFor="confirmPassword"
+                    className="text-sm font-semibold text-primary"
+                  >
+                    Confirme a senha
+                  </label>
+
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    disabled={isUpdatingPassword}
+                    className={inputClass}
+                  />
+                </fieldset>
               </div>
 
               {passwordError && (
@@ -209,7 +231,9 @@ console.log(email)
             <div className="flex flex-col gap-3 border-t border-secondary/30 pt-5">
               <div className="flex items-center gap-2 text-primary">
                 <RotateCcwKey size={20} />
-                <h2 className="text-lg font-semibold">Resetar senha</h2>
+                <h2 className="text-lg text-text font-semibold">
+                  Resetar senha
+                </h2>
               </div>
 
               <p className="text-sm text-primary/80">
@@ -221,7 +245,7 @@ console.log(email)
                   type="email"
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
-                  disabled={isSendingReset}
+                  disabled
                   placeholder="E-mail da conta"
                   className={inputClass}
                 />
