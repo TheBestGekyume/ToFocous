@@ -134,3 +134,54 @@ def remove_project_user(
         raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.delete("/leave/{project_id}")
+def leave_project(
+    project_id: str,
+    current_user=Depends(get_current_user),
+    supabase=Depends(get_db)
+):
+    try:
+        project_response = supabase.table("projects") \
+            .select("id, user_id") \
+            .eq("id", project_id) \
+            .execute()
+
+        if not project_response.data:
+            raise HTTPException(status_code=404, detail="Projeto não encontrado.")
+
+        project = project_response.data[0]
+
+        if project["user_id"] == current_user.id:
+            raise HTTPException(
+                status_code=400,
+                detail="O dono do projeto não pode sair do próprio projeto."
+            )
+
+        membership_response = supabase.table("project_users") \
+            .select("id") \
+            .eq("project_id", project_id) \
+            .eq("user_id", current_user.id) \
+            .execute()
+
+        if not membership_response.data:
+            raise HTTPException(
+                status_code=404,
+                detail="Você não faz parte deste projeto."
+            )
+
+        response = supabase.table("project_users") \
+            .delete() \
+            .eq("project_id", project_id) \
+            .eq("user_id", current_user.id) \
+            .execute()
+
+        return {
+            "message": "Você saiu do projeto com sucesso.",
+            "data": response.data
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
