@@ -12,10 +12,10 @@ type LoginResponse = {
   user_id: string;
 };
 
-export async function loginUser(payload: LoginPayload) {
-  const response = await api.post<LoginResponse>("/auth/login/", payload);
+export const loginUser = async (payload: LoginPayload) => {
   resetAuthState();
-  // console.log(response)
+
+  const response = await api.post<LoginResponse>("/auth/login/", payload);
 
   setTokens(response.data.access_token, response.data.refresh_token);
   localStorage.setItem("user_id", response.data.user_id);
@@ -23,11 +23,11 @@ export async function loginUser(payload: LoginPayload) {
   return response;
 }
 
-export async function signUpUser(payload: {
+export const signUpUser = async (payload: {
   name: string;
   email: string;
   password: string;
-}) {
+}) => {
   const response = await api.post("/auth/signup/", payload);
   return response;
 }
