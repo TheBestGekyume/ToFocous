@@ -55,7 +55,8 @@ export const TaskPage = () => {
           <ProjectItem project={currentProject} singleProjectItem={true} />
         </div>
       )}
-      <div className="flex flex-col bg-background-header/40 border border-zinc-500 rounded-xl p-5 pb-8 gap-8">
+      <div className="flex flex-col bg-background-header/50 
+      border-2 border-secondary rounded-xl p-5 pb-8 gap-8">
         <div className="w-full transition-all duration-300">
           <TaskForm />
 
