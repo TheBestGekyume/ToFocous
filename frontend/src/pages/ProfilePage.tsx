@@ -77,7 +77,7 @@ export const ProfilePage = () => {
         <FeedbackToast type={feedback.type} message={feedback.message} />
       )}
 
-      <section className="max-w-4xl mx-auto bg-background-header border border-secondary/40 rounded-2xl shadow-xl p-5 md:p-7 flex flex-col gap-6">
+      <section className="max-w-4xl mx-auto bg-background-header rounded-2xl shadow-xl p-5 md:p-7 flex flex-col gap-6">
         <header className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-full bg-accent/20 text-primary">
@@ -142,7 +142,7 @@ export const ProfilePage = () => {
               onSave={handleUpdateEmail}
             />
 
-            <div className="flex flex-col gap-3 border-t border-secondary/30 pt-5">
+            <div className="flex flex-col gap-3 border-t border-secondary/50 pt-5">
               <div className="flex items-center gap-2 text-primary">
                 <KeyRound size={20} />
                 <h2 className="text-lg text-text font-semibold">
@@ -228,7 +228,7 @@ export const ProfilePage = () => {
               </button>
             </div>
 
-            <div className="flex flex-col gap-3 border-t border-secondary/30 pt-5">
+            <div className="flex flex-col gap-3 border-t border-secondary/50 pt-5">
               <div className="flex items-center gap-2 text-primary">
                 <RotateCcwKey size={20} />
                 <h2 className="text-lg text-text font-semibold">

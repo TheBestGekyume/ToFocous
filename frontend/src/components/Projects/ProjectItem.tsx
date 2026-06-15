@@ -8,17 +8,21 @@ import { ProjectUsersModal } from "./ProjectUsersModal";
 type Props = {
   project: TProject;
   onEdit?: (project: TProject) => void;
-  showActions?: boolean;
+  singleProjectItem?: boolean;
 };
 
-export const ProjectItem = ({ project, onEdit, showActions = true }: Props) => {
+export const ProjectItem = ({
+  project,
+  onEdit,
+  singleProjectItem = false,
+}: Props) => {
   const navigate = useNavigate();
   const { deleteProject } = useProjects();
 
   const [showUsersModal, setShowUsersModal] = useState(false);
 
   const handleProjectClick = () => {
-    if (showActions) {
+    if (!singleProjectItem) {
       navigate(`/projects/${project.id}`);
       return;
     }
@@ -29,8 +33,8 @@ export const ProjectItem = ({ project, onEdit, showActions = true }: Props) => {
   return (
     <>
       <div
-        className={`relative p-4 rounded-xl shadow-md duration-300 hover:scale-105 cursor-pointer ${
-          showActions ? "" : "w-max mx-auto"
+        className={`relative h-full min-h-28 p-4 rounded-xl shadow-md duration-300 hover:scale-[1.02] cursor-pointer ${
+          singleProjectItem ? "w-fit max-w-full mx-auto" : ""
         }`}
         style={{
           backgroundColor: project.color + "75",
@@ -38,23 +42,23 @@ export const ProjectItem = ({ project, onEdit, showActions = true }: Props) => {
         }}
         onClick={handleProjectClick}
       >
-        <div className="flex justify-between items-center">
-          {!showActions && (
-            <button
-              className="p-2 me-5 bg-zinc-700/75 hover:bg-zinc-800/75 duration-300 w-fit rounded-full h-fit"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/projects/`);
-              }}
-            >
-              <ArrowLeft size={24} />
-            </button>
-          )}
-
-          <div className="flex items-center">
-            {showActions && (
+        <div className="flex h-full justify-between gap-3">
+          <div className="flex min-w-0 items-center">
+            {singleProjectItem && (
               <button
-                className="p-2 rounded-full bg-blue-500 hover:bg-blue-700 transition"
+                className="p-2 me-5 bg-zinc-700/75 hover:bg-zinc-800/75 duration-300 w-fit rounded-full h-fit"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/projects/");
+                }}
+              >
+                <ArrowLeft size={24} />
+              </button>
+            )}
+
+            {!singleProjectItem && (
+              <button
+                className="shrink-0 p-2 rounded-full bg-blue-500 hover:bg-blue-700 transition"
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowUsersModal(true);
@@ -64,57 +68,58 @@ export const ProjectItem = ({ project, onEdit, showActions = true }: Props) => {
               </button>
             )}
 
-            <div className="w-full text-start px-3">
-              <h2 className="text-xl font-bold mb-2">
+            <div className="min-w-0 text-start px-3">
+              <h2
+                className={`text-xl font-bold mb-2 ${singleProjectItem ? "" : "line-clamp-2"}`}
+              >
                 {project.title[0].toUpperCase() + project.title.substring(1)}
               </h2>
 
-              <p className="text-sm text-zinc-300">{project.description}</p>
+              <p
+                className={`text-sm text-zinc-300 ${singleProjectItem ? "text-wrap" : "line-clamp-2"}`}
+              >
+                {project.description}
+              </p>
             </div>
           </div>
 
-          {/* {showActions && ( */}
-            <div className="flex flex-col gap-2 ps-2">
-              <button
-                className="p-2 rounded-full bg-yellow-400 hover:bg-yellow-600 transition shadow-md"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit?.(project);
-                }}
-              >
-                <Pencil size={16} />
-              </button>
+          <div className="flex shrink-0 flex-col gap-2 ps-2 justify-center">
+            <button
+              className="p-2 rounded-full bg-yellow-400 hover:bg-yellow-600 transition shadow-md"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.(project);
+              }}
+            >
+              <Pencil size={16} />
+            </button>
 
-              <button
-                className="p-2 rounded-full bg-red-500 hover:bg-red-700 transition shadow-md"
-                onClick={(e) => {
-                  e.stopPropagation();
+            <button
+              className="p-2 rounded-full bg-red-500 hover:bg-red-700 transition shadow-md"
+              onClick={(e) => {
+                e.stopPropagation();
 
-                  if (
-                    confirm(
-                      `O Projeto ${project.title} e todas as tarefas e subtarefas serão PERMANENTEMENTE excluídos. Deseja continuar?`
-                    )
-                  ) {
-                    deleteProject(project.id);
-                  }
-                }}
-              >
-                <Trash2 size={16} className="text-white" />
-              </button>
-            </div>
-          {/* )} */}
+                if (
+                  confirm(
+                    `O Projeto ${project.title} e todas as tarefas e subtarefas serão PERMANENTEMENTE excluídos. Deseja continuar?`
+                  )
+                ) {
+                  deleteProject(project.id);
+                }
+              }}
+            >
+              <Trash2 size={16} className="text-white" />
+            </button>
+          </div>
         </div>
       </div>
 
-      
-
-        <ProjectUsersModal
-          isOpen={showUsersModal}
-          projectId={project.id}
-          projectTitle={project.title}
-          onClose={() => setShowUsersModal(false)}
-        />
-      
+      <ProjectUsersModal
+        isOpen={showUsersModal}
+        projectId={project.id}
+        projectTitle={project.title}
+        onClose={() => setShowUsersModal(false)}
+      />
     </>
   );
 };
