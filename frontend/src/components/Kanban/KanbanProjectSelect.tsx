@@ -15,7 +15,7 @@ export const KanbanProjectSelect = ({
     <div className="flex flex-col gap-2">
       <label
         htmlFor="kanban-project"
-        className="font-bold text-primary text-sm"
+        className="font-medium text-text/75 text-sm"
       >
         Projeto
       </label>
@@ -25,16 +25,16 @@ export const KanbanProjectSelect = ({
         value={selectedProjectId}
         onChange={(event) => onChangeProject(event.target.value)}
         className="
-          h-10 rounded-md border border-secondary/30 bg-background-header
-          px-3 text-text outline-none duration-100
-          hover:border-secondary focus:border-accent
+          h-10 rounded-md border border-zinc-700 bg-zinc-950
+          px-3 py-2 text-text outline-none duration-150
+          hover:bg-zinc-900 focus:bg-zinc-950 focus:border-accent
         "
       >
         {projects.map((project) => (
           <option
             key={project.id}
             value={project.id}
-            className="bg-background-header text-text"
+            className="text-text"
           >
             {project.title}
           </option>
