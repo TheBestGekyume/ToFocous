@@ -10,11 +10,9 @@ export const ProjectList = ({ onEdit }: Props) => {
   const { projects } = useProjects();
 
   return (
-    <div className="columns-1 sm:columns-2 md:columns-3 mt-4 mb-10">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 auto-rows-fr gap-4 mt-4 mb-10">
       {projects.map((project) => (
-        <div key={project.id} className="mb-4 break-inside-avoid">
-          <ProjectItem project={project} onEdit={onEdit} />
-        </div>
+        <ProjectItem key={project.id} project={project} onEdit={onEdit} />
       ))}
     </div>
   );
