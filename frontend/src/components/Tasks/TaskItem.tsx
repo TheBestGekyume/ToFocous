@@ -131,6 +131,7 @@ export const TaskItem = ({ task }: TaskProps) => {
               handleChange("title", e.target.value);
               requestAnimationFrame(resizeTitle);
             }}
+            disabled={isDone}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             placeholder="Insira o título"
@@ -151,6 +152,7 @@ export const TaskItem = ({ task }: TaskProps) => {
                 handleChange("description", e.target.value);
                 requestAnimationFrame(checkDescriptionOverflow);
               }}
+              disabled={isDone}
               onBlur={handleBlur}
               onFocus={checkDescriptionOverflow}
               onMouseEnter={checkDescriptionOverflow}
@@ -158,9 +160,9 @@ export const TaskItem = ({ task }: TaskProps) => {
               onKeyDown={handleDescriptionKeyDown}
               spellCheck={false}
               rows={2}
-              className="w-full resize-none overflow-hidden rounded-sm border border-transparent px-1 m-0 text-text outline-none duration-100
+              className={`w-full resize-none overflow-hidden rounded-sm border border-transparent px-1 m-0 text-text outline-none duration-100
       focus:bg-zinc-900 focus:border-accent focus:resize-y hover:resize-y
-      hover:bg-zinc-700"
+      hover:bg-zinc-700  ${isDone ? "line-through text-zinc-500" : ""}`}
             />
 
             {descriptionOverflow && (

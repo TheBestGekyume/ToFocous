@@ -22,6 +22,8 @@ export const ProfilePage = () => {
     emailState,
     passwordState,
     resetPasswordState,
+    createPasswordState,
+    authInfoState,
     feedback,
   } = useProfile();
 
@@ -69,7 +71,17 @@ export const ProfilePage = () => {
     handleRequestPasswordReset,
   } = resetPasswordState;
 
-  // console.log(email);
+  const {
+    createPassword,
+    setCreatePassword,
+    confirmCreatePassword,
+    setConfirmCreatePassword,
+    isCreatingPassword,
+    createPasswordError,
+    handleCreatePassword,
+  } = createPasswordState;
+
+  const { hasPassword, hasGoogleAuth } = authInfoState;
 
   return (
     <main className="w-full min-h-full p-4 md:p-8 text-text">
@@ -105,7 +117,7 @@ export const ProfilePage = () => {
           <div className="flex flex-col gap-6">
             <div className="flex bg-background-body border border-secondary/40 rounded-xl p-4">
               <p className="text-sm text-primary">
-                ID do usuário:{" "}
+                ID do usuário:
                 <span className="text-sm break-all text-zinc-300">
                   {user.id}
                 </span>
@@ -142,135 +154,209 @@ export const ProfilePage = () => {
               onSave={handleUpdateEmail}
             />
 
-            <div className="flex flex-col gap-3 border-t border-secondary/50 pt-5">
-              <div className="flex items-center gap-2 text-primary">
-                <KeyRound size={20} />
-                <h2 className="text-lg text-text font-semibold">
-                  Trocar senha
-                </h2>
-              </div>
+            {hasPassword === false && hasGoogleAuth ? (
+              <div className="flex flex-col gap-3 border-t border-secondary/50 pt-5">
+                <div className="flex items-center gap-2 text-primary">
+                  <KeyRound size={20} />
+                  <h2 className="text-lg text-text font-semibold">
+                    Criar senha de acesso
+                  </h2>
+                </div>
+                <p className="text-sm text-primary/80">
+                  Sua conta usa login com Google. Crie uma senha para também
+                  acessar com e-mail e senha.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <fieldset>
+                    <label
+                      htmlFor="createPassword"
+                      className="text-sm font-semibold text-primary"
+                    >
+                      Senha
+                    </label>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                <fieldset>
-                  <label
-                    htmlFor="currentPassword"
-                    className="text-sm font-semibold text-primary"
-                  >
-                    Senha atual
-                  </label>
-                  <input
-                    id="currentPassword"
-                    name="currentPassword"
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    disabled={isUpdatingPassword}
-                    className={inputClass}
-                  />
-                </fieldset>
+                    <input
+                      id="createPassword"
+                      name="createPassword"
+                      type="password"
+                      value={createPassword}
+                      onChange={(e) => setCreatePassword(e.target.value)}
+                      disabled={isCreatingPassword}
+                      className={inputClass}
+                    />
+                  </fieldset>
 
-                <fieldset>
-                  <label
-                    htmlFor="newPassword"
-                    className="text-sm font-semibold text-primary"
-                  >
-                    Nova senha
-                  </label>
-                  <input
-                    id="newPassword"
-                    name="newPassword"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    disabled={isUpdatingPassword}
-                    className={inputClass}
-                  />
-                </fieldset>
+                  <fieldset>
+                    <label
+                      htmlFor="confirmCreatePassword"
+                      className="text-sm font-semibold text-primary"
+                    >
+                      Confirme a senha
+                    </label>
 
-                <fieldset>
-                  <label
-                    htmlFor="confirmPassword"
-                    className="text-sm font-semibold text-primary"
-                  >
-                    Confirme a senha
-                  </label>
-
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    value={confirmNewPassword}
-                    onChange={(e) => setConfirmNewPassword(e.target.value)}
-                    disabled={isUpdatingPassword}
-                    className={inputClass}
-                  />
-                </fieldset>
-              </div>
-
-              {passwordError && (
-                <p className="text-sm text-red-400">{passwordError}</p>
-              )}
-
-              <button
-                type="button"
-                onClick={handleUpdatePassword}
-                disabled={isUpdatingPassword}
-                className={`${buttonBaseClass} bg-green-600 hover:bg-green-800 self-end`}
-              >
-                {isUpdatingPassword ? (
-                  <LoadingDots />
-                ) : (
-                  <>
-                    <Check size={18} />
-                    Atualizar senha
-                  </>
+                    <input
+                      id="confirmCreatePassword"
+                      name="confirmCreatePassword"
+                      type="password"
+                      value={confirmCreatePassword}
+                      onChange={(e) => setConfirmCreatePassword(e.target.value)}
+                      disabled={isCreatingPassword}
+                      className={inputClass}
+                    />
+                  </fieldset>
+                </div>
+                {createPasswordError && (
+                  <p className="text-sm text-red-400">{createPasswordError}</p>
                 )}
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-3 border-t border-secondary/50 pt-5">
-              <div className="flex items-center gap-2 text-primary">
-                <RotateCcwKey size={20} />
-                <h2 className="text-lg text-text font-semibold">
-                  Resetar senha
-                </h2>
-              </div>
-
-              <p className="text-sm text-primary/80">
-                Envie um link de redefinição para o e-mail da conta.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-2">
-                <input
-                  type="email"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  disabled
-                  placeholder="E-mail da conta"
-                  className={inputClass}
-                />
-
                 <button
                   type="button"
-                  onClick={handleRequestPasswordReset}
-                  disabled={isSendingReset}
-                  className={`${buttonBaseClass} bg-zinc-700 hover:bg-zinc-600 whitespace-nowrap`}
+                  onClick={handleCreatePassword}
+                  disabled={isCreatingPassword}
+                  className={`${buttonBaseClass} bg-green-600 hover:bg-green-800 self-end`}
                 >
-                  {isSendingReset ? (
+                  {isCreatingPassword ? (
                     <LoadingDots />
                   ) : (
                     <>
-                      <RotateCcwKey size={18} />
-                      Enviar reset
+                      <Check size={18} />
+                      Criar senha
                     </>
                   )}
                 </button>
               </div>
+            ) : (
+              <>
+                <div className="flex flex-col gap-3 border-t border-secondary/50 pt-5">
+                  <div className="flex items-center gap-2 text-primary">
+                    <KeyRound size={20} />
+                    <h2 className="text-lg text-text font-semibold">
+                      Trocar senha
+                    </h2>
+                  </div>
 
-              {resetError && (
-                <p className="text-sm text-red-400">{resetError}</p>
-              )}
-            </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <fieldset>
+                      <label
+                        htmlFor="currentPassword"
+                        className="text-sm font-semibold text-primary"
+                      >
+                        Senha atual
+                      </label>
+                      <input
+                        id="currentPassword"
+                        name="currentPassword"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        disabled={isUpdatingPassword}
+                        className={inputClass}
+                      />
+                    </fieldset>
+
+                    <fieldset>
+                      <label
+                        htmlFor="newPassword"
+                        className="text-sm font-semibold text-primary"
+                      >
+                        Nova senha
+                      </label>
+                      <input
+                        id="newPassword"
+                        name="newPassword"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        disabled={isUpdatingPassword}
+                        className={inputClass}
+                      />
+                    </fieldset>
+
+                    <fieldset>
+                      <label
+                        htmlFor="confirmPassword"
+                        className="text-sm font-semibold text-primary"
+                      >
+                        Confirme a senha
+                      </label>
+
+                      <input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type="password"
+                        value={confirmNewPassword}
+                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        disabled={isUpdatingPassword}
+                        className={inputClass}
+                      />
+                    </fieldset>
+                  </div>
+
+                  {passwordError && (
+                    <p className="text-sm text-red-400">{passwordError}</p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleUpdatePassword}
+                    disabled={isUpdatingPassword}
+                    className={`${buttonBaseClass} bg-green-600 hover:bg-green-800 self-end`}
+                  >
+                    {isUpdatingPassword ? (
+                      <LoadingDots />
+                    ) : (
+                      <>
+                        <Check size={18} />
+                        Atualizar senha
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-3 border-t border-secondary/50 pt-5">
+                  <div className="flex items-center gap-2 text-primary">
+                    <RotateCcwKey size={20} />
+                    <h2 className="text-lg text-text font-semibold">
+                      Resetar senha
+                    </h2>
+                  </div>
+
+                  <p className="text-sm text-primary/80">
+                    Envie um link de redefinição para o e-mail da conta.
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="email"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      disabled
+                      placeholder="E-mail da conta"
+                      className={inputClass}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={handleRequestPasswordReset}
+                      disabled={isSendingReset}
+                      className={`${buttonBaseClass} bg-zinc-700 hover:bg-zinc-600 whitespace-nowrap`}
+                    >
+                      {isSendingReset ? (
+                        <LoadingDots />
+                      ) : (
+                        <>
+                          <RotateCcwKey size={18} />
+                          Enviar reset
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {resetError && (
+                    <p className="text-sm text-red-400">{resetError}</p>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         )}
       </section>
