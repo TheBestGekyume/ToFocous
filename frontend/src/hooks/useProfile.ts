@@ -4,7 +4,9 @@ import {
   requestPasswordReset,
   updateMyEmail,
   updateMyPassword,
+  createMyPassword,
 } from "../services/users/userService";
+import { supabaseAuthClient } from "../services/auth/supabaseAuthClient";
 
 type ProfileFeedback = {
   type: "success" | "error";
@@ -36,7 +38,15 @@ export const useProfile = () => {
   const [passwordError, setPasswordError] = useState("");
   const [resetError, setResetError] = useState("");
 
+  const [createPassword, setCreatePassword] = useState("");
+  const [confirmCreatePassword, setConfirmCreatePassword] = useState("");
+  const [isCreatingPassword, setIsCreatingPassword] = useState(false);
+  const [createPasswordError, setCreatePasswordError] = useState("");
+
   const [feedback, setFeedback] = useState<ProfileFeedback | null>(null);
+
+  const [hasPassword, setHasPassword] = useState<boolean | null>(null);
+  const [hasGoogleAuth, setHasGoogleAuth] = useState(false);
 
   useEffect(() => {
     fetchMyUser();
@@ -65,6 +75,24 @@ export const useProfile = () => {
       setResetEmail(user.email);
     }
   }, [user]);
+
+  useEffect(() => {
+    async function loadAuthInfo() {
+      const { data, error } = await supabaseAuthClient.auth.getUserIdentities();
+
+      if (error) {
+        setHasPassword(null);
+        return;
+      }
+
+      const providers = data.identities.map((identity) => identity.provider);
+
+      setHasPassword(providers.includes("email"));
+      setHasGoogleAuth(providers.includes("google"));
+    }
+
+    void loadAuthInfo();
+  }, []);
 
   const handleCancelNameEdit = () => {
     if (!user) return;
@@ -229,6 +257,53 @@ export const useProfile = () => {
     }
   };
 
+  const handleCreatePassword = async () => {
+    if (!createPassword || !confirmCreatePassword) {
+      setCreatePasswordError("Preencha todos os campos de senha.");
+      return;
+    }
+
+    if (createPassword !== confirmCreatePassword) {
+      setCreatePasswordError("A senha e a confirmação não conferem.");
+      return;
+    }
+
+    if (createPassword.length < 6) {
+      setCreatePasswordError("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+
+    setCreatePasswordError("");
+    setFeedback(null);
+    setIsCreatingPassword(true);
+
+    try {
+      const response = await createMyPassword({
+        new_password: createPassword,
+        confirm_new_password: confirmCreatePassword,
+      });
+
+      setFeedback({
+        type: "success",
+        message: response.message,
+      });
+
+      setCreatePassword("");
+      setConfirmCreatePassword("");
+
+      setHasPassword(true);
+    } catch {
+      setFeedback({
+        type: "error",
+        message: "Não foi possível criar a senha.",
+      });
+    } finally {
+      setIsCreatingPassword(false);
+    }
+  };
+
+
+
   return {
     userState: {
       user,
@@ -276,6 +351,21 @@ export const useProfile = () => {
       isSendingReset,
       resetError,
       handleRequestPasswordReset,
+    },
+
+    createPasswordState: {
+      createPassword,
+      setCreatePassword,
+      confirmCreatePassword,
+      setConfirmCreatePassword,
+      isCreatingPassword,
+      createPasswordError,
+      handleCreatePassword,
+    },
+
+    authInfoState: {
+      hasPassword,
+      hasGoogleAuth,
     },
 
     feedback,
