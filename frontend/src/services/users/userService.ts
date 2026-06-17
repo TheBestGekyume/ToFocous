@@ -1,5 +1,6 @@
 import { api } from "../api/api";
 import type {
+  TCreatePasswordDTO,
   TMessageResponse,
   TResetPasswordDTO,
   TUpdateEmailDTO,
@@ -8,6 +9,7 @@ import type {
   TUser,
   TUserResponse,
 } from "../../types/TUser";
+import { supabaseAuthClient } from "../auth/supabaseAuthClient";
 
 export const getMyUser = async (): Promise<TUser> => {
   const response = await api.get<TUserResponse>("/usuarios/me/");
@@ -54,4 +56,20 @@ export const updateMyEmail = async (
   );
 
   return response.data;
+};
+
+export const createMyPassword = async (
+  payload: TCreatePasswordDTO
+): Promise<TMessageResponse> => {
+  const { error } = await supabaseAuthClient.auth.updateUser({
+    password: payload.new_password,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    message: "Senha criada com sucesso.",
+  };
 };

@@ -13,7 +13,6 @@ export type TUserResponse = {
   data: TUser;
 };
 
-
 export type TUpdatePasswordDTO = {
   current_password: string;
   new_password: string;
@@ -26,6 +25,11 @@ export type TResetPasswordDTO = {
 
 export type TUpdateEmailDTO = {
   email: string;
+};
+
+export type TCreatePasswordDTO = {
+  new_password: string;
+  confirm_new_password: string;
 };
 
 export type TMessageResponse = {

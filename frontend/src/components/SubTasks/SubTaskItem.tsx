@@ -92,6 +92,7 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
           placeholder="Título da subtarefa"
           rows={1}
           spellCheck={false}
+          disabled={isDone}
           className={`outline-none border border-transparent
             duration-100 hover:bg-zinc-700 focus:bg-zinc-900
             focus:border-accent rounded-md p-1 resize-none overflow-hidden
@@ -113,7 +114,7 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
             onMouseDown={startResizeTracking}
             onKeyDown={handleDescriptionKeyDown}
             spellCheck={false}
-            // placeholder="Descrição"
+            disabled={isDone}
             rows={2}
             className={`w-full resize-none overflow-hidden outline-none border border-transparent duration-100
       hover:bg-zinc-700 focus:bg-zinc-900 focus:border-accent focus:resize-y hover:resize-y rounded-md p-1
