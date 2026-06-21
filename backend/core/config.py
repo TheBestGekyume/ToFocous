@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     SUPABASE_URL: str
     SUPABASE_ANON_KEY: str
     FRONTEND_URL: str
+    SUPABASE_SERVICE_ROLE_KEY: str
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env"

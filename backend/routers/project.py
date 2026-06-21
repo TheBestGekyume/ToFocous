@@ -62,7 +62,8 @@ def get_project_by_id(
             "id": project["id"],
             "title": project["title"],
             "description": project["description"],
-            "color": project["color"]
+            "color": project["color"],
+            "is_owner": project["user_id"] == current_user.id
         }
 
     except Exception as e:

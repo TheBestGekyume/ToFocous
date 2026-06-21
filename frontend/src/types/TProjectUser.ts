@@ -1,11 +1,13 @@
+export type TProjectUserUser = {
+  id: string;
+  name: string;
+};
+
 export type TProjectUser = {
   id: string;
   project_id: string;
   user_id: string;
-  usuarios: {
-    id: string;
-    name: string;
-  } | null;
+  user: TProjectUserUser | null;
 };
 
 export type TAddProjectUserDTO = {
