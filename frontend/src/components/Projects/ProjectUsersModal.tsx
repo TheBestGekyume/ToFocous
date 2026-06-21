@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Trash2, UserRoundPlus } from "lucide-react";
+import { LogOut, Trash2, UsersRound, UserRoundCog } from "lucide-react";
 import { useProjectUsers } from "../../hooks/useProjectUsers";
 import { LoadingDots } from "../_Common/LoadingDots";
 import { Modal } from "../_Common/Modal";
@@ -9,14 +9,18 @@ type Props = {
   isOpen: boolean;
   projectId: string;
   projectTitle: string;
+  isOwner: boolean;
   onClose: () => void;
+  onLeaveProject?: () => void;
 };
 
 export const ProjectUsersModal = ({
   isOpen,
   projectId,
   projectTitle,
+  isOwner,
   onClose,
+  onLeaveProject,
 }: Props) => {
   const {
     projectUsers,
@@ -24,10 +28,12 @@ export const ProjectUsersModal = ({
     fetchProjectUsers,
     addProjectUser,
     removeProjectUser,
+    leaveProject,
   } = useProjectUsers(projectId);
 
   const [userId, setUserId] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -38,7 +44,7 @@ export const ProjectUsersModal = ({
   const handleAddUser = async () => {
     const trimmedUserId = userId.trim();
 
-    if (!trimmedUserId) return;
+    if (!trimmedUserId || !isOwner) return;
 
     setSubmitting(true);
 
@@ -51,11 +57,31 @@ export const ProjectUsersModal = ({
   };
 
   const handleRemoveUser = async (targetUserId: string) => {
+    if (!isOwner) return;
+
     const confirmed = confirm("Remover este usuário do projeto?");
 
     if (!confirmed) return;
 
     await removeProjectUser(targetUserId);
+  };
+
+  const handleLeaveProject = async () => {
+    if (isOwner) return;
+
+    const confirmed = confirm("Deseja sair deste projeto?");
+
+    if (!confirmed) return;
+
+    setLeaving(true);
+
+    try {
+      await leaveProject();
+      onLeaveProject?.();
+      onClose();
+    } finally {
+      setLeaving(false);
+    }
   };
 
   return (
@@ -71,34 +97,38 @@ export const ProjectUsersModal = ({
       >
         <div className="flex flex-col gap-5">
           <div className="flex items-center gap-2 text-primary">
-            <UserRoundPlus size={22} />
-            <span className="font-semibold">Gerenciar usuários</span>
+            {isOwner ? <UserRoundCog size={22} /> : <UsersRound size={22} />}
+            <span className="font-semibold">
+              {isOwner ? "Gerenciar usuários" : "Usuários do projeto"}
+            </span>
           </div>
 
-          <div className="flex gap-2">
-            <input
-              value={userId}
-              onChange={(event) => setUserId(event.target.value)}
-              placeholder="ID do usuário"
-              className="
-              w-full rounded-md border border-transparent bg-zinc-800
-              p-2 text-text outline-none transition focus:border-accent
-              hover:bg-zinc-700 focus:bg-zinc-900
-            "
-            />
+          {isOwner && (
+            <div className="flex gap-2">
+              <input
+                value={userId}
+                onChange={(event) => setUserId(event.target.value)}
+                placeholder="ID do usuário"
+                className="
+                  w-full rounded-md border border-transparent bg-zinc-800
+                  p-2 text-text outline-none transition focus:border-accent
+                  hover:bg-zinc-700 focus:bg-zinc-900
+                "
+              />
 
-            <button
-              type="button"
-              onClick={handleAddUser}
-              disabled={submitting || !userId.trim()}
-              className="
-              rounded-md bg-accent px-4 py-2 font-semibold text-white
-              transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50
-            "
-            >
-              Adicionar
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={handleAddUser}
+                disabled={submitting || !userId.trim()}
+                className="
+                  rounded-md bg-accent px-4 py-2 font-semibold text-white
+                  transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50
+                "
+              >
+                Adicionar
+              </button>
+            </div>
+          )}
 
           <div className="flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
             {loading ? (
@@ -114,13 +144,13 @@ export const ProjectUsersModal = ({
                 <div
                   key={projectUser.id}
                   className="
-                  flex items-center justify-between gap-3 rounded-md
-                  border border-secondary/20 bg-background-body p-3
-                "
+                    flex items-center justify-between gap-3 rounded-md
+                    border border-secondary/20 bg-background-body p-3
+                  "
                 >
                   <div className="min-w-0">
                     <p className="font-semibold text-text">
-                      {projectUser.usuarios?.name ?? "Usuário sem nome"}
+                      {projectUser.user?.name ?? "Usuário sem nome"}
                     </p>
 
                     <p className="break-all text-xs text-text/60">
@@ -128,21 +158,39 @@ export const ProjectUsersModal = ({
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveUser(projectUser.user_id)}
-                    className="
-                    shrink-0 rounded-full bg-red-500 p-2 text-white
-                    transition hover:bg-red-700
-                  "
-                    title="Remover usuário"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  {isOwner && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveUser(projectUser.user_id)}
+                      className="
+                        shrink-0 rounded-full bg-red-500 p-2 text-white
+                        transition hover:bg-red-700
+                      "
+                      title="Remover usuário"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               ))
             )}
           </div>
+
+          {!isOwner && (
+            <button
+              type="button"
+              onClick={handleLeaveProject}
+              disabled={leaving}
+              className="
+                flex items-center justify-center gap-2 rounded-md
+                bg-red-500 px-4 py-2 font-semibold text-white
+                transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50
+              "
+            >
+              <LogOut size={18} />
+              {leaving ? "Saindo..." : "Sair do projeto"}
+            </button>
+          )}
         </div>
       </Modal>
     </>

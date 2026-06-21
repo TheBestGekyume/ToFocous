@@ -3,6 +3,7 @@ export type TProject = {
   title: string;
   description: string;
   color: string;
+  is_owner: boolean;
 };
 
 export type TCreateProjectDTO = {

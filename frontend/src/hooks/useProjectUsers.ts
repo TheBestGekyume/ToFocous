@@ -1,4 +1,3 @@
-
 import { useCallback, useState } from "react";
 import { projectUserService } from "../services/projects/projectUserService";
 import type { TProjectUser } from "../types/TProjectUser";
@@ -52,11 +51,16 @@ export const useProjectUsers = (projectId: string) => {
     [projectId]
   );
 
+  const leaveProject = useCallback(async () => {
+    await projectUserService.leaveProject(projectId);
+  }, [projectId]);
+
   return {
     projectUsers,
     loading,
     fetchProjectUsers,
     addProjectUser,
     removeProjectUser,
+    leaveProject,
   };
 };
