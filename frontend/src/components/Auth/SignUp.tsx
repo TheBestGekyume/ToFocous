@@ -3,6 +3,7 @@ import { signUpUser } from "../../services/auth/authService";
 import { LoadingDots } from "../_Common/LoadingDots";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
 import { getApiErrorMessage } from "../../utils/apiError";
+import { PasswordInput } from "../_Common/PasswordInput";
 
 export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
   const [name, setName] = useState("");
@@ -70,24 +71,21 @@ export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
           required
         />
 
-        <input
-          type="password"
-          placeholder="Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
-          required
-        />
+       <PasswordInput
+  value={password}
+  onChange={setPassword}
+  placeholder="Senha"
+  required
+  className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
+/>
 
-        <input
-          type="password"
-          placeholder="Confirmar senha"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
-          required
-        />
-
+<PasswordInput
+  value={confirmPassword}
+  onChange={setConfirmPassword}
+  placeholder="Confirmar senha"
+  required
+  className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
+/>
         {error && <p className="text-red-400 text-sm">{error}</p>}
         {success && (
           <p className="whitespace-pre-line text-sm text-green-400">

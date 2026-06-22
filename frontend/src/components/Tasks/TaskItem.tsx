@@ -104,9 +104,7 @@ export const TaskItem = ({ task }: TaskProps) => {
             {showStartTime && !isDone && (
               <TimeInput
                 value={localData.start_time}
-                onChange={(time) =>
-                  handleImmediateChange("start_time", time || "")
-                }
+                onChange={(time) => handleImmediateChange("start_time", time)}
                 title="Hora de início"
                 icon={AlarmClockPlus}
               />
@@ -115,9 +113,7 @@ export const TaskItem = ({ task }: TaskProps) => {
             {showTime && !isDone && (
               <TimeInput
                 value={localData.due_time}
-                onChange={(time) =>
-                  handleImmediateChange("due_time", time || "")
-                }
+                onChange={(time) => handleImmediateChange("due_time", time)}
                 title="Hora de prazo"
                 icon={AlarmClockCheck}
               />
@@ -181,15 +177,18 @@ export const TaskItem = ({ task }: TaskProps) => {
 
         <div className="flex flex-col items-end justify-center gap-4 text-sm ms-5">
           <div className="flex gap-4 w-max">
-            <Dropdown
-              value={localData.priority}
-              options={priorityOptions}
-              onChange={changePriority}
-              buttonClass={`font-bold px-2 py-1 hover:bg-zinc-700 rounded-sm duration-100
+            {!isDone && (
+              <Dropdown
+                value={localData.priority}
+                options={priorityOptions}
+                onChange={changePriority}
+                buttonClass={`font-bold px-2 py-1 hover:bg-zinc-700 rounded-sm duration-100
                 ${currentPriority.color}`}
-              renderLabel={(value) => `Prioridade: ${priorityMap[value].label}`}
-            />
-
+                renderLabel={(value) =>
+                  `Prioridade: ${priorityMap[value].label}`
+                }
+              />
+            )}
             {!isDetailsPage && (
               <button
                 onClick={navigateToDetails}
