@@ -5,6 +5,7 @@ import { LoadingDots } from "../_Common/LoadingDots";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
 import { getApiErrorMessage } from "../../utils/apiError";
 import { GoogleLoginButton } from "./GoogleLoginButton";
+import { PasswordInput } from "../_Common/PasswordInput";
 
 export const Login = ({ onSwitch }: { onSwitch: () => void }) => {
   const [email, setEmail] = useState("");
@@ -48,14 +49,13 @@ export const Login = ({ onSwitch }: { onSwitch: () => void }) => {
           required
         />
 
-        <input
-          type="password"
-          placeholder="Senha"
+        <PasswordInput
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
-          border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"
+          onChange={setPassword}
+          placeholder="Senha"
           required
+          className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
+  border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"
         />
 
         {error && <p className="text-red-400 text-sm">{error}</p>}

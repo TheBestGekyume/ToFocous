@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { LoadingDots } from "../components/_Common/LoadingDots";
 import { FeedbackToast } from "../components/_Common/FeedbackToast";
 import { supabaseAuthClient } from "../services/auth/supabaseAuthClient";
+import { PasswordInput } from "../components/_Common/PasswordInput";
 
 type Feedback = {
   type: "success" | "error";
@@ -169,10 +170,7 @@ export const ResetPasswordPage = () => {
   return (
     <main className="w-full min-h-screen p-4 md:p-8 text-text flex items-center justify-center">
       {feedback && (
-        <FeedbackToast
-          type={feedback.type}
-          message={feedback.message}
-        />
+        <FeedbackToast type={feedback.type} message={feedback.message} />
       )}
 
       <section className="w-full max-w-md bg-background-header border border-secondary/40 rounded-2xl shadow-xl p-5 md:p-7 flex flex-col gap-6">
@@ -203,11 +201,10 @@ export const ResetPasswordPage = () => {
                 Nova senha
               </label>
 
-              <input
+              <PasswordInput
                 id="reset-password"
-                type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={setPassword}
                 disabled={!canResetPassword || updatingPassword}
                 placeholder="Digite sua nova senha"
                 className={inputClass}
@@ -222,11 +219,10 @@ export const ResetPasswordPage = () => {
                 Confirmar nova senha
               </label>
 
-              <input
+              <PasswordInput
                 id="reset-confirm-password"
-                type="password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={setConfirmPassword}
                 disabled={!canResetPassword || updatingPassword}
                 placeholder="Confirme sua nova senha"
                 className={inputClass}
