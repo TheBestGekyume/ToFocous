@@ -4,16 +4,20 @@ import type { LucideIcon } from "lucide-react";
 type TimeInputProps = {
   value?: string | null;
   onChange: (time: string | null) => void;
-  // onBlur?: () => void;
   title: string;
   placeholder?: string;
   icon: LucideIcon;
 };
 
+const formatTimeToHHMM = (time?: string | null): string => {
+  if (!time) return "";
+
+  return time.slice(0, 5);
+};
+
 export const TimeInput = ({
   value,
   onChange,
-  // onBlur,
   title,
   placeholder = "hh:mm",
   icon: Icon,
@@ -22,11 +26,10 @@ export const TimeInput = ({
   const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
-    setInternalValue(value || "");
+    setInternalValue(formatTimeToHHMM(value));
   }, [value]);
 
   const isEmpty = !internalValue;
-
   const inputType = !isFocused && isEmpty ? "text" : "time";
 
   return (
@@ -36,7 +39,7 @@ export const TimeInput = ({
       focus-within:border-accent focus-within:bg-zinc-900"
       title={title}
     >
-      {Icon && <Icon size={16} />}
+      <Icon size={16} />
 
       <input
         type={inputType}
@@ -47,27 +50,24 @@ export const TimeInput = ({
         onBlur={(e) => {
           setIsFocused(false);
 
-          const val = e.target.value;
-          setInternalValue(val);
-          onChange(val || null);
+          const formattedTime = formatTimeToHHMM(e.target.value);
 
-          // onBlur?.();
+          setInternalValue(formattedTime);
+          onChange(formattedTime || null);
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-
-            (e.currentTarget as HTMLInputElement).blur();
+            e.currentTarget.blur();
           }
 
           if (e.key === "Escape") {
-            setInternalValue(value || "");
-            (e.currentTarget as HTMLInputElement).blur();
+            setInternalValue(formatTimeToHHMM(value));
+            e.currentTarget.blur();
           }
         }}
         onChange={(e) => {
-          const val = e.target.value;
-          setInternalValue(val);
+          setInternalValue(formatTimeToHHMM(e.target.value));
         }}
         className="bg-transparent outline-none text-center appearance-none"
       />

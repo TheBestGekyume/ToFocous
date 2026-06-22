@@ -3,6 +3,7 @@ import { LoadingDots } from "../components/_Common/LoadingDots";
 import { ProfileEditableField } from "../components/Profile/ProfileEditableField";
 import { useProfile } from "../hooks/useProfile";
 import { FeedbackToast } from "../components/_Common/FeedbackToast";
+import { PasswordInput } from "../components/_Common/PasswordInput";
 
 const inputClass = `
   w-full p-3 rounded-lg bg-zinc-800 border border-transparent text-text
@@ -175,12 +176,11 @@ export const ProfilePage = () => {
                       Senha
                     </label>
 
-                    <input
+                    <PasswordInput
                       id="createPassword"
                       name="createPassword"
-                      type="password"
                       value={createPassword}
-                      onChange={(e) => setCreatePassword(e.target.value)}
+                      onChange={setCreatePassword}
                       disabled={isCreatingPassword}
                       className={inputClass}
                     />
@@ -194,12 +194,11 @@ export const ProfilePage = () => {
                       Confirme a senha
                     </label>
 
-                    <input
+                    <PasswordInput
                       id="confirmCreatePassword"
                       name="confirmCreatePassword"
-                      type="password"
                       value={confirmCreatePassword}
-                      onChange={(e) => setConfirmCreatePassword(e.target.value)}
+                      onChange={setConfirmCreatePassword}
                       disabled={isCreatingPassword}
                       className={inputClass}
                     />
@@ -242,12 +241,11 @@ export const ProfilePage = () => {
                       >
                         Senha atual
                       </label>
-                      <input
+                      <PasswordInput
                         id="currentPassword"
                         name="currentPassword"
-                        type="password"
                         value={currentPassword}
-                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        onChange={setCurrentPassword}
                         disabled={isUpdatingPassword}
                         className={inputClass}
                       />
@@ -260,12 +258,11 @@ export const ProfilePage = () => {
                       >
                         Nova senha
                       </label>
-                      <input
+                      <PasswordInput
                         id="newPassword"
                         name="newPassword"
-                        type="password"
                         value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
+                        onChange={setNewPassword}
                         disabled={isUpdatingPassword}
                         className={inputClass}
                       />
@@ -279,12 +276,11 @@ export const ProfilePage = () => {
                         Confirme a senha
                       </label>
 
-                      <input
+                      <PasswordInput
                         id="confirmPassword"
                         name="confirmPassword"
-                        type="password"
                         value={confirmNewPassword}
-                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        onChange={setConfirmNewPassword}
                         disabled={isUpdatingPassword}
                         className={inputClass}
                       />
