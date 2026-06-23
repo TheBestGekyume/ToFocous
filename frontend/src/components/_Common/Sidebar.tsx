@@ -80,7 +80,7 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
               className="flex items-center duration-150 hover:text-purple-500"
             >
               <Folder />
-              <span className="px-3">Projects</span>
+              <span className="px-3">Projetos</span>
             </Link>
 
             <Link
