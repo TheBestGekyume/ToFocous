@@ -121,7 +121,7 @@ export const SubTasksPage = () => {
           className="px-4 py-2 mx-auto bg-green-600 hover:bg-green-800 duration-300 rounded-md w-fit font-semibold"
           onClick={() => setIsCreatingSubTask(true)}
         >
-          + SubTask
+          + SubTarefa
         </button>
 
         <hr className="my-3 text-accent/75" />
