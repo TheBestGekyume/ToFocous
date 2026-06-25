@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from backend.routers import auth, project_users, settings, tasks, subtasks, project, usuarios, agenda, health
+from backend.routers import auth, project_users, settings, tasks, subtasks, project, usuarios, agenda, health, task_assignment
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -27,3 +27,4 @@ app.include_router(project_users.router)
 app.include_router(usuarios.router)
 app.include_router(agenda.router)   
 app.include_router(health.router)
+app.include_router(task_assignment.router)
