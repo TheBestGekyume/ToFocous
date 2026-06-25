@@ -62,8 +62,16 @@ export const TaskPage = () => {
 
           <hr className="text-zinc-700 my-10" />
 
-          <div className="px-4">
+          <div className="px-2">
             <div className="flex flex-wrap justify-between items-center pb-4">
+              
+              {currentProject && (
+                <h4 className="text-2xl font-medium text-accent">
+                  <span className="text-white">Tarefas de</span>{" "}
+                  {currentProject.title[0].toUpperCase() +
+                    currentProject.title.substring(1)}
+                </h4>
+              )}
               <div className="flex flex-wrap gap-4">
                 <SortTasks />
 
@@ -74,13 +82,7 @@ export const TaskPage = () => {
                   Limpar Concluídas
                 </button> */}
               </div>
-              {currentProject && (
-                <h4 className="text-xl text-accent pe-2">
-                  <span className="text-white">/</span>{" "}
-                  {currentProject.title[0].toUpperCase() +
-                    currentProject.title.substring(1)}
-                </h4>
-              )}
+              
             </div>
 
             <TaskList />
