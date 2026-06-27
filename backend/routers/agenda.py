@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.supabase import get_db
 from backend.models.agenda import AgendaItemResponse, AgendaResponse
+from backend.core.responses import ApiResponse, success
 
 
 router = APIRouter(prefix="/agenda", tags=["Agenda"])
@@ -180,7 +181,7 @@ def query_subtasks_by_date(
     return response.data or []
 
 
-@router.get("/", response_model=AgendaResponse)
+@router.get("/", response_model=ApiResponse[AgendaResponse])
 def list_agenda_items(
     year: int = Query(..., ge=2000, le=2500),
     month: int = Query(..., ge=1, le=12),
@@ -188,52 +189,51 @@ def list_agenda_items(
     current_user=Depends(get_current_user),
     supabase=Depends(get_db),
 ):
-    try:
-        month_start, month_end = get_month_range(year, month)
+    month_start, month_end = get_month_range(year, month)
 
-        which_date_use_in_calendar = get_user_calendar_setting(
+    which_date_use_in_calendar = get_user_calendar_setting(
+        supabase=supabase,
+        user_id=current_user.id,
+    )
+
+    date_fields = get_date_fields_by_calendar_setting(
+        which_date_use_in_calendar=which_date_use_in_calendar,
+    )
+
+    agenda_items: list[AgendaItemResponse] = []
+
+    for date_field in date_fields:
+        tasks = query_tasks_by_date(
             supabase=supabase,
             user_id=current_user.id,
+            date_field=date_field,
+            month_start=month_start,
+            month_end=month_end,
+            project_id=project_id,
         )
 
-        date_fields = get_date_fields_by_calendar_setting(
-            which_date_use_in_calendar=which_date_use_in_calendar,
+        subtasks = query_subtasks_by_date(
+            supabase=supabase,
+            user_id=current_user.id,
+            date_field=date_field,
+            month_start=month_start,
+            month_end=month_end,
+            project_id=project_id,
         )
 
-        agenda_items: list[AgendaItemResponse] = []
+        for task in tasks:
+            agenda_items.append(build_task_agenda_item(task, date_field))
 
-        for date_field in date_fields:
-            tasks = query_tasks_by_date(
-                supabase=supabase,
-                user_id=current_user.id,
-                date_field=date_field,
-                month_start=month_start,
-                month_end=month_end,
-                project_id=project_id,
-            )
+        for subtask in subtasks:
+            agenda_items.append(build_subtask_agenda_item(subtask, date_field))
 
-            subtasks = query_subtasks_by_date(
-                supabase=supabase,
-                user_id=current_user.id,
-                date_field=date_field,
-                month_start=month_start,
-                month_end=month_end,
-                project_id=project_id,
-            )
+    agenda_items.sort(key=lambda item: item.date)
 
-            for task in tasks:
-                agenda_items.append(build_task_agenda_item(task, date_field))
-
-            for subtask in subtasks:
-                agenda_items.append(build_subtask_agenda_item(subtask, date_field))
-
-        agenda_items.sort(key=lambda item: item.date)
-
-        return AgendaResponse(
+    return success(
+        content=AgendaResponse(
             year=year,
             month=month,
             items=agenda_items,
-        )
-
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        ),
+        message="Agenda carregada com sucesso.",
+    )

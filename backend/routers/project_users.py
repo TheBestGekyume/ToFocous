@@ -1,296 +1,457 @@
-import httpx
-from fastapi import APIRouter, Depends, HTTPException
-from backend.core.config import settings
+from fastapi import APIRouter, Depends
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.supabase import get_db
-from backend.models.project_user import PostProjectUser, DeleteProjectUser
-from pydantic import BaseModel
+from backend.models.project_user import (
+    DeleteProjectUser,
+    DeleteProjectUserResponse,
+    PostProjectUser,
+    ProjectUserListResponse,
+    ProjectUserResponse,
+    UsuarioResumoResponse,
+)
+from backend.core.responses import ApiResponse, created, failure, success
+
 
 router = APIRouter(prefix="/project-users", tags=["Project Users"])
 
-SUPABASE_URL = settings.SUPABASE_URL
-SUPABASE_SERVICE_ROLE_KEY = settings.SUPABASE_SERVICE_ROLE_KEY
+
+def api_response(response: ApiResponse):
+    return JSONResponse(
+        status_code=response.http_code,
+        content=jsonable_encoder(response),
+    )
 
 
-@router.get("/{project_id}/")
-async def get_project_users(
+@router.get(
+    "/{project_id}/",
+    response_model=ApiResponse[ProjectUserListResponse],
+)
+def get_project_users(
     project_id: str,
     current_user=Depends(get_current_user),
-    supabase=Depends(get_db)
+    supabase=Depends(get_db),
 ):
     try:
-        project_response = supabase.table("projects") \
-            .select("id, user_id") \
-            .eq("id", project_id) \
+        project_response = (
+            supabase
+            .table("projects")
+            .select("id, user_id")
+            .eq("id", project_id)
             .execute()
+        )
 
         if not project_response.data:
-            raise HTTPException(
-                status_code=404,
-                detail="Projeto não encontrado."
+            return api_response(
+                failure(
+                    message="Projeto não encontrado.",
+                    http_code=404,
+                    error_code="PROJECT_NOT_FOUND",
+                )
             )
 
         project = project_response.data[0]
 
         is_owner = project["user_id"] == current_user.id
 
-        membership_response = supabase.table("project_users") \
-            .select("id") \
-            .eq("project_id", project_id) \
-            .eq("user_id", current_user.id) \
+        membership_response = (
+            supabase
+            .table("project_users")
+            .select("id")
+            .eq("project_id", project_id)
+            .eq("user_id", current_user.id)
             .execute()
+        )
 
-        is_member = len(membership_response.data) > 0
+        is_member = len(membership_response.data or []) > 0
 
         if not is_owner and not is_member:
-            raise HTTPException(
-                status_code=403,
-                detail="Você não tem acesso a este projeto."
+            return api_response(
+                failure(
+                    message="Você não tem acesso a este projeto.",
+                    http_code=403,
+                    error_code="PROJECT_ACCESS_DENIED",
+                )
             )
 
-        project_users_response = supabase.table("project_users") \
-            .select("id, project_id, user_id") \
-            .eq("project_id", project_id) \
+        project_users_response = (
+            supabase
+            .table("project_users")
+            .select("id, project_id, user_id")
+            .eq("project_id", project_id)
             .execute()
+        )
 
-        users_with_auth_data = []
+        project_users = project_users_response.data or []
 
-        for project_user in project_users_response.data:
-            auth_user = await get_auth_user_by_id(project_user["user_id"])
-            display_name = get_display_name_from_auth_user(auth_user)
+        user_ids = [
+            project_user["user_id"]
+            for project_user in project_users
+        ]
 
-            users_with_auth_data.append({
-                **project_user,
-                "user": {
-                    "id": auth_user.get("id"),
-                    "name": display_name
-                }
-            })
+        usuarios_by_id = get_usuarios_by_ids(
+            supabase=supabase,
+            user_ids=user_ids,
+        )
 
-        return {
-            "message": "Usuários do projeto listados com sucesso.",
-            "data": users_with_auth_data
-        }
+        users_with_usuario_data: list[ProjectUserResponse] = []
 
-    except HTTPException:
-        raise
+        for project_user in project_users:
+            usuario = usuarios_by_id.get(project_user["user_id"])
+
+            users_with_usuario_data.append(
+                ProjectUserResponse(
+                    id=project_user["id"],
+                    project_id=project_user["project_id"],
+                    user_id=project_user["user_id"],
+                    user=UsuarioResumoResponse(
+                        id=project_user["user_id"],
+                        name=usuario.get("name") if usuario else "Usuário sem nome",
+                        email=usuario.get("email") if usuario else None,
+                    ),
+                )
+            )
+
+        return api_response(
+            success(
+                content=ProjectUserListResponse(
+                    users=users_with_usuario_data,
+                ),
+                message="Usuários do projeto listados com sucesso.",
+            )
+        )
+
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@router.post("/")
-async def add_project_user(
-    data: PostProjectUser,
-    current_user=Depends(get_current_user),
-    supabase=Depends(get_db)
-):
-    try:
-        project_response = supabase.table("projects") \
-            .select("id, user_id") \
-            .eq("id", data.project_id) \
-            .execute()
-
-        if not project_response.data:
-            raise HTTPException(
-                status_code=404,
-                detail="Projeto não encontrado."
+        return api_response(
+            failure(
+                message=str(e),
+                http_code=400,
+                error_code="PROJECT_USERS_LIST_ERROR",
             )
-
-        project = project_response.data[0]
-
-        if project["user_id"] != current_user.id:
-            raise HTTPException(
-                status_code=403,
-                detail="Apenas o dono do projeto pode adicionar contribuidores."
-            )
-
-        existing_response = supabase.table("project_users") \
-            .select("id") \
-            .eq("project_id", data.project_id) \
-            .eq("user_id", data.user_id) \
-            .execute()
-
-        if existing_response.data:
-            raise HTTPException(
-                status_code=409,
-                detail="Usuário já está vinculado ao projeto."
-            )
-
-        auth_user = await get_auth_user_by_id(data.user_id)
-
-        display_name = get_display_name_from_auth_user(auth_user)
-
-        insert_data = {
-            "project_id": data.project_id,
-            "user_id": data.user_id
-        }
-
-        response = supabase.table("project_users") \
-            .insert(insert_data) \
-            .execute()
-
-        if not response.data:
-            raise HTTPException(
-                status_code=400,
-                detail="Não foi possível adicionar o usuário ao projeto."
-            )
-
-        return {
-            "message": "Usuário adicionado ao projeto com sucesso.",
-            "data": {
-                **response.data[0],
-                "user": {
-                    "id": auth_user.get("id"),
-                    "name": display_name                }
-            }
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
         )
 
 
-@router.delete("/")
-def remove_project_user(
-    data: DeleteProjectUser,
+@router.post(
+    "/",
+    response_model=ApiResponse[ProjectUserResponse],
+)
+def add_project_user(
+    data: PostProjectUser,
     current_user=Depends(get_current_user),
-    supabase=Depends(get_db)
+    supabase=Depends(get_db),
 ):
     try:
-        project_response = supabase.table("projects") \
-            .select("id, user_id") \
-            .eq("id", data.project_id) \
+        project_response = (
+            supabase
+            .table("projects")
+            .select("id, user_id")
+            .eq("id", data.project_id)
             .execute()
+        )
 
         if not project_response.data:
-            raise HTTPException(status_code=404, detail="Projeto não encontrado.")
+            return api_response(
+                failure(
+                    message="Projeto não encontrado.",
+                    http_code=404,
+                    error_code="PROJECT_NOT_FOUND",
+                )
+            )
 
         project = project_response.data[0]
 
         if project["user_id"] != current_user.id:
-            raise HTTPException(status_code=403, detail="Apenas o dono do projeto pode remover contribuidores.")
+            return api_response(
+                failure(
+                    message="Apenas o dono do projeto pode adicionar contribuidores.",
+                    http_code=403,
+                    error_code="ONLY_PROJECT_OWNER_CAN_ADD_USERS",
+                )
+            )
 
-        if data.user_id == project["user_id"]:
-            raise HTTPException(status_code=400, detail="O dono do projeto não pode ser removido.")
-
-        existing_response = supabase.table("project_users") \
-            .select("id") \
-            .eq("project_id", data.project_id) \
-            .eq("user_id", data.user_id) \
+        usuario_response = (
+            supabase
+            .table("usuarios")
+            .select("id, name, email")
+            .eq("id", data.user_id)
             .execute()
+        )
 
-        if not existing_response.data:
-            raise HTTPException(status_code=404, detail="Usuário não está vinculado a este projeto.")
+        if not usuario_response.data:
+            return api_response(
+                failure(
+                    message="Usuário não encontrado.",
+                    http_code=404,
+                    error_code="USER_NOT_FOUND",
+                )
+            )
 
-        response = supabase.table("project_users") \
-            .delete() \
-            .eq("project_id", data.project_id) \
-            .eq("user_id", data.user_id) \
+        usuario = usuario_response.data[0]
+
+        existing_response = (
+            supabase
+            .table("project_users")
+            .select("id")
+            .eq("project_id", data.project_id)
+            .eq("user_id", data.user_id)
             .execute()
+        )
 
-        return {
-            "message": "Usuário removido do projeto com sucesso.",
-            "data": response.data
+        if existing_response.data:
+            return api_response(
+                failure(
+                    message="Usuário já está vinculado ao projeto.",
+                    http_code=409,
+                    error_code="USER_ALREADY_LINKED_TO_PROJECT",
+                )
+            )
+
+        insert_data = {
+            "project_id": data.project_id,
+            "user_id": data.user_id,
         }
 
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        response = (
+            supabase
+            .table("project_users")
+            .insert(insert_data)
+            .execute()
+        )
 
-@router.delete("/leave/{project_id}")
+        if not response.data:
+            return api_response(
+                failure(
+                    message="Não foi possível adicionar o usuário ao projeto.",
+                    http_code=400,
+                    error_code="PROJECT_USER_CREATE_ERROR",
+                )
+            )
+
+        created_project_user = response.data[0]
+
+        return api_response(
+            created(
+                content=ProjectUserResponse(
+                    id=created_project_user["id"],
+                    project_id=created_project_user["project_id"],
+                    user_id=created_project_user["user_id"],
+                    user=UsuarioResumoResponse(
+                        id=usuario["id"],
+                        name=usuario["name"],
+                        email=usuario.get("email"),
+                    ),
+                ),
+                message="Usuário adicionado ao projeto com sucesso.",
+            )
+        )
+
+    except Exception as e:
+        return api_response(
+            failure(
+                message=str(e),
+                http_code=400,
+                error_code="PROJECT_USER_CREATE_ERROR",
+            )
+        )
+
+
+@router.delete(
+    "/",
+    response_model=ApiResponse[DeleteProjectUserResponse],
+)
+def remove_project_user(
+    data: DeleteProjectUser,
+    current_user=Depends(get_current_user),
+    supabase=Depends(get_db),
+):
+    try:
+        project_response = (
+            supabase
+            .table("projects")
+            .select("id, user_id")
+            .eq("id", data.project_id)
+            .execute()
+        )
+
+        if not project_response.data:
+            return api_response(
+                failure(
+                    message="Projeto não encontrado.",
+                    http_code=404,
+                    error_code="PROJECT_NOT_FOUND",
+                )
+            )
+
+        project = project_response.data[0]
+
+        if project["user_id"] != current_user.id:
+            return api_response(
+                failure(
+                    message="Apenas o dono do projeto pode remover contribuidores.",
+                    http_code=403,
+                    error_code="ONLY_PROJECT_OWNER_CAN_REMOVE_USERS",
+                )
+            )
+
+        if data.user_id == project["user_id"]:
+            return api_response(
+                failure(
+                    message="O dono do projeto não pode ser removido.",
+                    http_code=400,
+                    error_code="PROJECT_OWNER_CANNOT_BE_REMOVED",
+                )
+            )
+
+        existing_response = (
+            supabase
+            .table("project_users")
+            .select("id")
+            .eq("project_id", data.project_id)
+            .eq("user_id", data.user_id)
+            .execute()
+        )
+
+        if not existing_response.data:
+            return api_response(
+                failure(
+                    message="Usuário não está vinculado a este projeto.",
+                    http_code=404,
+                    error_code="PROJECT_USER_NOT_FOUND",
+                )
+            )
+
+        response = (
+            supabase
+            .table("project_users")
+            .delete()
+            .eq("project_id", data.project_id)
+            .eq("user_id", data.user_id)
+            .execute()
+        )
+
+        return api_response(
+            success(
+                content=DeleteProjectUserResponse(
+                    deleted=response.data or [],
+                ),
+                message="Usuário removido do projeto com sucesso.",
+            )
+        )
+
+    except Exception as e:
+        return api_response(
+            failure(
+                message=str(e),
+                http_code=400,
+                error_code="PROJECT_USER_DELETE_ERROR",
+            )
+        )
+
+
+@router.delete(
+    "/leave/{project_id}",
+    response_model=ApiResponse[DeleteProjectUserResponse],
+)
 def leave_project(
     project_id: str,
     current_user=Depends(get_current_user),
-    supabase=Depends(get_db)
+    supabase=Depends(get_db),
 ):
     try:
-        project_response = supabase.table("projects") \
-            .select("id, user_id") \
-            .eq("id", project_id) \
+        project_response = (
+            supabase
+            .table("projects")
+            .select("id, user_id")
+            .eq("id", project_id)
             .execute()
+        )
 
         if not project_response.data:
-            raise HTTPException(status_code=404, detail="Projeto não encontrado.")
+            return api_response(
+                failure(
+                    message="Projeto não encontrado.",
+                    http_code=404,
+                    error_code="PROJECT_NOT_FOUND",
+                )
+            )
 
         project = project_response.data[0]
 
         if project["user_id"] == current_user.id:
-            raise HTTPException(
-                status_code=400,
-                detail="O dono do projeto não pode sair do próprio projeto."
+            return api_response(
+                failure(
+                    message="O dono do projeto não pode sair do próprio projeto.",
+                    http_code=400,
+                    error_code="PROJECT_OWNER_CANNOT_LEAVE",
+                )
             )
 
-        membership_response = supabase.table("project_users") \
-            .select("id") \
-            .eq("project_id", project_id) \
-            .eq("user_id", current_user.id) \
+        membership_response = (
+            supabase
+            .table("project_users")
+            .select("id")
+            .eq("project_id", project_id)
+            .eq("user_id", current_user.id)
             .execute()
+        )
 
         if not membership_response.data:
-            raise HTTPException(
-                status_code=404,
-                detail="Você não faz parte deste projeto."
+            return api_response(
+                failure(
+                    message="Você não faz parte deste projeto.",
+                    http_code=404,
+                    error_code="PROJECT_MEMBERSHIP_NOT_FOUND",
+                )
             )
 
-        response = supabase.table("project_users") \
-            .delete() \
-            .eq("project_id", project_id) \
-            .eq("user_id", current_user.id) \
+        response = (
+            supabase
+            .table("project_users")
+            .delete()
+            .eq("project_id", project_id)
+            .eq("user_id", current_user.id)
             .execute()
+        )
 
-        return {
-            "message": "Você saiu do projeto com sucesso.",
-            "data": response.data
-        }
+        return api_response(
+            success(
+                content=DeleteProjectUserResponse(
+                    deleted=response.data or [],
+                ),
+                message="Você saiu do projeto com sucesso.",
+            )
+        )
 
-    except HTTPException:
-        raise
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-def safe_response_detail(response: httpx.Response):
-    try:
-        return response.json()
-    except Exception:
-        return response.text
-
-
-async def get_auth_user_by_id(user_id: str):
-    url = f"{SUPABASE_URL}/auth/v1/admin/users/{user_id}"
-
-    headers = {
-        "apikey": SUPABASE_SERVICE_ROLE_KEY,
-        "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
-        "Content-Type": "application/json",
-    }
-
-    async with httpx.AsyncClient(timeout=20) as client:
-        response = await client.get(
-            url,
-            headers=headers
+        return api_response(
+            failure(
+                message=str(e),
+                http_code=400,
+                error_code="PROJECT_LEAVE_ERROR",
+            )
         )
 
-    if response.status_code >= 400:
-        raise HTTPException(
-            status_code=response.status_code,
-            detail=safe_response_detail(response)
-        )
 
-    return response.json()
+def get_usuarios_by_ids(
+    supabase,
+    user_ids: list[str],
+) -> dict:
+    if not user_ids:
+        return {}
 
-
-def get_display_name_from_auth_user(auth_user: dict):
-    user_metadata = auth_user.get("user_metadata") or {}
-
-    return (
-        user_metadata.get("display_name")
-        or user_metadata.get("name")
-        or user_metadata.get("full_name")
-        or "Usuário sem nome"
+    response = (
+        supabase
+        .table("usuarios")
+        .select("id, name, email")
+        .in_("id", user_ids)
+        .execute()
     )
+
+    usuarios = response.data or []
+
+    return {
+        usuario["id"]: usuario
+        for usuario in usuarios
+    }
