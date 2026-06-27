@@ -1,7 +1,8 @@
-from pydantic import BaseModel
-from typing import Optional
 from datetime import date, time
 from enum import Enum
+from typing import Optional
+
+from pydantic import BaseModel
 
 
 class TaskPriority(str, Enum):
@@ -38,3 +39,24 @@ class PatchTask(BaseModel):
     priority: Optional[TaskPriority] = None
     status: Optional[TaskStatus] = None
     project_id: Optional[str] = None
+
+
+class TaskResponse(BaseModel):
+    id: str
+    title: str
+    description: str | None = None
+    start_time: str | None = None
+    start_date: date | None = None
+    due_time: str | None = None
+    due_date: date | None = None
+    status: TaskStatus
+    priority: TaskPriority
+    project_id: str
+
+
+class TaskListResponse(BaseModel):
+    tasks: list[TaskResponse]
+
+
+class DeleteTaskResponse(BaseModel):
+    deleted: list[dict]

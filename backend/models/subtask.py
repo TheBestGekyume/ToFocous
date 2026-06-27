@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from datetime import date, time
 from typing import Optional
-from datetime import time, date
+from pydantic import BaseModel
+
 from backend.models.task import TaskPriority, TaskStatus
 
 
@@ -24,3 +25,23 @@ class PatchSubTask(BaseModel):
     due_date: Optional[date] = None
     priority: Optional[TaskPriority] = None
     status: Optional[TaskStatus] = None
+
+
+class SubTaskResponse(BaseModel):
+    id: str
+    title: str
+    description: str | None = None
+    start_date: date | None = None
+    start_time: str | None = None
+    due_date: date | None = None
+    due_time: str | None = None
+    priority: TaskPriority | None = None
+    status: TaskStatus
+
+
+class SubTaskListResponse(BaseModel):
+    subtasks: list[SubTaskResponse]
+
+
+class DeleteSubTaskResponse(BaseModel):
+    deleted: list[dict]
