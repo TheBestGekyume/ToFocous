@@ -93,7 +93,7 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
           rows={1}
           spellCheck={false}
           disabled={isDone}
-          className={`outline-none border border-transparent
+          className={`text-xl outline-none border border-transparent
             duration-100 hover:bg-zinc-700 focus:bg-zinc-900
             focus:border-accent rounded-md p-1 resize-none overflow-hidden
             ${isDone ? "line-through text-zinc-400" : ""}
