@@ -77,13 +77,18 @@ export const TaskItem = ({
     startResizeTracking,
   } = useTextareaOverflow(localData.description);
 
-  const { assignments, assignUserToTask, removeTaskAssignment } = useTasks();
+  const {
+    assignments,
+    assignUserToTask,
+    removeTaskAssignment,
+  } = useTasks();
 
   const taskAssignments = assignments.filter(
     (assignment) => assignment.task_id === task.id
   );
 
   const canManageAssignments = isProjectOwner && projectMembers.length >= 2;
+
 
   if (!settings) return <LoadingOverlay show />;
 
@@ -239,7 +244,7 @@ export const TaskItem = ({
               <Trash2 size={20} />
             </button>
           </div>
-          {projectMembers.length >= 2 && (
+          {projectMembers.length >= 2 &&  (
             <div>
               <AssignmentControl
                 assignments={taskAssignments}

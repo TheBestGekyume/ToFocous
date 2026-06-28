@@ -17,6 +17,7 @@ export type TasksContextType = {
   loading: boolean;
 
   assignments: TTaskAssignment[];
+
   getProjectAssignments: (projectId: string) => Promise<TTaskAssignment[]>;
   assignUserToTask: (
     taskId: string,

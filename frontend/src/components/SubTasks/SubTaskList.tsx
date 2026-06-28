@@ -15,7 +15,13 @@ export const SubTaskList = ({
   projectMembers = [],
   isProjectOwner = false,
 }: Props) => {
-  if (!task.subtasks || task.subtasks.length === 0) return null;
+  if (!task.subtasks || task.subtasks.length === 0) {
+    return (
+      <p className="text-zinc-500 text-center italic py-5">
+        Nenhuma subtarefa adicionada ainda.
+      </p>
+    );
+  }
 
   return (
     <section className="flex flex-col gap-2">

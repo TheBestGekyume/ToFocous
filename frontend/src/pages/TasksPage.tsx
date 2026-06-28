@@ -21,7 +21,7 @@ export const TaskPage = () => {
 
   const [currentProject, setCurrentProject] = useState<TProject | null>(null);
   const [projectMembers, setProjectMembers] = useState<TProjectMember[]>([]);
-  const [pageLoading, setPageLoading] = useState(true);
+  const [projectLoading, setProjectLoading] = useState(true);
 
   useEffect(() => {
     let ignore = false;
@@ -29,31 +29,22 @@ export const TaskPage = () => {
     const loadProject = async () => {
       if (!projectId) return;
 
-      setPageLoading(true);
-      setProjectMembers([]);
+      setProjectLoading(true);
+      setCurrentProject(null);
 
       try {
-        const [project, projectUsers] = await Promise.all([
-          getProjectById(projectId),
-          fetchProjectUsers(),
-        ]);
+        const project = await getProjectById(projectId);
 
-        if (ignore) return;
-
-        const members: TProjectMember[] = projectUsers.map((projectUser) => ({
-          id: projectUser.user_id,
-          name: projectUser.user?.name ?? "Usuário sem nome",
-        }));
-
-        setCurrentProject(project);
-        setProjectMembers(members);
+        if (!ignore) {
+          setCurrentProject(project);
+        }
       } catch (error) {
         if (!ignore) {
           console.error("Erro ao carregar projeto:", error);
         }
       } finally {
         if (!ignore) {
-          setPageLoading(false);
+          setProjectLoading(false);
         }
       }
     };
@@ -63,7 +54,40 @@ export const TaskPage = () => {
     return () => {
       ignore = true;
     };
-  }, [projectId, getProjectById, fetchProjectUsers]);
+  }, [projectId, getProjectById]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadProjectMembers = async () => {
+      if (!projectId) return;
+
+      setProjectMembers([]);
+
+      try {
+        const projectUsers = await fetchProjectUsers();
+
+        if (ignore) return;
+
+        const members: TProjectMember[] = projectUsers.map((projectUser) => ({
+          id: projectUser.user_id,
+          name: projectUser.user?.name ?? "Usuário sem nome",
+        }));
+
+        setProjectMembers(members);
+      } catch (error) {
+        if (!ignore) {
+          console.error("Erro ao carregar membros do projeto:", error);
+        }
+      }
+    };
+
+    loadProjectMembers();
+
+    return () => {
+      ignore = true;
+    };
+  }, [projectId, fetchProjectUsers]);
 
   useEffect(() => {
     if (!projectId) return;
@@ -75,13 +99,21 @@ export const TaskPage = () => {
     };
   }, [projectId, subscribeToProjectRealtime]);
 
+  if (projectLoading) {
+    return <LoadingOverlay show />;
+  }
+
+  if (!currentProject) {
+    return (
+      <p className="mt-10 text-center text-zinc-500">Projeto não encontrado.</p>
+    );
+  }
+
   return (
     <div className="flex flex-col w-full max-w-5xl mx-auto pb-8">
-      {currentProject && (
-        <div className="py-10">
-          <ProjectItem project={currentProject} singleProjectItem={true} />
-        </div>
-      )}
+      <div className="py-10">
+        <ProjectItem project={currentProject} singleProjectItem={true} />
+      </div>
 
       <div
         className="flex flex-col bg-background-header/50 
@@ -94,27 +126,21 @@ export const TaskPage = () => {
 
           <div className="px-2">
             <div className="flex flex-wrap justify-between items-center pb-4">
-              {currentProject && (
-                <h4 className="text-2xl font-medium text-accent">
-                  <span className="text-white">Tarefas de</span>{" "}
-                  {currentProject.title[0].toUpperCase() +
-                    currentProject.title.substring(1)}
-                </h4>
-              )}
+              <h4 className="text-2xl font-medium text-accent">
+                <span className="text-white">Tarefas de</span>{" "}
+                {currentProject.title[0].toUpperCase() +
+                  currentProject.title.substring(1)}
+              </h4>
 
               <div className="flex flex-wrap gap-4">
                 <SortTasks />
               </div>
             </div>
 
-            {pageLoading ? (
-              <LoadingOverlay show />
-            ) : (
-              <TaskList
-                projectMembers={projectMembers}
-                isProjectOwner={currentProject?.is_owner ?? false}
-              />
-            )}
+            <TaskList
+              projectMembers={projectMembers}
+              isProjectOwner={currentProject.is_owner}
+            />
           </div>
         </div>
       </div>

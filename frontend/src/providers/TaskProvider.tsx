@@ -241,8 +241,11 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   const getProjectAssignments = useCallback(
     async (projectId: string): Promise<TTaskAssignment[]> => {
       try {
+        setAssignments([]);
+
         const data =
           await taskAssignmentService.getProjectAssignments(projectId);
+
         setAssignments(data);
 
         return data;
