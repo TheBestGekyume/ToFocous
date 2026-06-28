@@ -1,4 +1,6 @@
 import { api } from "../api/api";
+import type { TApiResponse } from "../../types/TApi";
+import { requireApiContent } from "../../types/TApi";
 import type {
   TCreatePasswordDTO,
   TMessageResponse,
@@ -7,55 +9,57 @@ import type {
   TUpdatePasswordDTO,
   TUpdateUserDTO,
   TUser,
-  TUserResponse,
 } from "../../types/TUser";
 import { supabaseAuthClient } from "../auth/supabaseAuthClient";
 
 export const getMyUser = async (): Promise<TUser> => {
-  const response = await api.get<TUserResponse>("/usuarios/me/");
+  const response = await api.get<TApiResponse<TUser>>("/usuarios/me/");
 
-  return response.data.data;
+  return requireApiContent(response.data);
 };
 
 export const updateMyUser = async (
   payload: TUpdateUserDTO
 ): Promise<TUser> => {
-  const response = await api.patch<TUserResponse>("/usuarios/me/", payload);
-  // console.log("updateMyUser -> ",response.data.data)
-  return response.data.data;
+  const response = await api.patch<TApiResponse<TUser>>(
+    "/usuarios/me/",
+    payload
+  );
+
+  return requireApiContent(response.data);
 };
 
 export const updateMyPassword = async (
   payload: TUpdatePasswordDTO
 ): Promise<TMessageResponse> => {
-  const response = await api.patch<TMessageResponse>(
+  const response = await api.patch<TApiResponse<TMessageResponse>>(
     "/usuarios/me/password",
     payload
   );
 
-  return response.data;
+  return requireApiContent(response.data);
 };
 
 export const requestPasswordReset = async (
   payload: TResetPasswordDTO
 ): Promise<TMessageResponse> => {
-  const response = await api.post<TMessageResponse>(
+  const response = await api.post<TApiResponse<TMessageResponse>>(
     "/usuarios/reset-password",
     payload
   );
 
-  return response.data;
+  return requireApiContent(response.data);
 };
 
 export const updateMyEmail = async (
   payload: TUpdateEmailDTO
 ): Promise<TMessageResponse> => {
-  const response = await api.patch<TMessageResponse>(
+  const response = await api.patch<TApiResponse<TMessageResponse>>(
     "/usuarios/me/email",
     payload
   );
 
-  return response.data;
+  return requireApiContent(response.data);
 };
 
 export const createMyPassword = async (

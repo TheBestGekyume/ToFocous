@@ -29,14 +29,14 @@ import { useTasks } from "../../hooks/useTasks";
 
 type TaskProps = {
   task: TTask;
-  projectMembers: TProjectMember[];
-  isProjectOwner: boolean;
+  projectMembers?: TProjectMember[];
+  isProjectOwner?: boolean;
 };
 
 export const TaskItem = ({
   task,
-  projectMembers,
-  isProjectOwner,
+  projectMembers = [],
+  isProjectOwner = false,
 }: TaskProps) => {
   const {
     localData,

@@ -1,67 +1,110 @@
 import { api } from "../api/api";
+import type { TApiResponse } from "../../types/TApi";
+import { requireApiContent } from "../../types/TApi";
 
-import type { TTask, TCreateTaskDTO, TSubTask, TCreateSubTaskDTO } from "../../types/TTask";
+import type {
+  TTask,
+  TCreateTaskDTO,
+  TUpdateTaskDTO,
+  TSubTask,
+  TCreateSubTaskDTO,
+  TUpdateSubTaskDTO,
+} from "../../types/TTask";
+
+type TaskListResponse = {
+  tasks: TTask[];
+};
+
+type SubTaskListResponse = {
+  subtasks: TSubTask[];
+};
 
 export const taskService = {
+  // TASKS
 
-  //TAKS
-
-  async getTasksByProject(projectId: string) {
-    const res = await api.get(`/tasks/`, {
+  async getTasksByProject(projectId: string): Promise<TTask[]> {
+    const response = await api.get<TApiResponse<TaskListResponse>>("/tasks/", {
       params: { project_id: projectId },
     });
-    // console.log("teste123", res.data)
-    return res.data;
+
+    return requireApiContent(response.data).tasks;
   },
 
   async getTasks(): Promise<TTask[]> {
-    const res = await api.get("/tasks/");
-    return res.data;
+    const response = await api.get<TApiResponse<TaskListResponse>>("/tasks/");
+
+    return requireApiContent(response.data).tasks;
   },
 
   async createTask(data: TCreateTaskDTO): Promise<TTask> {
-    const res = await api.post("/tasks/", data);
-    return res.data.data;
+    const response = await api.post<TApiResponse<TTask>>("/tasks/", data);
+
+    return requireApiContent(response.data);
   },
 
-  async updateTask(id: string, data: Partial<TTask>): Promise<TTask> {
-    const res = await api.patch(`/tasks/${id}`, data);
-    return res.data.data;
+  async updateTask(id: string, data: TUpdateTaskDTO): Promise<TTask> {
+    const response = await api.patch<TApiResponse<TTask>>(
+      `/tasks/${id}/`,
+      data
+    );
+
+    return requireApiContent(response.data);
   },
 
   async deleteTask(id: string): Promise<void> {
-    await api.delete(`/tasks/${id}/`);
+    const response = await api.delete<TApiResponse<TaskListResponse>>(
+      `/tasks/${id}/`
+    );
+
+    requireApiContent(response.data);
   },
 
+  // SUBTASKS
 
-  //SUBTASKS
+  async getSubTasks(taskId: string): Promise<TSubTask[]> {
+    const response = await api.get<TApiResponse<SubTaskListResponse>>(
+      `/subtasks/${taskId}/`
+    );
 
-  async getSubTasks(taskId: string) {
-    const res = await api.get(`/subtasks/${taskId}/`);
-    return res.data;
+    return requireApiContent(response.data).subtasks;
   },
 
-  async createSubTask(taskId: string, data: TCreateSubTaskDTO): Promise<TSubTask> {
-    const res = await api.post(`/subtasks/${taskId}/`, data);
-    return res.data.data;
+  async createSubTask(
+    taskId: string,
+    data: TCreateSubTaskDTO
+  ): Promise<TSubTask> {
+    const response = await api.post<TApiResponse<TSubTask>>(
+      `/subtasks/${taskId}/`,
+      data
+    );
+
+    return requireApiContent(response.data);
   },
 
-  async updateSubTask(subtaskId: string, taskId: string, data: Partial<TSubTask>) {
-    const res = await api.patch(`/subtasks/${subtaskId}/`, data, {
-      params: { task_id: taskId },
-    });
-    return res.data.data;
+  async updateSubTask(
+    subtaskId: string,
+    taskId: string,
+    data: TUpdateSubTaskDTO
+  ): Promise<TSubTask> {
+    const response = await api.patch<TApiResponse<TSubTask>>(
+      `/subtasks/${subtaskId}/`,
+      data,
+      {
+        params: { task_id: taskId },
+      }
+    );
+
+    return requireApiContent(response.data);
   },
 
-  async deleteSubTask(subtaskId: string, taskId: string) {
-    const res = await api.delete(`/subtasks/${subtaskId}/`, {
-      params: { task_id: taskId },
-    });
-    return res.data.message;
-  }
+  async deleteSubTask(subtaskId: string, taskId: string): Promise<void> {
+    const response = await api.delete<TApiResponse<TaskListResponse>>(
+      `/subtasks/${subtaskId}/`,
+      {
+        params: { task_id: taskId },
+      }
+    );
 
+    requireApiContent(response.data);
+  },
 };
-
-
-
-

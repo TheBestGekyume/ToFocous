@@ -8,20 +8,35 @@ import { LoadingOverlay } from "../components/_Common/LoadingOverlay";
 import { SubTaskList } from "../components/SubTasks/SubTaskList";
 import { TaskHeader } from "../components/SubTasks/TaskHeader";
 
+import { useProjects } from "../hooks/useProjects";
+import { useProjectUsers } from "../hooks/useProjectUsers";
+import type { TProject } from "../types/TProject";
+import type { TProjectMember } from "../components/_Common/AssignmentControl";
+
 export const SubTasksPage = () => {
   const { projectId, taskId } = useParams<{
     projectId: string;
     taskId: string;
   }>();
 
-  const { tasks, getTasksByProject, getSubTasks, subscribeToProjectRealtime } =
-    useTasks();
+  const {
+    tasks,
+    getTasksByProject,
+    getSubTasks,
+    getProjectAssignments,
+    subscribeToProjectRealtime,
+  } = useTasks();
   const [isCreatingSubTask, setIsCreatingSubTask] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const task = tasks.find((t) => t.id === taskId);
   const taskExists = Boolean(task);
+  const { getProjectById } = useProjects();
+  const { fetchProjectUsers } = useProjectUsers(projectId ?? "");
+
+  const [currentProject, setCurrentProject] = useState<TProject | null>(null);
+  const [projectMembers, setProjectMembers] = useState<TProjectMember[]>([]);
 
   useEffect(() => {
     if (!projectId || !taskId) {
@@ -37,7 +52,22 @@ export const SubTasksPage = () => {
       setNotFound(false);
 
       try {
-        const projectTasks = await getTasksByProject(projectId);
+        const [project, projectUsers, projectTasks] = await Promise.all([
+          getProjectById(projectId),
+          fetchProjectUsers(),
+          getTasksByProject(projectId),
+          getProjectAssignments(projectId),
+        ]);
+
+        const members: TProjectMember[] = projectUsers.map((projectUser) => ({
+          id: projectUser.user_id,
+          name: projectUser.user?.name ?? "Usuário sem nome",
+        }));
+
+        if (isMounted) {
+          setCurrentProject(project);
+          setProjectMembers(members);
+        }
 
         const taskExistsInProject = projectTasks.some(
           (projectTask) => projectTask.id === taskId
@@ -62,7 +92,14 @@ export const SubTasksPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [projectId, taskId, getTasksByProject]);
+  }, [
+    projectId,
+    taskId,
+    getTasksByProject,
+    getProjectById,
+    fetchProjectUsers,
+    getProjectAssignments,
+  ]);
 
   useEffect(() => {
     if (!taskId || !taskExists) return;
@@ -126,8 +163,12 @@ export const SubTasksPage = () => {
 
         <hr className="my-3 text-accent/75" />
 
-        <SubTaskList task={task} setLoading={setLoading} />
-
+        <SubTaskList
+          task={task}
+          setLoading={setLoading}
+          projectMembers={projectMembers}
+          isProjectOwner={currentProject?.is_owner ?? false}
+        />
         <Modal
           isOpen={isCreatingSubTask}
           onClose={() => setIsCreatingSubTask(false)}

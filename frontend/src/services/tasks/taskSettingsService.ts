@@ -1,14 +1,15 @@
 import { api } from "../api/api";
 import type { ITaskSettings } from "../../types/TSettings";
+import { requireApiContent } from "../../types/TApi";
 
 export async function getTaskSettings(): Promise<ITaskSettings> {
-  const res = await api.get("/settings/");
-  return res.data;
+  const response = await api.get("/settings/");
+  return requireApiContent(response.data);
 }
 
 export async function updateTaskSettings(
   data: ITaskSettings
 ): Promise<ITaskSettings> {
-  const res = await api.patch("/settings/", data);
-  return res.data;
+  const response = await api.patch("/settings/", data);
+  return requireApiContent(response.data);
 }

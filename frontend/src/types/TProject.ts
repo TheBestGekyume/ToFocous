@@ -13,3 +13,5 @@ export type TCreateProjectDTO = {
 };
 
 export type TUpdateProjectDTO = Partial<TCreateProjectDTO>;
+
+

@@ -1,12 +1,20 @@
 import type { TTask } from "../../types/TTask";
+import type { TProjectMember } from "../_Common/AssignmentControl";
 import { SubTaskItem } from "./SubTaskItem";
 
-type SubTaskListProps = {
+type Props = {
   task: TTask;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  projectMembers?: TProjectMember[];
+  isProjectOwner?: boolean;
 };
 
-export const SubTaskList = ({ task, setLoading }: SubTaskListProps) => {
+export const SubTaskList = ({
+  task,
+  setLoading,
+  projectMembers = [],
+  isProjectOwner = false,
+}: Props) => {
   if (!task.subtasks || task.subtasks.length === 0) return null;
 
   return (
@@ -17,6 +25,8 @@ export const SubTaskList = ({ task, setLoading }: SubTaskListProps) => {
           subtask={subtask}
           taskId={task.id}
           setLoading={setLoading}
+          projectMembers={projectMembers}
+          isProjectOwner={isProjectOwner}
         />
       ))}
     </section>

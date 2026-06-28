@@ -4,51 +4,56 @@ import type {
   TDeleteTaskAssignmentDTO,
   TTaskAssignment,
 } from "../../types/TTaskAssignment";
+import { requireApiContent, type TApiResponse } from "../../types/TApi";
 
-type ApiResponse<T> = {
-  message: string;
-  data: T;
+type TaskAssignmentListResponse = {
+  assignments: TTaskAssignment[];
 };
 
 export const taskAssignmentService = {
   async getProjectAssignments(projectId: string): Promise<TTaskAssignment[]> {
-    const response = await api.get<ApiResponse<TTaskAssignment[]>>(
+    const response = await api.get<TApiResponse<TaskAssignmentListResponse>>(
       `/task-assignments/project/${projectId}/`
     );
+    return requireApiContent(response.data).assignments;
 
-    return response.data.data;
   },
 
   async getTaskAssignments(taskId: string): Promise<TTaskAssignment[]> {
-    const response = await api.get<ApiResponse<TTaskAssignment[]>>(
+    const response = await api.get<TApiResponse<TTaskAssignment[]>>(
       `/task-assignments/task/${taskId}/`
     );
 
-    return response.data.data;
+    return requireApiContent(response.data);
   },
 
   async getSubTaskAssignments(subtaskId: string): Promise<TTaskAssignment[]> {
-    const response = await api.get<ApiResponse<TTaskAssignment[]>>(
+    const response = await api.get<TApiResponse<TTaskAssignment[]>>(
       `/task-assignments/subtask/${subtaskId}/`
     );
 
-    return response.data.data;
+    return requireApiContent(response.data);
   },
 
   async createAssignment(
     payload: TCreateTaskAssignmentDTO
   ): Promise<TTaskAssignment> {
-    const response = await api.post<ApiResponse<TTaskAssignment>>(
+    const response = await api.post<TApiResponse<TTaskAssignment>>(
       "/task-assignments/",
       payload
     );
 
-    return response.data.data;
+    return requireApiContent(response.data);
+
   },
 
-  async deleteAssignment(payload: TDeleteTaskAssignmentDTO): Promise<void> {
-    await api.delete<ApiResponse<TTaskAssignment[]>>("/task-assignments/", {
+  async deleteAssignment(payload: TDeleteTaskAssignmentDTO): Promise<TTaskAssignment[]> {
+    const response = await api.delete<TApiResponse<TTaskAssignment[]>>("/task-assignments/", {
       data: payload,
     });
+    return requireApiContent(response.data);
+
   },
+
+
 };
