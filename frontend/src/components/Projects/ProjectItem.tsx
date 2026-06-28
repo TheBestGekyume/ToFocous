@@ -13,7 +13,7 @@ import { ProjectUsersModal } from "./ProjectUsersModal";
 
 type Props = {
   project: TProject;
-  onEdit?: (project: TProject) => void;
+  onEdit: (project: TProject) => void;
   singleProjectItem?: boolean;
 };
 

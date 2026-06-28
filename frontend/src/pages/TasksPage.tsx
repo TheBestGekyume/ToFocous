@@ -10,18 +10,25 @@ import { ProjectItem } from "../components/Projects/ProjectItem";
 import type { TProjectMember } from "../components/_Common/AssignmentControl";
 import { useProjectUsers } from "../hooks/useProjectUsers";
 import { LoadingOverlay } from "../components/_Common/LoadingOverlay";
+import { Modal } from "../components/_Common/Modal";
+import { ProjectForm } from "../components/Projects/ProjectForm";
 
 export const TaskPage = () => {
   const { subscribeToProjectRealtime } = useTasks();
   const { getProjectById } = useProjects();
 
   const { projectId } = useParams();
+  const [editingProject, setEditingProject] = useState<TProject | null>(null);
 
   const { fetchProjectUsers } = useProjectUsers(projectId ?? "");
 
   const [currentProject, setCurrentProject] = useState<TProject | null>(null);
   const [projectMembers, setProjectMembers] = useState<TProjectMember[]>([]);
   const [projectLoading, setProjectLoading] = useState(true);
+
+  const closeEditModal = () => {
+    setEditingProject(null);
+  };
 
   useEffect(() => {
     let ignore = false;
@@ -112,7 +119,11 @@ export const TaskPage = () => {
   return (
     <div className="flex flex-col w-full max-w-5xl mx-auto pb-8">
       <div className="py-10">
-        <ProjectItem project={currentProject} singleProjectItem={true} />
+        <ProjectItem
+          project={currentProject}
+          singleProjectItem={true}
+          onEdit={setEditingProject}
+        />
       </div>
 
       <div
@@ -144,6 +155,20 @@ export const TaskPage = () => {
           </div>
         </div>
       </div>
+      <Modal
+        isOpen={!!editingProject}
+        onClose={closeEditModal}
+        title="Editar Projeto"
+        size="md"
+      >
+        {editingProject && (
+          <ProjectForm
+            mode="edit"
+            project={editingProject}
+            onClose={closeEditModal}
+          />
+        )}
+      </Modal>
     </div>
   );
 };
