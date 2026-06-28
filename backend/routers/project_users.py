@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
 
+from backend.core.excepcions import AppException
+from backend.core.responses import ApiResponse, created, success
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.supabase import get_db
 from backend.models.project_user import (
@@ -12,17 +12,9 @@ from backend.models.project_user import (
     ProjectUserResponse,
     UsuarioResumoResponse,
 )
-from backend.core.responses import ApiResponse, created, failure, success
 
 
 router = APIRouter(prefix="/project-users", tags=["Project Users"])
-
-
-def api_response(response: ApiResponse):
-    return JSONResponse(
-        status_code=response.http_code,
-        content=jsonable_encoder(response),
-    )
 
 
 @router.get(
@@ -44,12 +36,10 @@ def get_project_users(
         )
 
         if not project_response.data:
-            return api_response(
-                failure(
-                    message="Projeto não encontrado.",
-                    http_code=404,
-                    error_code="PROJECT_NOT_FOUND",
-                )
+            raise AppException(
+                message="Projeto não encontrado.",
+                http_code=404,
+                error_code="PROJECT_NOT_FOUND",
             )
 
         project = project_response.data[0]
@@ -68,12 +58,10 @@ def get_project_users(
         is_member = len(membership_response.data or []) > 0
 
         if not is_owner and not is_member:
-            return api_response(
-                failure(
-                    message="Você não tem acesso a este projeto.",
-                    http_code=403,
-                    error_code="PROJECT_ACCESS_DENIED",
-                )
+            raise AppException(
+                message="Você não tem acesso a este projeto.",
+                http_code=403,
+                error_code="PROJECT_ACCESS_DENIED",
             )
 
         project_users_response = (
@@ -114,28 +102,28 @@ def get_project_users(
                 )
             )
 
-        return api_response(
-            success(
-                content=ProjectUserListResponse(
-                    users=users_with_usuario_data,
-                ),
-                message="Usuários do projeto listados com sucesso.",
-            )
+        return success(
+            content=ProjectUserListResponse(
+                users=users_with_usuario_data,
+            ),
+            message="Usuários do projeto listados com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="PROJECT_USERS_LIST_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao listar usuários do projeto.",
+            http_code=500,
+            error_code="PROJECT_USERS_LIST_ERROR",
         )
 
 
 @router.post(
     "/",
     response_model=ApiResponse[ProjectUserResponse],
+    status_code=201,
 )
 def add_project_user(
     data: PostProjectUser,
@@ -152,23 +140,19 @@ def add_project_user(
         )
 
         if not project_response.data:
-            return api_response(
-                failure(
-                    message="Projeto não encontrado.",
-                    http_code=404,
-                    error_code="PROJECT_NOT_FOUND",
-                )
+            raise AppException(
+                message="Projeto não encontrado.",
+                http_code=404,
+                error_code="PROJECT_NOT_FOUND",
             )
 
         project = project_response.data[0]
 
         if project["user_id"] != current_user.id:
-            return api_response(
-                failure(
-                    message="Apenas o dono do projeto pode adicionar contribuidores.",
-                    http_code=403,
-                    error_code="ONLY_PROJECT_OWNER_CAN_ADD_USERS",
-                )
+            raise AppException(
+                message="Apenas o dono do projeto pode adicionar contribuidores.",
+                http_code=403,
+                error_code="ONLY_PROJECT_OWNER_CAN_ADD_USERS",
             )
 
         usuario_response = (
@@ -180,12 +164,10 @@ def add_project_user(
         )
 
         if not usuario_response.data:
-            return api_response(
-                failure(
-                    message="Usuário não encontrado.",
-                    http_code=404,
-                    error_code="USER_NOT_FOUND",
-                )
+            raise AppException(
+                message="Usuário não encontrado.",
+                http_code=404,
+                error_code="USER_NOT_FOUND",
             )
 
         usuario = usuario_response.data[0]
@@ -200,12 +182,10 @@ def add_project_user(
         )
 
         if existing_response.data:
-            return api_response(
-                failure(
-                    message="Usuário já está vinculado ao projeto.",
-                    http_code=409,
-                    error_code="USER_ALREADY_LINKED_TO_PROJECT",
-                )
+            raise AppException(
+                message="Usuário já está vinculado ao projeto.",
+                http_code=409,
+                error_code="USER_ALREADY_LINKED_TO_PROJECT",
             )
 
         insert_data = {
@@ -221,39 +201,36 @@ def add_project_user(
         )
 
         if not response.data:
-            return api_response(
-                failure(
-                    message="Não foi possível adicionar o usuário ao projeto.",
-                    http_code=400,
-                    error_code="PROJECT_USER_CREATE_ERROR",
-                )
+            raise AppException(
+                message="Não foi possível adicionar o usuário ao projeto.",
+                http_code=400,
+                error_code="PROJECT_USER_CREATE_ERROR",
             )
 
         created_project_user = response.data[0]
 
-        return api_response(
-            created(
-                content=ProjectUserResponse(
-                    id=created_project_user["id"],
-                    project_id=created_project_user["project_id"],
-                    user_id=created_project_user["user_id"],
-                    user=UsuarioResumoResponse(
-                        id=usuario["id"],
-                        name=usuario["name"],
-                        email=usuario.get("email"),
-                    ),
+        return created(
+            content=ProjectUserResponse(
+                id=created_project_user["id"],
+                project_id=created_project_user["project_id"],
+                user_id=created_project_user["user_id"],
+                user=UsuarioResumoResponse(
+                    id=usuario["id"],
+                    name=usuario["name"],
+                    email=usuario.get("email"),
                 ),
-                message="Usuário adicionado ao projeto com sucesso.",
-            )
+            ),
+            message="Usuário adicionado ao projeto com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="PROJECT_USER_CREATE_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao adicionar usuário ao projeto.",
+            http_code=500,
+            error_code="PROJECT_USER_CREATE_ERROR",
         )
 
 
@@ -276,32 +253,26 @@ def remove_project_user(
         )
 
         if not project_response.data:
-            return api_response(
-                failure(
-                    message="Projeto não encontrado.",
-                    http_code=404,
-                    error_code="PROJECT_NOT_FOUND",
-                )
+            raise AppException(
+                message="Projeto não encontrado.",
+                http_code=404,
+                error_code="PROJECT_NOT_FOUND",
             )
 
         project = project_response.data[0]
 
         if project["user_id"] != current_user.id:
-            return api_response(
-                failure(
-                    message="Apenas o dono do projeto pode remover contribuidores.",
-                    http_code=403,
-                    error_code="ONLY_PROJECT_OWNER_CAN_REMOVE_USERS",
-                )
+            raise AppException(
+                message="Apenas o dono do projeto pode remover contribuidores.",
+                http_code=403,
+                error_code="ONLY_PROJECT_OWNER_CAN_REMOVE_USERS",
             )
 
         if data.user_id == project["user_id"]:
-            return api_response(
-                failure(
-                    message="O dono do projeto não pode ser removido.",
-                    http_code=400,
-                    error_code="PROJECT_OWNER_CANNOT_BE_REMOVED",
-                )
+            raise AppException(
+                message="O dono do projeto não pode ser removido.",
+                http_code=400,
+                error_code="PROJECT_OWNER_CANNOT_BE_REMOVED",
             )
 
         existing_response = (
@@ -314,12 +285,10 @@ def remove_project_user(
         )
 
         if not existing_response.data:
-            return api_response(
-                failure(
-                    message="Usuário não está vinculado a este projeto.",
-                    http_code=404,
-                    error_code="PROJECT_USER_NOT_FOUND",
-                )
+            raise AppException(
+                message="Usuário não está vinculado a este projeto.",
+                http_code=404,
+                error_code="PROJECT_USER_NOT_FOUND",
             )
 
         response = (
@@ -331,22 +300,21 @@ def remove_project_user(
             .execute()
         )
 
-        return api_response(
-            success(
-                content=DeleteProjectUserResponse(
-                    deleted=response.data or [],
-                ),
-                message="Usuário removido do projeto com sucesso.",
-            )
+        return success(
+            content=DeleteProjectUserResponse(
+                deleted=response.data or [],
+            ),
+            message="Usuário removido do projeto com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="PROJECT_USER_DELETE_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao remover usuário do projeto.",
+            http_code=500,
+            error_code="PROJECT_USER_DELETE_ERROR",
         )
 
 
@@ -369,23 +337,19 @@ def leave_project(
         )
 
         if not project_response.data:
-            return api_response(
-                failure(
-                    message="Projeto não encontrado.",
-                    http_code=404,
-                    error_code="PROJECT_NOT_FOUND",
-                )
+            raise AppException(
+                message="Projeto não encontrado.",
+                http_code=404,
+                error_code="PROJECT_NOT_FOUND",
             )
 
         project = project_response.data[0]
 
         if project["user_id"] == current_user.id:
-            return api_response(
-                failure(
-                    message="O dono do projeto não pode sair do próprio projeto.",
-                    http_code=400,
-                    error_code="PROJECT_OWNER_CANNOT_LEAVE",
-                )
+            raise AppException(
+                message="O dono do projeto não pode sair do próprio projeto.",
+                http_code=400,
+                error_code="PROJECT_OWNER_CANNOT_LEAVE",
             )
 
         membership_response = (
@@ -398,12 +362,10 @@ def leave_project(
         )
 
         if not membership_response.data:
-            return api_response(
-                failure(
-                    message="Você não faz parte deste projeto.",
-                    http_code=404,
-                    error_code="PROJECT_MEMBERSHIP_NOT_FOUND",
-                )
+            raise AppException(
+                message="Você não faz parte deste projeto.",
+                http_code=404,
+                error_code="PROJECT_MEMBERSHIP_NOT_FOUND",
             )
 
         response = (
@@ -415,22 +377,21 @@ def leave_project(
             .execute()
         )
 
-        return api_response(
-            success(
-                content=DeleteProjectUserResponse(
-                    deleted=response.data or [],
-                ),
-                message="Você saiu do projeto com sucesso.",
-            )
+        return success(
+            content=DeleteProjectUserResponse(
+                deleted=response.data or [],
+            ),
+            message="Você saiu do projeto com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="PROJECT_LEAVE_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao sair do projeto.",
+            http_code=500,
+            error_code="PROJECT_LEAVE_ERROR",
         )
 
 

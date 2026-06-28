@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
 
-from backend.dependencies.supabase import get_db
+from backend.core.excepcions import AppException
+from backend.core.responses import ApiResponse, created, success
 from backend.dependencies.auth import get_current_user
+from backend.dependencies.supabase import get_db
 from backend.models.project import (
     DeleteProjectResponse,
     PatchProject,
@@ -11,17 +11,9 @@ from backend.models.project import (
     ProjectListResponse,
     ProjectResponse,
 )
-from backend.core.responses import ApiResponse, created, failure, success
 
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
-
-
-def api_response(response: ApiResponse):
-    return JSONResponse(
-        status_code=response.http_code,
-        content=jsonable_encoder(response),
-    )
 
 
 def build_project_response(project: dict, current_user) -> ProjectResponse:
@@ -77,6 +69,7 @@ def user_has_project_access(
 @router.post(
     "/",
     response_model=ApiResponse[ProjectResponse],
+    status_code=201,
 )
 def post_project(
     data: PostProject,
@@ -95,33 +88,30 @@ def post_project(
         )
 
         if not response.data:
-            return api_response(
-                failure(
-                    message="Não foi possível criar o projeto.",
-                    http_code=400,
-                    error_code="PROJECT_CREATE_ERROR",
-                )
+            raise AppException(
+                message="Não foi possível criar o projeto.",
+                http_code=400,
+                error_code="PROJECT_CREATE_ERROR",
             )
 
         project = response.data[0]
 
-        return api_response(
-            created(
-                content=build_project_response(
-                    project=project,
-                    current_user=current_user,
-                ),
-                message="Projeto criado com sucesso.",
-            )
+        return created(
+            content=build_project_response(
+                project=project,
+                current_user=current_user,
+            ),
+            message="Projeto criado com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="PROJECT_CREATE_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao criar projeto.",
+            http_code=500,
+            error_code="PROJECT_CREATE_ERROR",
         )
 
 
@@ -141,12 +131,10 @@ def get_project_by_id(
         )
 
         if not project:
-            return api_response(
-                failure(
-                    message="Projeto não encontrado.",
-                    http_code=404,
-                    error_code="PROJECT_NOT_FOUND",
-                )
+            raise AppException(
+                message="Projeto não encontrado.",
+                http_code=404,
+                error_code="PROJECT_NOT_FOUND",
             )
 
         if not user_has_project_access(
@@ -154,31 +142,28 @@ def get_project_by_id(
             project=project,
             current_user=current_user,
         ):
-            return api_response(
-                failure(
-                    message="Você não tem acesso a este projeto.",
-                    http_code=403,
-                    error_code="PROJECT_ACCESS_DENIED",
-                )
+            raise AppException(
+                message="Você não tem acesso a este projeto.",
+                http_code=403,
+                error_code="PROJECT_ACCESS_DENIED",
             )
 
-        return api_response(
-            success(
-                content=build_project_response(
-                    project=project,
-                    current_user=current_user,
-                ),
-                message="Projeto encontrado com sucesso.",
-            )
+        return success(
+            content=build_project_response(
+                project=project,
+                current_user=current_user,
+            ),
+            message="Projeto encontrado com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="PROJECT_GET_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao buscar projeto.",
+            http_code=500,
+            error_code="PROJECT_GET_ERROR",
         )
 
 
@@ -240,22 +225,21 @@ def get_projects(
             for project in projects_by_id.values()
         ]
 
-        return api_response(
-            success(
-                content=ProjectListResponse(
-                    projects=projects,
-                ),
-                message="Projetos listados com sucesso.",
-            )
+        return success(
+            content=ProjectListResponse(
+                projects=projects,
+            ),
+            message="Projetos listados com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="PROJECT_LIST_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao listar projetos.",
+            http_code=500,
+            error_code="PROJECT_LIST_ERROR",
         )
 
 
@@ -273,11 +257,9 @@ def patch_project(
         patchdata = data.model_dump(exclude_none=True, mode="json")
 
         if not patchdata:
-            return api_response(
-                success(
-                    content=None,
-                    message="Nenhuma alteração feita.",
-                )
+            return success(
+                content=None,
+                message="Nenhuma alteração feita.",
             )
 
         project = get_project_by_id_from_db(
@@ -286,21 +268,17 @@ def patch_project(
         )
 
         if not project:
-            return api_response(
-                failure(
-                    message="Projeto não encontrado.",
-                    http_code=404,
-                    error_code="PROJECT_NOT_FOUND",
-                )
+            raise AppException(
+                message="Projeto não encontrado.",
+                http_code=404,
+                error_code="PROJECT_NOT_FOUND",
             )
 
         if project["user_id"] != current_user.id:
-            return api_response(
-                failure(
-                    message="Apenas o dono do projeto pode atualizar este projeto.",
-                    http_code=403,
-                    error_code="ONLY_PROJECT_OWNER_CAN_UPDATE",
-                )
+            raise AppException(
+                message="Apenas o dono do projeto pode atualizar este projeto.",
+                http_code=403,
+                error_code="ONLY_PROJECT_OWNER_CAN_UPDATE",
             )
 
         response = (
@@ -312,33 +290,30 @@ def patch_project(
         )
 
         if not response.data:
-            return api_response(
-                failure(
-                    message="Não foi possível atualizar o projeto.",
-                    http_code=400,
-                    error_code="PROJECT_UPDATE_ERROR",
-                )
+            raise AppException(
+                message="Não foi possível atualizar o projeto.",
+                http_code=400,
+                error_code="PROJECT_UPDATE_ERROR",
             )
 
         updated_project = response.data[0]
 
-        return api_response(
-            success(
-                content=build_project_response(
-                    project=updated_project,
-                    current_user=current_user,
-                ),
-                message="Projeto atualizado com sucesso.",
-            )
+        return success(
+            content=build_project_response(
+                project=updated_project,
+                current_user=current_user,
+            ),
+            message="Projeto atualizado com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="PROJECT_UPDATE_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao atualizar projeto.",
+            http_code=500,
+            error_code="PROJECT_UPDATE_ERROR",
         )
 
 
@@ -358,21 +333,17 @@ def delete_project(
         )
 
         if not project:
-            return api_response(
-                failure(
-                    message="Projeto não encontrado.",
-                    http_code=404,
-                    error_code="PROJECT_NOT_FOUND",
-                )
+            raise AppException(
+                message="Projeto não encontrado.",
+                http_code=404,
+                error_code="PROJECT_NOT_FOUND",
             )
 
         if project["user_id"] != current_user.id:
-            return api_response(
-                failure(
-                    message="Apenas o dono do projeto pode deletar este projeto.",
-                    http_code=403,
-                    error_code="ONLY_PROJECT_OWNER_CAN_DELETE",
-                )
+            raise AppException(
+                message="Apenas o dono do projeto pode deletar este projeto.",
+                http_code=403,
+                error_code="ONLY_PROJECT_OWNER_CAN_DELETE",
             )
 
         response = (
@@ -384,28 +355,25 @@ def delete_project(
         )
 
         if not response.data:
-            return api_response(
-                failure(
-                    message="Não foi possível deletar o projeto.",
-                    http_code=400,
-                    error_code="PROJECT_DELETE_ERROR",
-                )
-            )
-
-        return api_response(
-            success(
-                content=DeleteProjectResponse(
-                    deleted=response.data or [],
-                ),
-                message="Projeto deletado com sucesso.",
-            )
-        )
-
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
+            raise AppException(
+                message="Não foi possível deletar o projeto.",
                 http_code=400,
                 error_code="PROJECT_DELETE_ERROR",
             )
+
+        return success(
+            content=DeleteProjectResponse(
+                deleted=response.data or [],
+            ),
+            message="Projeto deletado com sucesso.",
+        )
+
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao deletar projeto.",
+            http_code=500,
+            error_code="PROJECT_DELETE_ERROR",
         )

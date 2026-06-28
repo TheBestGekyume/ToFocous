@@ -1,21 +1,13 @@
 from fastapi import APIRouter, Depends
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
 
+from backend.core.excepcions import AppException
+from backend.core.responses import ApiResponse, success
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.supabase import get_db
 from backend.models.settings import SettingsResponse, UpdtSettings
-from backend.core.responses import ApiResponse, failure, success
 
 
 router = APIRouter(prefix="/settings", tags=["Settings"])
-
-
-def api_response(response: ApiResponse):
-    return JSONResponse(
-        status_code=response.http_code,
-        content=jsonable_encoder(response),
-    )
 
 
 def build_settings_response(settings_data: dict) -> SettingsResponse:
@@ -45,30 +37,27 @@ def get_settings(
         )
 
         if not response.data:
-            return api_response(
-                failure(
-                    message="Configurações não encontradas.",
-                    http_code=404,
-                    error_code="SETTINGS_NOT_FOUND",
-                )
+            raise AppException(
+                message="Configurações não encontradas.",
+                http_code=404,
+                error_code="SETTINGS_NOT_FOUND",
             )
 
         settings_data = response.data[0]
 
-        return api_response(
-            success(
-                content=build_settings_response(settings_data),
-                message="Configurações encontradas com sucesso.",
-            )
+        return success(
+            content=build_settings_response(settings_data),
+            message="Configurações encontradas com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="SETTINGS_GET_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao buscar configurações.",
+            http_code=500,
+            error_code="SETTINGS_GET_ERROR",
         )
 
 
@@ -88,11 +77,9 @@ def update_settings(
         )
 
         if not update_data:
-            return api_response(
-                success(
-                    content=None,
-                    message="Nenhuma alteração feita.",
-                )
+            return success(
+                content=None,
+                message="Nenhuma alteração feita.",
             )
 
         existing_response = (
@@ -104,12 +91,10 @@ def update_settings(
         )
 
         if not existing_response.data:
-            return api_response(
-                failure(
-                    message="Configurações não encontradas.",
-                    http_code=404,
-                    error_code="SETTINGS_NOT_FOUND",
-                )
+            raise AppException(
+                message="Configurações não encontradas.",
+                http_code=404,
+                error_code="SETTINGS_NOT_FOUND",
             )
 
         response = (
@@ -121,28 +106,25 @@ def update_settings(
         )
 
         if not response.data:
-            return api_response(
-                failure(
-                    message="Não foi possível atualizar as configurações.",
-                    http_code=400,
-                    error_code="SETTINGS_UPDATE_ERROR",
-                )
+            raise AppException(
+                message="Não foi possível atualizar as configurações.",
+                http_code=400,
+                error_code="SETTINGS_UPDATE_ERROR",
             )
 
         settings_data = response.data[0]
 
-        return api_response(
-            success(
-                content=build_settings_response(settings_data),
-                message="Alterações feitas com sucesso.",
-            )
+        return success(
+            content=build_settings_response(settings_data),
+            message="Alterações feitas com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="SETTINGS_UPDATE_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao atualizar configurações.",
+            http_code=500,
+            error_code="SETTINGS_UPDATE_ERROR",
         )

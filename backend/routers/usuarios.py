@@ -3,11 +3,10 @@ import httpx
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
 
 from backend.core.config import settings
-from backend.core.responses import ApiResponse, failure, success
+from backend.core.excepcions import AppException
+from backend.core.responses import ApiResponse, success
 from backend.dependencies.auth import get_current_user, get_bearer_token
 from backend.dependencies.supabase import get_db
 from backend.models.usuarios import (
@@ -30,13 +29,6 @@ SUPABASE_ANON_KEY = settings.SUPABASE_ANON_KEY
 FRONTEND_URL = settings.FRONTEND_URL
 
 
-def api_response(response: ApiResponse):
-    return JSONResponse(
-        status_code=response.http_code,
-        content=jsonable_encoder(response),
-    )
-
-
 @router.get(
     "/me/",
     response_model=ApiResponse[UsuarioResponse],
@@ -52,33 +44,30 @@ def get_my_user(
         )
 
         if not usuario:
-            return api_response(
-                failure(
-                    message="Usuário não encontrado.",
-                    http_code=404,
-                    error_code="USER_NOT_FOUND",
-                )
+            raise AppException(
+                message="Usuário não encontrado.",
+                http_code=404,
+                error_code="USER_NOT_FOUND",
             )
 
-        return api_response(
-            success(
-                content=UsuarioResponse(
-                    id=usuario["id"],
-                    name=usuario["name"],
-                    email=usuario.get("email"),
-                    created_at=usuario.get("created_at"),
-                ),
-                message="Usuário encontrado com sucesso.",
-            )
+        return success(
+            content=UsuarioResponse(
+                id=usuario["id"],
+                name=usuario["name"],
+                email=usuario.get("email"),
+                created_at=usuario.get("created_at"),
+            ),
+            message="Usuário encontrado com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="USER_GET_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao buscar usuário.",
+            http_code=500,
+            error_code="USER_GET_ERROR",
         )
 
 
@@ -95,12 +84,10 @@ def update_my_user(
         name = data.name.strip()
 
         if not name:
-            return api_response(
-                failure(
-                    message="O nome não pode ser vazio.",
-                    http_code=400,
-                    error_code="EMPTY_NAME",
-                )
+            raise AppException(
+                message="O nome não pode ser vazio.",
+                http_code=400,
+                error_code="EMPTY_NAME",
             )
 
         response = (
@@ -114,34 +101,31 @@ def update_my_user(
         )
 
         if not response.data:
-            return api_response(
-                failure(
-                    message="Usuário não encontrado.",
-                    http_code=404,
-                    error_code="USER_NOT_FOUND",
-                )
+            raise AppException(
+                message="Usuário não encontrado.",
+                http_code=404,
+                error_code="USER_NOT_FOUND",
             )
 
         usuario = response.data[0]
 
-        return api_response(
-            success(
-                content=UpdateUsuarioResponse(
-                    id=usuario["id"],
-                    name=usuario["name"],
-                    email=usuario.get("email"),
-                ),
-                message="Usuário atualizado com sucesso.",
-            )
+        return success(
+            content=UpdateUsuarioResponse(
+                id=usuario["id"],
+                name=usuario["name"],
+                email=usuario.get("email"),
+            ),
+            message="Usuário atualizado com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="USER_UPDATE_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao atualizar usuário.",
+            http_code=500,
+            error_code="USER_UPDATE_ERROR",
         )
 
 
@@ -157,21 +141,17 @@ async def update_my_password(
 ):
     try:
         if data.new_password != data.confirm_new_password:
-            return api_response(
-                failure(
-                    message="A nova senha e a confirmação da nova senha não conferem.",
-                    http_code=400,
-                    error_code="PASSWORD_CONFIRMATION_MISMATCH",
-                )
+            raise AppException(
+                message="A nova senha e a confirmação da nova senha não conferem.",
+                http_code=400,
+                error_code="PASSWORD_CONFIRMATION_MISMATCH",
             )
 
         if data.current_password == data.new_password:
-            return api_response(
-                failure(
-                    message="A nova senha não pode ser igual à senha atual.",
-                    http_code=400,
-                    error_code="NEW_PASSWORD_SAME_AS_CURRENT",
-                )
+            raise AppException(
+                message="A nova senha não pode ser igual à senha atual.",
+                http_code=400,
+                error_code="NEW_PASSWORD_SAME_AS_CURRENT",
             )
 
         usuario = get_usuario_by_id(
@@ -180,23 +160,19 @@ async def update_my_password(
         )
 
         if not usuario:
-            return api_response(
-                failure(
-                    message="Usuário não encontrado.",
-                    http_code=404,
-                    error_code="USER_NOT_FOUND",
-                )
+            raise AppException(
+                message="Usuário não encontrado.",
+                http_code=404,
+                error_code="USER_NOT_FOUND",
             )
 
         user_email = usuario.get("email")
 
         if not user_email:
-            return api_response(
-                failure(
-                    message="Não foi possível identificar o email do usuário autenticado.",
-                    http_code=400,
-                    error_code="USER_EMAIL_NOT_FOUND",
-                )
+            raise AppException(
+                message="Não foi possível identificar o email do usuário autenticado.",
+                http_code=400,
+                error_code="USER_EMAIL_NOT_FOUND",
             )
 
         login_url = f"{SUPABASE_URL}/auth/v1/token?grant_type=password"
@@ -219,12 +195,10 @@ async def update_my_password(
             )
 
         if login_response.status_code >= 400:
-            return api_response(
-                failure(
-                    message="Senha atual incorreta.",
-                    http_code=400,
-                    error_code="CURRENT_PASSWORD_INCORRECT",
-                )
+            raise AppException(
+                message="Senha atual incorreta.",
+                http_code=400,
+                error_code="CURRENT_PASSWORD_INCORRECT",
             )
 
         update_url = f"{SUPABASE_URL}/auth/v1/user"
@@ -247,28 +221,25 @@ async def update_my_password(
             )
 
         if update_response.status_code >= 400:
-            return api_response(
-                failure(
-                    message=str(safe_response_detail(update_response)),
-                    http_code=update_response.status_code,
-                    error_code="PASSWORD_UPDATE_AUTH_ERROR",
-                )
+            raise AppException(
+                message=str(safe_response_detail(update_response)),
+                http_code=update_response.status_code,
+                error_code="PASSWORD_UPDATE_AUTH_ERROR",
             )
 
-        return api_response(
-            success(
-                content=None,
-                message="Senha atualizada com sucesso.",
-            )
+        return success(
+            content=None,
+            message="Senha atualizada com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="PASSWORD_UPDATE_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao atualizar senha.",
+            http_code=500,
+            error_code="PASSWORD_UPDATE_ERROR",
         )
 
 
@@ -304,28 +275,25 @@ async def request_password_reset(
             )
 
         if response.status_code >= 400:
-            return api_response(
-                failure(
-                    message=str(safe_response_detail(response)),
-                    http_code=response.status_code,
-                    error_code="PASSWORD_RESET_REQUEST_ERROR",
-                )
+            raise AppException(
+                message=str(safe_response_detail(response)),
+                http_code=response.status_code,
+                error_code="PASSWORD_RESET_REQUEST_ERROR",
             )
 
-        return api_response(
-            success(
-                content=None,
-                message="Se o email estiver cadastrado, enviaremos instruções para redefinir a senha.",
-            )
+        return success(
+            content=None,
+            message="Se o email estiver cadastrado, enviaremos instruções para redefinir a senha.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="PASSWORD_RESET_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao solicitar redefinição de senha.",
+            http_code=500,
+            error_code="PASSWORD_RESET_ERROR",
         )
 
 
@@ -346,35 +314,29 @@ async def update_my_email(
         )
 
         if not usuario:
-            return api_response(
-                failure(
-                    message="Usuário não encontrado.",
-                    http_code=404,
-                    error_code="USER_NOT_FOUND",
-                )
+            raise AppException(
+                message="Usuário não encontrado.",
+                http_code=404,
+                error_code="USER_NOT_FOUND",
             )
 
         new_email = data.email.strip().lower()
         current_email = (usuario.get("email") or "").strip().lower()
 
         if current_email == new_email:
-            return api_response(
-                failure(
-                    message="O novo email deve ser diferente do email atual.",
-                    http_code=400,
-                    error_code="EMAIL_SAME_AS_CURRENT",
-                )
+            raise AppException(
+                message="O novo email deve ser diferente do email atual.",
+                http_code=400,
+                error_code="EMAIL_SAME_AS_CURRENT",
             )
 
         identities_result = await get_user_identities(access_token)
 
         if identities_result["error"]:
-            return api_response(
-                failure(
-                    message=identities_result["message"],
-                    http_code=identities_result["http_code"],
-                    error_code="USER_IDENTITIES_GET_ERROR",
-                )
+            raise AppException(
+                message=identities_result["message"],
+                http_code=identities_result["http_code"],
+                error_code="USER_IDENTITIES_GET_ERROR",
             )
 
         identities = identities_result["identities"]
@@ -387,15 +349,13 @@ async def update_my_email(
         has_multiple_identities = len(identities) >= 2
 
         if has_google_identity and not has_multiple_identities:
-            return api_response(
-                failure(
-                    message=(
-                        "Não é possível trocar o email agora porque o Google é o único método de login desta conta. "
-                        "Adicione/defina um método de login por email e senha antes de trocar o email."
-                    ),
-                    http_code=400,
-                    error_code="GOOGLE_IS_ONLY_LOGIN_METHOD",
-                )
+            raise AppException(
+                message=(
+                    "Não é possível trocar o email agora porque o Google é o único método de login desta conta. "
+                    "Adicione/defina um método de login por email e senha antes de trocar o email."
+                ),
+                http_code=400,
+                error_code="GOOGLE_IS_ONLY_LOGIN_METHOD",
             )
 
         should_unlink_google = has_google_identity and has_multiple_identities
@@ -427,12 +387,10 @@ async def update_my_email(
         )
 
         if not pending_response.data:
-            return api_response(
-                failure(
-                    message="Não foi possível registrar a solicitação de troca de email.",
-                    http_code=400,
-                    error_code="EMAIL_CHANGE_REQUEST_CREATE_ERROR",
-                )
+            raise AppException(
+                message="Não foi possível registrar a solicitação de troca de email.",
+                http_code=400,
+                error_code="EMAIL_CHANGE_REQUEST_CREATE_ERROR",
             )
 
         pending_id = pending_response.data[0]["id"]
@@ -473,32 +431,29 @@ async def update_my_email(
                 .execute()
             )
 
-            return api_response(
-                failure(
-                    message=str(safe_response_detail(response)),
-                    http_code=response.status_code,
-                    error_code="EMAIL_UPDATE_AUTH_ERROR",
-                )
+            raise AppException(
+                message=str(safe_response_detail(response)),
+                http_code=response.status_code,
+                error_code="EMAIL_UPDATE_AUTH_ERROR",
             )
 
-        return api_response(
-            success(
-                content=EmailChangeRequestResponse(
-                    new_email=new_email,
-                    should_unlink_google_after_confirmation=should_unlink_google,
-                    should_finalize_after_redirect=True,
-                ),
-                message="Solicitação de troca de email enviada. Verifique o email para confirmar a alteração.",
-            )
+        return success(
+            content=EmailChangeRequestResponse(
+                new_email=new_email,
+                should_unlink_google_after_confirmation=should_unlink_google,
+                should_finalize_after_redirect=True,
+            ),
+            message="Solicitação de troca de email enviada. Verifique o email para confirmar a alteração.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="EMAIL_UPDATE_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao solicitar troca de email.",
+            http_code=500,
+            error_code="EMAIL_UPDATE_ERROR",
         )
 
 
@@ -526,30 +481,26 @@ async def finalize_email_change(
         )
 
         if not pending_response.data:
-            return api_response(
-                success(
-                    content=FinalizeEmailChangeResponse(
-                        email_change_finalized=False,
-                        should_logout=False,
-                    ),
-                    message="Nenhuma troca de email pendente para finalizar.",
-                )
+            return success(
+                content=FinalizeEmailChangeResponse(
+                    email_change_finalized=False,
+                    should_logout=False,
+                ),
+                message="Nenhuma troca de email pendente para finalizar.",
             )
 
         pending = pending_response.data[0]
         expected_email = (pending["new_email"] or "").strip().lower()
 
         if current_email != expected_email:
-            return api_response(
-                success(
-                    content=FinalizeEmailChangeResponse(
-                        email_change_finalized=False,
-                        should_logout=False,
-                        current_email=current_email,
-                        expected_email=expected_email,
-                    ),
-                    message="A troca de email ainda não foi confirmada.",
-                )
+            return success(
+                content=FinalizeEmailChangeResponse(
+                    email_change_finalized=False,
+                    should_logout=False,
+                    current_email=current_email,
+                    expected_email=expected_email,
+                ),
+                message="A troca de email ainda não foi confirmada.",
             )
 
         google_result = {
@@ -563,12 +514,10 @@ async def finalize_email_change(
             )
 
             if unlink_result["error"]:
-                return api_response(
-                    failure(
-                        message=unlink_result["message"],
-                        http_code=unlink_result["http_code"],
-                        error_code="GOOGLE_IDENTITY_UNLINK_ERROR",
-                    )
+                raise AppException(
+                    message=unlink_result["message"],
+                    http_code=unlink_result["http_code"],
+                    error_code="GOOGLE_IDENTITY_UNLINK_ERROR",
                 )
 
             google_result = unlink_result["google_identity"]
@@ -595,27 +544,26 @@ async def finalize_email_change(
             .execute()
         )
 
-        return api_response(
-            success(
-                content=FinalizeEmailChangeResponse(
-                    email_change_finalized=True,
-                    google_identity=GoogleIdentityResultResponse(
-                        google_unlinked=google_result["google_unlinked"],
-                        reason=google_result["reason"],
-                    ),
-                    should_logout=True,
+        return success(
+            content=FinalizeEmailChangeResponse(
+                email_change_finalized=True,
+                google_identity=GoogleIdentityResultResponse(
+                    google_unlinked=google_result["google_unlinked"],
+                    reason=google_result["reason"],
                 ),
-                message="Troca de email finalizada com sucesso.",
-            )
+                should_logout=True,
+            ),
+            message="Troca de email finalizada com sucesso.",
         )
 
-    except Exception as e:
-        return api_response(
-            failure(
-                message=str(e),
-                http_code=400,
-                error_code="EMAIL_CHANGE_FINALIZE_ERROR",
-            )
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao finalizar troca de email.",
+            http_code=500,
+            error_code="EMAIL_CHANGE_FINALIZE_ERROR",
         )
 
 
