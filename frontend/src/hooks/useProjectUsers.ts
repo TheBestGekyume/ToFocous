@@ -6,12 +6,16 @@ export const useProjectUsers = (projectId: string) => {
   const [projectUsers, setProjectUsers] = useState<TProjectUser[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchProjectUsers = useCallback(async () => {
+  const fetchProjectUsers = useCallback(async (): Promise<TProjectUser[]> => {
+    if (!projectId) return [];
+
     setLoading(true);
 
     try {
       const users = await projectUserService.getProjectUsers(projectId);
       setProjectUsers(users);
+
+      return users;
     } finally {
       setLoading(false);
     }
@@ -19,6 +23,8 @@ export const useProjectUsers = (projectId: string) => {
 
   const addProjectUser = useCallback(
     async (userId: string) => {
+      if (!projectId) return;
+
       const created = await projectUserService.addProjectUser({
         project_id: projectId,
         user_id: userId,
@@ -39,6 +45,8 @@ export const useProjectUsers = (projectId: string) => {
 
   const removeProjectUser = useCallback(
     async (userId: string) => {
+      if (!projectId) return;
+
       await projectUserService.removeProjectUser({
         project_id: projectId,
         user_id: userId,
@@ -52,6 +60,8 @@ export const useProjectUsers = (projectId: string) => {
   );
 
   const leaveProject = useCallback(async () => {
+    if (!projectId) return;
+
     await projectUserService.leaveProject(projectId);
   }, [projectId]);
 

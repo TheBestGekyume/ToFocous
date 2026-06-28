@@ -15,6 +15,8 @@ import type {
 } from "@supabase/supabase-js";
 import { supabaseRealtimeClient } from "../services/realtime/supabaseRealtimeClient";
 import { getAccessToken } from "../utils/tokenUtils";
+import { taskAssignmentService } from "../services/tasks/taskAssignmentService";
+import type { TTaskAssignment } from "../types/TTaskAssignment";
 import axios from "axios";
 
 type TaskRealtimePayload = RealtimePostgresChangesPayload<TTask>;
@@ -24,6 +26,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   const [tasks, setTasks] = useState<TTask[]>([]);
   const [loading, setLoading] = useState(false);
   const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
+  const [assignments, setAssignments] = useState<TTaskAssignment[]>([]);
 
   const [sortConfig, setSortConfig] = useState<{
     type: SortType;
@@ -235,6 +238,94 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     []
   );
 
+  const getProjectAssignments = useCallback(
+    async (projectId: string): Promise<TTaskAssignment[]> => {
+      try {
+        setAssignments([]);
+
+        const data =
+          await taskAssignmentService.getProjectAssignments(projectId);
+
+        setAssignments(data);
+
+        return data;
+      } catch (err) {
+        console.error("Erro ao buscar responsáveis do projeto", err);
+        throw err;
+      }
+    },
+    []
+  );
+
+  const assignUserToTask = useCallback(
+    async (taskId: string, assignedUserId: string) => {
+      try {
+        const created = await taskAssignmentService.createAssignment({
+          task_id: taskId,
+          assigned_user_id: assignedUserId,
+        });
+
+        setAssignments((prev) => {
+          const alreadyExists = prev.some(
+            (assignment) => assignment.id === created.id
+          );
+
+          if (alreadyExists) return prev;
+
+          return [...prev, created];
+        });
+
+        return created;
+      } catch (err) {
+        console.error("Erro ao atribuir responsável à task", err);
+        throw err;
+      }
+    },
+    []
+  );
+
+  const assignUserToSubTask = useCallback(
+    async (subtaskId: string, assignedUserId: string) => {
+      try {
+        const created = await taskAssignmentService.createAssignment({
+          subtask_id: subtaskId,
+          assigned_user_id: assignedUserId,
+        });
+
+        setAssignments((prev) => {
+          const alreadyExists = prev.some(
+            (assignment) => assignment.id === created.id
+          );
+
+          if (alreadyExists) return prev;
+
+          return [...prev, created];
+        });
+
+        return created;
+      } catch (err) {
+        console.error("Erro ao atribuir responsável à subtask", err);
+        throw err;
+      }
+    },
+    []
+  );
+
+  const removeTaskAssignment = useCallback(async (assignmentId: string) => {
+    try {
+      await taskAssignmentService.deleteAssignment({
+        assignment_id: assignmentId,
+      });
+
+      setAssignments((prev) =>
+        prev.filter((assignment) => assignment.id !== assignmentId)
+      );
+    } catch (err) {
+      console.error("Erro ao remover responsável", err);
+      throw err;
+    }
+  }, []);
+
   const upsertTaskFromRealtime = useCallback((incomingTask: TTask) => {
     setTasks((prev) => {
       const alreadyExists = prev.some((task) => task.id === incomingTask.id);
@@ -429,6 +520,13 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       updateTask,
       deleteTask,
 
+      assignments,
+
+      getProjectAssignments,
+      assignUserToTask,
+      assignUserToSubTask,
+      removeTaskAssignment,
+
       getSubTasks,
       createSubTask,
       updateSubTask,
@@ -450,6 +548,11 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       createSubTask,
       updateSubTask,
       deleteSubTask,
+      assignments,
+      getProjectAssignments,
+      assignUserToTask,
+      assignUserToSubTask,
+      removeTaskAssignment,
       subscribeToProjectRealtime,
     ]
   );

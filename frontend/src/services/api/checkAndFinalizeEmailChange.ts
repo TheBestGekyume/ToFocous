@@ -1,5 +1,6 @@
 import { api } from "./api";
 import { supabaseAuthClient } from "../auth/supabaseAuthClient";
+import { requireApiContent, type TApiResponse } from "../../types/TApi";
 
 type FinalizeEmailChangeResponse = {
   should_logout?: boolean;
@@ -14,9 +15,9 @@ export const checkAndFinalizeEmailChange =
       return { should_logout: false };
     }
 
-    const response = await api.post<FinalizeEmailChangeResponse>(
+    const response = await api.post<TApiResponse<FinalizeEmailChangeResponse>>(
       "/usuarios/me/email/finalize"
     );
 
-    return response.data;
+    return requireApiContent(response.data);
   };

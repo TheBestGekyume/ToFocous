@@ -1,3 +1,4 @@
+import { requireApiContent, type TApiResponse } from "../../types/TApi";
 import type { TPriority, TStatus } from "../../types/TTask";
 import { api } from "../api/api";
 
@@ -35,7 +36,7 @@ export const getAgendaItems = async ({
   month,
   projectId,
 }: GetAgendaItemsParams): Promise<AgendaItemResponse[]> => {
-  const response = await api.get<AgendaResponse>("/agenda/", {
+  const response = await api.get<TApiResponse<AgendaResponse>>("/agenda/", {
     params: {
       year,
       month,
@@ -43,5 +44,11 @@ export const getAgendaItems = async ({
     },
   });
 
-  return response.data.items;
+  console.log("response =>", response)
+
+ return requireApiContent(response.data).items;
+
+  // const content = requireApiContent(response.data);
+
+  // return content.items;
 };

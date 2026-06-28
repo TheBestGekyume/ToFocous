@@ -7,6 +7,7 @@ import {
   createMyPassword,
 } from "../services/users/userService";
 import { supabaseAuthClient } from "../services/auth/supabaseAuthClient";
+import axios from "axios";
 
 type ProfileFeedback = {
   type: "success" | "error";
@@ -216,10 +217,16 @@ export const useProfile = () => {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
-    } catch {
+    } catch (error) {
+      let message = "Não foi possível atualizar a senha.";
+      console.log("ERROR:",error)
+      if (axios.isAxiosError(error)) {
+        message = error.response?.data?.detail || message;
+      }
+
       setFeedback({
         type: "error",
-        message: "Não foi possível atualizar a senha.",
+        message,
       });
     } finally {
       setIsUpdatingPassword(false);

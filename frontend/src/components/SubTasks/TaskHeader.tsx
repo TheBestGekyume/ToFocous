@@ -3,12 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { TaskItem } from "../Tasks/TaskItem";
 import type { TTask } from "../../types/TTask";
 import { useParams } from "react-router-dom";
+import type { TProjectMember } from "../_Common/AssignmentControl";
 
 type TaskHeaderProps = {
   task: TTask;
+  projectMembers?: TProjectMember[];
+  isProjectOwner?: boolean;
 };
 
-export const TaskHeader = ({ task }: TaskHeaderProps) => {
+export const TaskHeader = ({
+  task,
+  projectMembers = [],
+  isProjectOwner = false,
+}: TaskHeaderProps) => {
   const navigate = useNavigate();
 
   const { projectId } = useParams();
@@ -23,7 +30,11 @@ export const TaskHeader = ({ task }: TaskHeaderProps) => {
       </button>
 
       <section className="mx-auto w-full px-15">
-        <TaskItem task={task} />
+        <TaskItem
+          task={task}
+          projectMembers={projectMembers}
+          isProjectOwner={isProjectOwner}
+        />
       </section>
     </div>
   );

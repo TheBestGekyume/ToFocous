@@ -6,7 +6,7 @@ import type {
   TCreateSubTaskDTO,
   SortType,
 } from "../types/TTask";
-
+import type { TTaskAssignment } from "../types/TTaskAssignment";
 
 export type TasksContextType = {
   tasks: TTask[];
@@ -15,6 +15,19 @@ export type TasksContextType = {
   handleSortConfig: (type: SortType, isAscending?: boolean) => void;
   resetSort: () => void;
   loading: boolean;
+
+  assignments: TTaskAssignment[];
+
+  getProjectAssignments: (projectId: string) => Promise<TTaskAssignment[]>;
+  assignUserToTask: (
+    taskId: string,
+    assignedUserId: string
+  ) => Promise<TTaskAssignment>;
+  assignUserToSubTask: (
+    subtaskId: string,
+    assignedUserId: string
+  ) => Promise<TTaskAssignment>;
+  removeTaskAssignment: (assignmentId: string) => Promise<void>;
 
   sortConfig: {
     type: SortType;
