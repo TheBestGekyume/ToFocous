@@ -6,6 +6,7 @@ import type {
   TProject,
   TUpdateProjectDTO,
 } from "../types/TProject";
+import { logApiError } from "../utils/apiError";
 
 const upsertProject = (list: TProject[], project: TProject): TProject[] => {
   const alreadyExists = list.some((item) => item.id === project.id);
@@ -45,6 +46,9 @@ export const ProjectsProvider = ({
       setProjects(uniqueProjects);
 
       return uniqueProjects;
+    } catch (error: unknown) {
+      logApiError("Erro ao buscar projetos", error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -52,7 +56,7 @@ export const ProjectsProvider = ({
 
   const getProjectById = useCallback(
     async (id: string): Promise<TProject> => {
-      const existingProject = projects.find((p) => p.id === id);
+      const existingProject = projects.find((project) => project.id === id);
 
       if (existingProject) {
         return existingProject;
@@ -66,6 +70,9 @@ export const ProjectsProvider = ({
         setProjects((prev) => upsertProject(prev, data));
 
         return data;
+      } catch (error: unknown) {
+        logApiError(`Erro ao buscar projeto ${id}`, error);
+        throw error;
       } finally {
         setLoading(false);
       }
@@ -73,31 +80,51 @@ export const ProjectsProvider = ({
     [projects]
   );
 
-  const createProject = useCallback(async (payload: TCreateProjectDTO) => {
-    const newProject = await projectService.createProject(payload);
+  const createProject = useCallback(
+    async (payload: TCreateProjectDTO): Promise<TProject> => {
+      try {
+        const newProject = await projectService.createProject(payload);
 
-    setProjects((prev) => upsertProject(prev, newProject));
-  }, []);
+        setProjects((prev) => upsertProject(prev, newProject));
 
-  const updateProject = useCallback(
-    async (id: string, payload: TUpdateProjectDTO) => {
-      const updated = await projectService.updateProject(id, payload);
-
-      setProjects((prev) => upsertProject(prev, updated));
-
-      return updated;
+        return newProject;
+      } catch (error: unknown) {
+        logApiError("Erro ao criar projeto", error);
+        throw error;
+      }
     },
     []
   );
 
-  const deleteProject = useCallback(async (id: string) => {
-    await projectService.deleteProject(id);
+  const updateProject = useCallback(
+    async (id: string, payload: TUpdateProjectDTO): Promise<TProject> => {
+      try {
+        const updated = await projectService.updateProject(id, payload);
 
-    setProjects((prev) => prev.filter((p) => p.id !== id));
+        setProjects((prev) => upsertProject(prev, updated));
+
+        return updated;
+      } catch (error: unknown) {
+        logApiError(`Erro ao atualizar projeto ${id}`, error);
+        throw error;
+      }
+    },
+    []
+  );
+
+  const deleteProject = useCallback(async (id: string): Promise<void> => {
+    try {
+      await projectService.deleteProject(id);
+
+      setProjects((prev) => prev.filter((project) => project.id !== id));
+    } catch (error: unknown) {
+      logApiError(`Erro ao deletar projeto ${id}`, error);
+      throw error;
+    }
   }, []);
 
   useEffect(() => {
-    fetchProjects();
+    void fetchProjects().catch(() => undefined);
   }, [fetchProjects]);
 
   return (

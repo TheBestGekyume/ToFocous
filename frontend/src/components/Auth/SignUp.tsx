@@ -2,12 +2,13 @@ import { useState } from "react";
 import { signUpUser } from "../../services/auth/authService";
 import { LoadingDots } from "../_Common/LoadingDots";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
-import { getApiErrorMessage } from "../../utils/apiError";
+import { getApiErrorMessage, logApiError } from "../../utils/apiError";
 import { PasswordInput } from "../_Common/PasswordInput";
 
 export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -17,6 +18,7 @@ export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setError(null);
     setSuccess(null);
 
@@ -28,22 +30,26 @@ export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
     setLoading(true);
 
     try {
-      await signUpUser({ name, email, password });
+      const response = await signUpUser({
+        name,
+        email,
+        password,
+      });
 
-      setSuccess(
-        `Conta criada com sucesso!\n Ative sua conta pelo email ${email}`
-      );
+      setSuccess(`${response.message}\nAtive sua conta pelo email ${email}.`);
 
-      setTimeout(() => {
+      window.setTimeout(() => {
         onSwitch();
       }, 5000);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, "Erro ao criar conta"));
-      console.error(err);
+    } catch (error: unknown) {
+      logApiError("Erro ao criar conta", error);
+
+      setError(getApiErrorMessage(error, "Erro ao criar conta."));
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <>
       <LoadingOverlay
@@ -58,8 +64,8 @@ export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
           placeholder="Nome de usuário"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
-          required
+ className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
+          border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"          required
         />
 
         <input
@@ -67,26 +73,30 @@ export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
-          required
+ className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
+          border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"          required
         />
 
-       <PasswordInput
-  value={password}
-  onChange={setPassword}
-  placeholder="Senha"
-  required
-  className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
-/>
+        <PasswordInput
+          value={password}
+          onChange={setPassword}
+          placeholder="Senha"
+          required
+           className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
+          border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"
+        />
 
-<PasswordInput
-  value={confirmPassword}
-  onChange={setConfirmPassword}
-  placeholder="Confirmar senha"
-  required
-  className="w-full rounded-md bg-background-body text-text px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
-/>
+        <PasswordInput
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          placeholder="Confirmar senha"
+          required
+           className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
+          border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"
+        />
+
         {error && <p className="text-red-400 text-sm">{error}</p>}
+
         {success && (
           <p className="whitespace-pre-line text-sm text-green-400">
             {success}

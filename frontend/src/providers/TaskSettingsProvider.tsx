@@ -5,6 +5,7 @@ import {
   getTaskSettings,
   updateTaskSettings,
 } from "../services/tasks/taskSettingsService";
+import { logApiError } from "../utils/apiError";
 
 export const TaskSettingsProvider = ({ children }: { children: ReactNode }) => {
   const [settings, setSettings] = useState<ITaskSettings | null>(null);
@@ -16,31 +17,37 @@ export const TaskSettingsProvider = ({ children }: { children: ReactNode }) => {
       try {
         const data = await getTaskSettings();
         setSettings(data);
-      } catch (err) {
-        console.error(err);
+      } catch (error: unknown) {
+        logApiError("Erro ao buscar configurações de tarefas", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    void fetchData();
   }, []);
 
   const updateSettings = async (data: Partial<ITaskSettings>) => {
     if (!settings) return;
 
-    const updated = { ...settings, ...data };
+    const updatedSettings: ITaskSettings = {
+      ...settings,
+      ...data,
+    };
 
-    if (!updated.use_start_date) {
-      updated.which_date_use_in_calendar = "UseDueDate";
+    if (!updatedSettings.use_start_date) {
+      updatedSettings.which_date_use_in_calendar = "UseDueDate";
     }
-    setSettings(updated);
+
+    setSettings(updatedSettings);
     setUpdating(true);
 
     try {
-      await updateTaskSettings(updated);
-    } catch (err) {
-      console.error(err);
+      const savedSettings = await updateTaskSettings(updatedSettings);
+
+      setSettings(savedSettings);
+    } catch (error: unknown) {
+      logApiError("Erro ao atualizar configurações de tarefas", error);
 
       setSettings(settings);
     } finally {
@@ -48,17 +55,19 @@ export const TaskSettingsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const canUseStartTime = settings?.use_time && settings?.use_start_date;
+  const canUseStartTime = Boolean(
+    settings?.use_time && settings?.use_start_date
+  );
 
-  const canShowCalendarOption = settings?.use_start_date;
+  const canShowCalendarOption = Boolean(settings?.use_start_date);
 
   return (
     <TaskSettingsContext.Provider
       value={{
         settings,
         updateSettings,
-        canUseStartTime: !!canUseStartTime,
-        canShowCalendarOption: !!canShowCalendarOption,
+        canUseStartTime,
+        canShowCalendarOption,
         loading,
         updating,
       }}

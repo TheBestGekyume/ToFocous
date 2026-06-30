@@ -1,3 +1,4 @@
+import { FeedbackToast } from "../components/_Common/FeedbackToast";
 import { LoadingOverlay } from "../components/_Common/LoadingOverlay";
 import { AgendaCalendar } from "../components/Agenda/AgendaCalendar";
 import { AgendaHeader } from "../components/Agenda/AgendaHeader";
@@ -6,6 +7,8 @@ import { useAgenda } from "../hooks/useAgenda";
 export const AgendaPage = () => {
   const {
     loading,
+    error,
+
     currentMonth,
     agendaItemsByDate,
     activeDateKey,
@@ -38,6 +41,8 @@ export const AgendaPage = () => {
           onToday={goToToday}
           onChangeProject={changeSelectedProjectId}
         />
+
+        {error && <FeedbackToast type={"error"} message={error} />}
 
         <AgendaCalendar
           currentMonth={currentMonth}

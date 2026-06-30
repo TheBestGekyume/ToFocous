@@ -5,6 +5,7 @@ import { LoadingDots } from "../components/_Common/LoadingDots";
 import { checkAndFinalizeEmailChange } from "../services/api/checkAndFinalizeEmailChange";
 import { supabaseAuthClient } from "../services/auth/supabaseAuthClient";
 import { clearTokens, setTokens, setUserId } from "../utils/tokenUtils";
+import { logApiError } from "../utils/apiError";
 
 const hasAuthCallbackParams = (): boolean => {
   const searchParams = new URLSearchParams(window.location.search);
@@ -25,6 +26,7 @@ export const AuthCallbackPage = () => {
 
   useEffect(() => {
     if (alreadyHandled.current) return;
+
     alreadyHandled.current = true;
 
     const handleCallback = async (): Promise<void> => {
@@ -64,8 +66,8 @@ export const AuthCallbackPage = () => {
         }
 
         navigate("/", { replace: true });
-      } catch (error) {
-        console.error("Erro no callback de autenticação:", error);
+      } catch (error: unknown) {
+        logApiError("Erro no callback de autenticação", error);
 
         clearTokens();
 

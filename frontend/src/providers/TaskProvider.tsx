@@ -8,6 +8,8 @@ import type {
   TCreateTaskDTO,
   TSubTask,
   TTask,
+  TUpdateSubTaskDTO,
+  TUpdateTaskDTO,
 } from "../types/TTask";
 import type {
   RealtimeChannel,
@@ -17,7 +19,7 @@ import { supabaseRealtimeClient } from "../services/realtime/supabaseRealtimeCli
 import { getAccessToken } from "../utils/tokenUtils";
 import { taskAssignmentService } from "../services/tasks/taskAssignmentService";
 import type { TTaskAssignment } from "../types/TTaskAssignment";
-import axios from "axios";
+import { isCanceledRequestError, logApiError } from "../utils/apiError";
 
 type TaskRealtimePayload = RealtimePostgresChangesPayload<TTask>;
 type SubTaskRealtimePayload = RealtimePostgresChangesPayload<TSubTask>;
@@ -62,9 +64,9 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       setTasks(data);
 
       return data;
-    } catch (err) {
-      console.error("Erro ao buscar tasks do usuário", err);
-      throw err;
+    } catch (error: unknown) {
+      logApiError("Erro ao buscar tasks do usuário", error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -79,9 +81,9 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
         setTasks(data);
 
         return data;
-      } catch (err) {
-        console.error(`Erro ao buscar task no projeto ${projectId}:`, err);
-        throw err;
+      } catch (error: unknown) {
+        logApiError(`Erro ao buscar tasks no projeto ${projectId}`, error);
+        throw error;
       } finally {
         setLoading(false);
       }
@@ -95,14 +97,14 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       setTasks((prev) => [created, ...prev]);
 
       return created;
-    } catch (err) {
-      console.error("Erro ao criar task", err);
-      throw err;
+    } catch (error: unknown) {
+      logApiError("Erro ao criar task", error);
+      throw error;
     }
   }, []);
 
   const updateTask = useCallback(
-    async (taskId: string, payload: Partial<TTask>) => {
+    async (taskId: string, payload: TUpdateTaskDTO) => {
       try {
         const updated = await taskService.updateTask(taskId, payload);
 
@@ -113,9 +115,9 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
         );
 
         return updated;
-      } catch (err) {
-        console.error("Erro ao atualizar task", err);
-        throw err;
+      } catch (error: unknown) {
+        logApiError("Erro ao atualizar task", error);
+        throw error;
       }
     },
     []
@@ -126,9 +128,9 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       await taskService.deleteTask(taskId);
 
       setTasks((prev) => prev.filter((task) => task.id !== taskId));
-    } catch (err) {
-      console.error("Erro ao deletar task", err);
-      throw err;
+    } catch (error: unknown) {
+      logApiError("Erro ao deletar task", error);
+      throw error;
     }
   }, []);
 
@@ -141,17 +143,13 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       );
 
       return subtasks;
-    } catch (err) {
-      const isCanceledRequest =
-        axios.isCancel(err) ||
-        (axios.isAxiosError(err) && err.code === "ERR_CANCELED");
-
-      if (isCanceledRequest) {
+    } catch (error: unknown) {
+      if (isCanceledRequestError(error)) {
         return [];
       }
 
-      console.error("Erro ao buscar subtasks", err);
-      throw err;
+      logApiError("Erro ao buscar subtasks", error);
+      throw error;
     }
   }, []);
 
@@ -172,16 +170,16 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
         );
 
         return created;
-      } catch (err) {
-        console.error("Erro ao criar subtask", err);
-        throw err;
+      } catch (error: unknown) {
+        logApiError("Erro ao criar subtask", error);
+        throw error;
       }
     },
     []
   );
 
   const updateSubTask = useCallback(
-    async (taskId: string, subtaskId: string, payload: Partial<TSubTask>) => {
+    async (taskId: string, subtaskId: string, payload: TUpdateSubTaskDTO) => {
       try {
         const updated = await taskService.updateSubTask(
           subtaskId,
@@ -205,9 +203,9 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
         );
 
         return updated;
-      } catch (err) {
-        console.error("Erro ao atualizar subtask", err);
-        throw err;
+      } catch (error: unknown) {
+        logApiError("Erro ao atualizar subtask", error);
+        throw error;
       }
     },
     []
@@ -230,9 +228,9 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
               : task
           )
         );
-      } catch (err) {
-        console.error("Erro ao deletar subtask", err);
-        throw err;
+      } catch (error: unknown) {
+        logApiError("Erro ao deletar subtask", error);
+        throw error;
       }
     },
     []
@@ -249,9 +247,9 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
         setAssignments(data);
 
         return data;
-      } catch (err) {
-        console.error("Erro ao buscar responsáveis do projeto", err);
-        throw err;
+      } catch (error: unknown) {
+        logApiError("Erro ao buscar responsáveis do projeto", error);
+        throw error;
       }
     },
     []
@@ -276,9 +274,9 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
         });
 
         return created;
-      } catch (err) {
-        console.error("Erro ao atribuir responsável à task", err);
-        throw err;
+      } catch (error: unknown) {
+        logApiError("Erro ao atribuir responsável à task", error);
+        throw error;
       }
     },
     []
@@ -303,9 +301,9 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
         });
 
         return created;
-      } catch (err) {
-        console.error("Erro ao atribuir responsável à subtask", err);
-        throw err;
+      } catch (error: unknown) {
+        logApiError("Erro ao atribuir responsável à subtask", error);
+        throw error;
       }
     },
     []
@@ -320,9 +318,9 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       setAssignments((prev) =>
         prev.filter((assignment) => assignment.id !== assignmentId)
       );
-    } catch (err) {
-      console.error("Erro ao remover responsável", err);
-      throw err;
+    } catch (error: unknown) {
+      logApiError("Erro ao remover responsável", error);
+      throw error;
     }
   }, []);
 

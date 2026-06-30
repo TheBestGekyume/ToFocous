@@ -8,25 +8,29 @@ export const useProjectItem = (project: TProject) => {
   const editable = useEditableItem<TProject>({
     initialData: project,
 
-    onUpdate: (updated) =>
-      updateProject(project.id, {
+    onUpdate: async (updated) => {
+      await updateProject(project.id, {
         title: updated.title,
         description: updated.description,
         color: updated.color,
-      }),
+      });
+    },
 
-    onDelete: () => deleteProject(project.id),
+    onDelete: async () => {
+      await deleteProject(project.id);
+    },
 
-    validate: (p) => !!p.title.trim(),
+    validate: (currentProject) => Boolean(currentProject.title.trim()),
 
-    hasChanged: (a, b) =>
-      a.title !== b.title ||
-      a.description !== b.description ||
-      a.color !== b.color,
+    hasChanged: (currentProject, previousProject) =>
+      currentProject.title !== previousProject.title ||
+      currentProject.description !== previousProject.description ||
+      currentProject.color !== previousProject.color,
   });
 
-  const changeColor = (color: string) =>
+  const changeColor = (color: string) => {
     editable.handleImmediateChange("color", color);
+  };
 
   return {
     ...editable,

@@ -4,13 +4,11 @@ import type {
   TProjectUser,
   TRemoveProjectUserDTO,
 } from "../../types/TProjectUser";
-import type { TApiResponse } from "../../types/TApi";
-import { requireApiContent } from "../../types/TApi";
+import { getApiSuccessOrThrow, type TApiResponse } from "../../types/TApi";
 
 type ProjectUsersListResponse = {
   users: TProjectUser[];
 };
-
 
 export const projectUserService = {
   async getProjectUsers(projectId: string): Promise<TProjectUser[]> {
@@ -18,7 +16,11 @@ export const projectUserService = {
       `/project-users/${projectId}/`
     );
 
-    return requireApiContent(response.data).users;
+    const success = getApiSuccessOrThrow(response.data, {
+      contentRequired: true,
+    });
+
+    return success.content.users;
   },
 
   async addProjectUser(payload: TAddProjectUserDTO): Promise<TProjectUser> {
@@ -27,21 +29,29 @@ export const projectUserService = {
       payload
     );
 
-    return requireApiContent(response.data);
+    const success = getApiSuccessOrThrow(response.data, {
+      contentRequired: true,
+    });
+
+    return success.content;
   },
 
   async removeProjectUser(payload: TRemoveProjectUserDTO): Promise<void> {
-    await api.delete<TApiResponse<ProjectUsersListResponse>>(
+    const response = await api.delete<TApiResponse<unknown>>(
       "/project-users/",
       {
         data: payload,
       }
     );
+
+    getApiSuccessOrThrow(response.data);
   },
 
   async leaveProject(projectId: string): Promise<void> {
-    await api.delete<TApiResponse<ProjectUsersListResponse>>(
+    const response = await api.delete<TApiResponse<unknown>>(
       `/project-users/leave/${projectId}/`
     );
+
+    getApiSuccessOrThrow(response.data);
   },
 };

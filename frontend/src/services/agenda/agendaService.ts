@@ -1,4 +1,4 @@
-import { requireApiContent, type TApiResponse } from "../../types/TApi";
+import { getApiSuccessOrThrow, type TApiResponse } from "../../types/TApi";
 import type { TPriority, TStatus } from "../../types/TTask";
 import { api } from "../api/api";
 
@@ -44,11 +44,9 @@ export const getAgendaItems = async ({
     },
   });
 
-  console.log("response =>", response)
+  const success = getApiSuccessOrThrow(response.data, {
+    contentRequired: true,
+  });
 
- return requireApiContent(response.data).items;
-
-  // const content = requireApiContent(response.data);
-
-  // return content.items;
+  return success.content.items;
 };

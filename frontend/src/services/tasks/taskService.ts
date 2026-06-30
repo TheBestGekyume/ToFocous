@@ -1,6 +1,6 @@
 import { api } from "../api/api";
 import type { TApiResponse } from "../../types/TApi";
-import { requireApiContent } from "../../types/TApi";
+import { getApiSuccessOrThrow } from "../../types/TApi";
 
 import type {
   TTask,
@@ -27,19 +27,31 @@ export const taskService = {
       params: { project_id: projectId },
     });
 
-    return requireApiContent(response.data).tasks;
+    const success = getApiSuccessOrThrow(response.data, {
+      contentRequired: true,
+    });
+
+    return success.content.tasks;
   },
 
   async getTasks(): Promise<TTask[]> {
     const response = await api.get<TApiResponse<TaskListResponse>>("/tasks/");
 
-    return requireApiContent(response.data).tasks;
+    const success = getApiSuccessOrThrow(response.data, {
+      contentRequired: true,
+    });
+
+    return success.content.tasks;
   },
 
   async createTask(data: TCreateTaskDTO): Promise<TTask> {
     const response = await api.post<TApiResponse<TTask>>("/tasks/", data);
 
-    return requireApiContent(response.data);
+    const success = getApiSuccessOrThrow(response.data, {
+      contentRequired: true,
+    });
+
+    return success.content;
   },
 
   async updateTask(id: string, data: TUpdateTaskDTO): Promise<TTask> {
@@ -48,15 +60,17 @@ export const taskService = {
       data
     );
 
-    return requireApiContent(response.data);
+    const success = getApiSuccessOrThrow(response.data, {
+      contentRequired: true,
+    });
+
+    return success.content;
   },
 
   async deleteTask(id: string): Promise<void> {
-    const response = await api.delete<TApiResponse<TaskListResponse>>(
-      `/tasks/${id}/`
-    );
+    const response = await api.delete<TApiResponse<unknown>>(`/tasks/${id}/`);
 
-    requireApiContent(response.data);
+    getApiSuccessOrThrow(response.data);
   },
 
   // SUBTASKS
@@ -66,7 +80,11 @@ export const taskService = {
       `/subtasks/${taskId}/`
     );
 
-    return requireApiContent(response.data).subtasks;
+    const success = getApiSuccessOrThrow(response.data, {
+      contentRequired: true,
+    });
+
+    return success.content.subtasks;
   },
 
   async createSubTask(
@@ -78,7 +96,11 @@ export const taskService = {
       data
     );
 
-    return requireApiContent(response.data);
+    const success = getApiSuccessOrThrow(response.data, {
+      contentRequired: true,
+    });
+
+    return success.content;
   },
 
   async updateSubTask(
@@ -94,17 +116,21 @@ export const taskService = {
       }
     );
 
-    return requireApiContent(response.data);
+    const success = getApiSuccessOrThrow(response.data, {
+      contentRequired: true,
+    });
+
+    return success.content;
   },
 
   async deleteSubTask(subtaskId: string, taskId: string): Promise<void> {
-    const response = await api.delete<TApiResponse<TaskListResponse>>(
+    const response = await api.delete<TApiResponse<unknown>>(
       `/subtasks/${subtaskId}/`,
       {
         params: { task_id: taskId },
       }
     );
 
-    requireApiContent(response.data);
+    getApiSuccessOrThrow(response.data);
   },
 };
