@@ -161,7 +161,7 @@ export const ResetPasswordPage = () => {
 
       window.setTimeout(() => {
         navigate("/acesso");
-      }, 2000);
+      }, 2500);
     } finally {
       setUpdatingPassword(false);
     }

@@ -2,11 +2,16 @@ import { useEffect, useState } from "react";
 import { useTasks } from "../hooks/useTasks";
 import { TaskForm } from "../components/Tasks/TaskForm";
 import { Modal } from "../components/_Common/Modal";
-import { priorityMap } from "../utils/taskUtils";
 import { useParams } from "react-router-dom";
 import { LoadingOverlay } from "../components/_Common/LoadingOverlay";
+import { LoadingLocal } from "../components/_Common/LoadingLocal";
 import { SubTaskList } from "../components/SubTasks/SubTaskList";
 import { TaskHeader } from "../components/SubTasks/TaskHeader";
+
+import { useProjects } from "../hooks/useProjects";
+import { useProjectUsers } from "../hooks/useProjectUsers";
+import type { TProject } from "../types/TProject";
+import type { TProjectMember } from "../components/_Common/AssignmentControl";
 
 export const SubTasksPage = () => {
   const { projectId, taskId } = useParams<{
@@ -14,14 +19,28 @@ export const SubTasksPage = () => {
     taskId: string;
   }>();
 
-  const { tasks, getTasksByProject, getSubTasks, subscribeToProjectRealtime } =
-    useTasks();
+  const {
+    tasks,
+    getTasksByProject,
+    getSubTasks,
+    getProjectAssignments,
+    subscribeToProjectRealtime,
+  } = useTasks();
+
+  const { getProjectById } = useProjects();
+  const { fetchProjectUsers } = useProjectUsers(projectId ?? "");
+
   const [isCreatingSubTask, setIsCreatingSubTask] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const [pageLoading, setPageLoading] = useState(true);
+  const [subTasksLoading, setSubTasksLoading] = useState(true);
+
   const [notFound, setNotFound] = useState(false);
-  const task = tasks.find((t) => t.id === taskId);
-  const taskExists = Boolean(task);
+  const [currentProject, setCurrentProject] = useState<TProject | null>(null);
+  const [projectMembers, setProjectMembers] = useState<TProjectMember[]>([]);
+
+  const task = tasks.find((currentTask) => currentTask.id === taskId);
 
   useEffect(() => {
     if (!projectId || !taskId) {
@@ -32,48 +51,36 @@ export const SubTasksPage = () => {
 
     let isMounted = true;
 
-    const loadTasks = async () => {
+    const loadBaseData = async () => {
       setPageLoading(true);
       setNotFound(false);
+      setCurrentProject(null);
+      setProjectMembers([]);
 
       try {
-        const projectTasks = await getTasksByProject(projectId);
+        const [project, projectTasks] = await Promise.all([
+          getProjectById(projectId),
+          getTasksByProject(projectId),
+        ]);
+
+        if (!isMounted) return;
 
         const taskExistsInProject = projectTasks.some(
           (projectTask) => projectTask.id === taskId
         );
 
-        if (!taskExistsInProject && isMounted) {
+        if (!taskExistsInProject) {
           setNotFound(true);
-          setPageLoading(false);
+          return;
         }
+
+        setCurrentProject(project);
       } catch (err) {
-        console.error("Erro ao carregar tarefas do projeto", err);
+        console.error("Erro ao carregar dados da tarefa", err);
 
         if (isMounted) {
           setNotFound(true);
-          setPageLoading(false);
         }
-      }
-    };
-
-    loadTasks();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [projectId, taskId, getTasksByProject]);
-
-  useEffect(() => {
-    if (!taskId || !taskExists) return;
-
-    let isMounted = true;
-
-    const loadSubTasks = async () => {
-      try {
-        await getSubTasks(taskId);
-      } catch (err) {
-        console.error("Erro ao carregar subtarefas", err);
       } finally {
         if (isMounted) {
           setPageLoading(false);
@@ -81,12 +88,59 @@ export const SubTasksPage = () => {
       }
     };
 
-    loadSubTasks();
+    loadBaseData();
 
     return () => {
       isMounted = false;
     };
-  }, [taskId, taskExists, getSubTasks]);
+  }, [projectId, taskId, getProjectById, getTasksByProject]);
+
+  useEffect(() => {
+    if (!projectId || !taskId || pageLoading || notFound) return;
+
+    let isMounted = true;
+
+    const loadSubTaskContent = async () => {
+      setSubTasksLoading(true);
+
+      try {
+        const [projectUsers] = await Promise.all([
+          fetchProjectUsers(),
+          getProjectAssignments(projectId),
+          getSubTasks(taskId),
+        ]);
+
+        if (!isMounted) return;
+
+        const members: TProjectMember[] = projectUsers.map((projectUser) => ({
+          id: projectUser.user_id,
+          name: projectUser.user?.name ?? "Usuário sem nome",
+        }));
+
+        setProjectMembers(members);
+      } catch (err) {
+        console.error("Erro ao carregar conteúdo das subtarefas", err);
+      } finally {
+        if (isMounted) {
+          setSubTasksLoading(false);
+        }
+      }
+    };
+
+    loadSubTaskContent();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    projectId,
+    taskId,
+    pageLoading,
+    notFound,
+    fetchProjectUsers,
+    getProjectAssignments,
+    getSubTasks,
+  ]);
 
   useEffect(() => {
     if (!projectId) return;
@@ -102,20 +156,20 @@ export const SubTasksPage = () => {
     return <LoadingOverlay show />;
   }
 
-  if (notFound || !task) {
+  if (notFound || !task || !currentProject) {
     return <p className="text-center mt-10">Tarefa não encontrada</p>;
   }
-
-  const currentPriority = priorityMap[task.priority];
-
-  if (!currentPriority) return null;
 
   return (
     <section className="flex items-center flex-col w-full pt-5">
       <LoadingOverlay show={loading} />
 
       <div className="flex flex-col w-3/4 p-5 gap-5">
-        <TaskHeader task={task} />
+        <TaskHeader
+          task={task}
+          projectMembers={projectMembers}
+          isProjectOwner={currentProject.is_owner}
+        />
 
         <button
           className="px-4 py-2 mx-auto bg-green-600 hover:bg-green-800 duration-300 rounded-md w-fit font-semibold"
@@ -126,7 +180,16 @@ export const SubTasksPage = () => {
 
         <hr className="my-3 text-accent/75" />
 
-        <SubTaskList task={task} setLoading={setLoading} />
+        {subTasksLoading ? (
+          <LoadingLocal message="Carregando subtarefas" />
+        ) : (
+          <SubTaskList
+            task={task}
+            setLoading={setLoading}
+            projectMembers={projectMembers}
+            isProjectOwner={currentProject.is_owner}
+          />
+        )}
 
         <Modal
           isOpen={isCreatingSubTask}

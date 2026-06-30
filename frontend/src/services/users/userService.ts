@@ -1,66 +1,76 @@
 import { api } from "../api/api";
+import type { TApiResponse, TApiSuccess } from "../../types/TApi";
+import { getApiSuccessOrThrow } from "../../types/TApi";
 import type {
   TCreatePasswordDTO,
-  TMessageResponse,
   TResetPasswordDTO,
   TUpdateEmailDTO,
   TUpdatePasswordDTO,
   TUpdateUserDTO,
   TUser,
-  TUserResponse,
 } from "../../types/TUser";
 import { supabaseAuthClient } from "../auth/supabaseAuthClient";
 
 export const getMyUser = async (): Promise<TUser> => {
-  const response = await api.get<TUserResponse>("/usuarios/me/");
+  const response = await api.get<TApiResponse<TUser>>("/usuarios/me/");
+  const success = getApiSuccessOrThrow(response.data, {
+    contentRequired: true,
+  });
 
-  return response.data.data;
+  return success.content;
 };
 
 export const updateMyUser = async (
   payload: TUpdateUserDTO
 ): Promise<TUser> => {
-  const response = await api.patch<TUserResponse>("/usuarios/me/", payload);
-  // console.log("updateMyUser -> ",response.data.data)
-  return response.data.data;
+  const response = await api.patch<TApiResponse<TUser>>(
+    "/usuarios/me/",
+    payload
+  );
+
+  const success = getApiSuccessOrThrow(response.data, {
+    contentRequired: true,
+  });
+
+  return success.content;
 };
 
 export const updateMyPassword = async (
   payload: TUpdatePasswordDTO
-): Promise<TMessageResponse> => {
-  const response = await api.patch<TMessageResponse>(
+): Promise<TApiSuccess<null>> => {
+  const response = await api.patch<TApiResponse<null>>(
     "/usuarios/me/password",
     payload
   );
 
-  return response.data;
+  return getApiSuccessOrThrow(response.data);
 };
 
 export const requestPasswordReset = async (
   payload: TResetPasswordDTO
-): Promise<TMessageResponse> => {
-  const response = await api.post<TMessageResponse>(
+): Promise<TApiSuccess<null>> => {
+  const response = await api.post<TApiResponse<null>>(
     "/usuarios/reset-password",
     payload
   );
 
-  return response.data;
+  return getApiSuccessOrThrow(response.data);
 };
 
 export const updateMyEmail = async (
   payload: TUpdateEmailDTO
-): Promise<TMessageResponse> => {
-  const response = await api.patch<TMessageResponse>(
+): Promise<TApiSuccess<unknown | null>> => {
+  const response = await api.patch<TApiResponse<unknown>>(
     "/usuarios/me/email",
     payload
   );
 
-  return response.data;
+  return getApiSuccessOrThrow(response.data);
 };
 
 export const createMyPassword = async (
   payload: TCreatePasswordDTO
-): Promise<TMessageResponse> => {
+): Promise<TApiSuccess<null>> => {
   const { error } = await supabaseAuthClient.auth.updateUser({
     password: payload.new_password,
   });
@@ -70,6 +80,9 @@ export const createMyPassword = async (
   }
 
   return {
+    content: null,
+    httpCode: 200,
     message: "Senha criada com sucesso.",
+    errorCode: null,
   };
 };

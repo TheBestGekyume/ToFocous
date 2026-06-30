@@ -21,12 +21,23 @@ import { useTaskItem } from "../../hooks/useTaskItem";
 import type { TTask } from "../../types/TTask";
 import { useTextareaOverflow } from "../../hooks/useTextareaOverflow";
 import { useAutoResizeTextarea } from "../../hooks/useAutoResizeTextarea";
+import {
+  AssignmentControl,
+  type TProjectMember,
+} from "../_Common/AssignmentControl";
+import { useTasks } from "../../hooks/useTasks";
 
 type TaskProps = {
   task: TTask;
+  projectMembers?: TProjectMember[];
+  isProjectOwner?: boolean;
 };
 
-export const TaskItem = ({ task }: TaskProps) => {
+export const TaskItem = ({
+  task,
+  projectMembers = [],
+  isProjectOwner = false,
+}: TaskProps) => {
   const {
     localData,
     loading,
@@ -65,6 +76,19 @@ export const TaskItem = ({ task }: TaskProps) => {
     checkOverflow: checkDescriptionOverflow,
     startResizeTracking,
   } = useTextareaOverflow(localData.description);
+
+  const {
+    assignments,
+    assignUserToTask,
+    removeTaskAssignment,
+  } = useTasks();
+
+  const taskAssignments = assignments.filter(
+    (assignment) => assignment.task_id === task.id
+  );
+
+  const canManageAssignments = isProjectOwner && projectMembers.length >= 2;
+
 
   if (!settings) return <LoadingOverlay show />;
 
@@ -220,6 +244,19 @@ export const TaskItem = ({ task }: TaskProps) => {
               <Trash2 size={20} />
             </button>
           </div>
+          {projectMembers.length >= 2 &&  (
+            <div>
+              <AssignmentControl
+                assignments={taskAssignments}
+                members={projectMembers}
+                canManage={canManageAssignments}
+                onAssign={async (userId) => {
+                  await assignUserToTask(task.id, userId);
+                }}
+                onRemove={removeTaskAssignment}
+              />
+            </div>
+          )}
         </div>
       </div>
     </>

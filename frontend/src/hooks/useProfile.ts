@@ -7,11 +7,13 @@ import {
   createMyPassword,
 } from "../services/users/userService";
 import { supabaseAuthClient } from "../services/auth/supabaseAuthClient";
-
+import { getApiErrorInfo } from "../utils/apiError";
 type ProfileFeedback = {
   type: "success" | "error";
   message: string;
 };
+
+
 
 export const useProfile = () => {
   const { user, loading, updating, fetchMyUser, updateUser } = useUser();
@@ -47,6 +49,7 @@ export const useProfile = () => {
 
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
   const [hasGoogleAuth, setHasGoogleAuth] = useState(false);
+
 
   useEffect(() => {
     fetchMyUser();
@@ -94,6 +97,24 @@ export const useProfile = () => {
     void loadAuthInfo();
   }, []);
 
+
+  const setErrorFeedback = (error: unknown, fallback: string) => {
+    const errorInfo = getApiErrorInfo(error, fallback);
+
+    console.error("Profile action error:", {
+      message: errorInfo.message,
+      httpCode: errorInfo.httpCode,
+      errorCode: errorInfo.errorCode,
+      raw: errorInfo.raw,
+    });
+
+    setFeedback({
+      type: "error",
+      message: errorInfo.message,
+    });
+  };
+
+
   const handleCancelNameEdit = () => {
     if (!user) return;
 
@@ -135,11 +156,8 @@ export const useProfile = () => {
       });
 
       setIsEditingName(false);
-    } catch {
-      setFeedback({
-        type: "error",
-        message: "Não foi possível atualizar o nome.",
-      });
+    } catch (error: unknown) {
+      setErrorFeedback(error, "Não foi possível atualizar o nome.");
     }
   };
 
@@ -171,11 +189,8 @@ export const useProfile = () => {
       });
 
       setIsEditingEmail(false);
-    } catch {
-      setFeedback({
-        type: "error",
-        message: "Não foi possível solicitar a troca de e-mail.",
-      });
+    } catch (error: unknown) {
+      setErrorFeedback(error, "Não foi possível solicitar a troca de e-mail.");
     } finally {
       setIsUpdatingEmail(false);
     }
@@ -216,11 +231,8 @@ export const useProfile = () => {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
-    } catch {
-      setFeedback({
-        type: "error",
-        message: "Não foi possível atualizar a senha.",
-      });
+    } catch (error: unknown) {
+      setErrorFeedback(error, "Não foi possível atualizar a senha.");
     } finally {
       setIsUpdatingPassword(false);
     }
@@ -247,11 +259,11 @@ export const useProfile = () => {
         type: "success",
         message: response.message,
       });
-    } catch {
-      setFeedback({
-        type: "error",
-        message: "Não foi possível enviar a solicitação de redefinição.",
-      });
+    } catch (error: unknown) {
+      setErrorFeedback(
+        error,
+        "Não foi possível enviar a solicitação de redefinição."
+      );
     } finally {
       setIsSendingReset(false);
     }
@@ -292,16 +304,12 @@ export const useProfile = () => {
       setConfirmCreatePassword("");
 
       setHasPassword(true);
-    } catch {
-      setFeedback({
-        type: "error",
-        message: "Não foi possível criar a senha.",
-      });
+    } catch (error: unknown) {
+      setErrorFeedback(error, "Não foi possível criar a senha.");
     } finally {
       setIsCreatingPassword(false);
     }
   };
-
 
 
   return {

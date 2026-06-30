@@ -1,33 +1,45 @@
 import { api, resetAuthState } from "../api/api";
 import { setTokens } from "../../utils/tokenUtils";
+import type { TApiResponse, TApiSuccess } from "../../types/TApi";
+import { getApiSuccessOrThrow } from "../../types/TApi";
+import type {
+  LoginPayload,
+  LoginResponse,
+  SignUpPayload,
+  SignUpResponse,
+} from "../../types/TAuth";
 
-type LoginPayload = {
-  email: string;
-  password: string;
-};
-
-type LoginResponse = {
-  access_token: string;
-  refresh_token: string;
-  user_id: string;
-};
-
-export const loginUser = async (payload: LoginPayload) => {
+export const loginUser = async (
+  payload: LoginPayload
+): Promise<LoginResponse> => {
   resetAuthState();
 
-  const response = await api.post<LoginResponse>("/auth/login/", payload);
+  const response = await api.post<TApiResponse<LoginResponse>>(
+    "/auth/login/",
+    payload
+  );
 
-  setTokens(response.data.access_token, response.data.refresh_token);
-  localStorage.setItem("user_id", response.data.user_id);
+  const success = getApiSuccessOrThrow(response.data, {
+    contentRequired: true,
+  });
 
-  return response;
-}
+  const content = success.content;
 
-export const signUpUser = async (payload: {
-  name: string;
-  email: string;
-  password: string;
-}) => {
-  const response = await api.post("/auth/signup/", payload);
-  return response;
-}
+  setTokens(content.access_token, content.refresh_token);
+  localStorage.setItem("user_id", content.user_id);
+
+  return content;
+};
+
+export const signUpUser = async (
+  payload: SignUpPayload
+): Promise<TApiSuccess<SignUpResponse>> => {
+  const response = await api.post<TApiResponse<SignUpResponse>>(
+    "/auth/signup/",
+    payload
+  );
+
+  return getApiSuccessOrThrow(response.data, {
+    contentRequired: true,
+  });
+};

@@ -1,8 +1,10 @@
 import axios from "axios";
 import { getRefreshToken, setTokens } from "../../utils/tokenUtils";
+const apiUrl = import.meta.env.VITE_API_URL;
+
 
 const apiRefresh = axios.create({
-    baseURL: "http://127.0.0.1:8000",
+    baseURL: apiUrl,
 });
 
 let refreshPromise: Promise<string> | null = null;

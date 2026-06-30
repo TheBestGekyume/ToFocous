@@ -20,3 +20,29 @@ class PostTaskAssignment(BaseModel):
 
 class DeleteTaskAssignment(BaseModel):
     assignment_id: str
+
+
+class UsuarioResumoResponse(BaseModel):
+    id: str
+    name: str
+    email: str | None = None
+
+
+class TaskAssignmentResponse(BaseModel):
+    id: str
+    project_id: str
+    assigned_user_id: str
+    assigned_by_user_id: str
+    task_id: str | None = None
+    subtask_id: str | None = None
+    created_at: str | None = None
+    assigned_user: UsuarioResumoResponse
+    assigned_by_user: UsuarioResumoResponse | None = None
+
+
+class TaskAssignmentListResponse(BaseModel):
+    assignments: list[TaskAssignmentResponse]
+
+
+class DeleteTaskAssignmentResponse(BaseModel):
+    deleted: list[dict]

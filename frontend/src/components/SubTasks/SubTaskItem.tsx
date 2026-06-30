@@ -17,14 +17,27 @@ import {
 import { Dropdown } from "../_Common/Dropdown";
 import { useTextareaOverflow } from "../../hooks/useTextareaOverflow";
 import { useAutoResizeTextarea } from "../../hooks/useAutoResizeTextarea";
+import {
+  AssignmentControl,
+  type TProjectMember,
+} from "../_Common/AssignmentControl";
+import { useTasks } from "../../hooks/useTasks";
 
 type Props = {
   subtask: TSubTask;
   taskId: string;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  projectMembers?: TProjectMember[];
+  isProjectOwner?: boolean;
 };
 
-export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
+export const SubTaskItem = ({
+  subtask,
+  taskId,
+  setLoading,
+  projectMembers = [],
+  isProjectOwner = false,
+}: Props) => {
   const {
     localData,
 
@@ -62,6 +75,14 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
     localData.due_date
   );
 
+  const { assignments, assignUserToSubTask, removeTaskAssignment } = useTasks();
+
+  const subtaskAssignments = assignments.filter(
+    (assignment) => assignment.subtask_id === subtask.id
+  );
+
+  const canManageAssignments = isProjectOwner && projectMembers.length >= 2;
+
   return (
     <div className="flex items-center gap-5 p-3 bg-zinc-800 border border-zinc-600 rounded-md">
       <button
@@ -80,25 +101,39 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
       </button>
 
       <div className="flex flex-1 flex-col gap-2">
-        <textarea
-          value={localData.title}
-          ref={titleRef}
-          onChange={(e) => {
-            handleChange("title", e.target.value);
-            requestAnimationFrame(resizeTitle);
-          }}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          placeholder="Título da subtarefa"
-          rows={1}
-          spellCheck={false}
-          disabled={isDone}
-          className={`outline-none border border-transparent
-            duration-100 hover:bg-zinc-700 focus:bg-zinc-900
+        <div className="flex gap-5">
+          <textarea
+            value={localData.title}
+            ref={titleRef}
+            onChange={(e) => {
+              handleChange("title", e.target.value);
+              requestAnimationFrame(resizeTitle);
+            }}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            placeholder="Título da subtarefa"
+            rows={1}
+            spellCheck={false}
+            disabled={isDone}
+            className={`text-xl outline-none border border-transparent
+            duration-100 hover:bg-zinc-700 focus:bg-zinc-900 flex-1
             focus:border-accent rounded-md p-1 resize-none overflow-hidden
             ${isDone ? "line-through text-zinc-400" : ""}
           `}
-        />
+          />
+
+          {projectMembers.length >= 2 && (
+            <AssignmentControl
+              assignments={subtaskAssignments}
+              members={projectMembers}
+              canManage={canManageAssignments}
+              onAssign={async (userId) => {
+                await assignUserToSubTask(subtask.id, userId);
+              }}
+              onRemove={removeTaskAssignment}
+            />
+          )}
+        </div>
 
         <div className="relative">
           <textarea
@@ -200,12 +235,14 @@ export const SubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
         )}
       </div>
 
-      <button
-        className="p-2 bg-red-600 hover:bg-red-800 rounded-full"
-        onClick={handleDelete}
-      >
-        <Trash2 size={18} />
-      </button>
+      <div className="flex flex-col items-end gap-3">
+        <button
+          className="p-2 bg-red-600 hover:bg-red-800 rounded-full"
+          onClick={handleDelete}
+        >
+          <Trash2 size={18} />
+        </button>
+      </div>
     </div>
   );
 };
