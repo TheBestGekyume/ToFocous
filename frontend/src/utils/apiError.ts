@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ApiContentError } from "../types/TApi";
+import { ApiResponseError } from "../types/TApi";
 import type { TApiResponse } from "../types/TApi";
 
 export type ApiErrorInfo = {
@@ -39,12 +39,12 @@ export function getApiErrorInfo(
   error: unknown,
   fallback = "Erro inesperado."
 ): ApiErrorInfo {
-  if (error instanceof ApiContentError) {
+  if (error instanceof ApiResponseError) {
     return {
       message: error.message,
       httpCode: error.httpCode,
       errorCode: error.errorCode,
-      raw: error,
+      raw: error.raw,
     };
   }
 
@@ -76,7 +76,8 @@ export function getApiErrorInfo(
         return {
           message: data.message,
           httpCode: error.response?.status ?? null,
-          errorCode: typeof data.error_code === "string" ? data.error_code : null,
+          errorCode:
+            typeof data.error_code === "string" ? data.error_code : null,
           raw: data,
         };
       }
@@ -112,4 +113,22 @@ export function getApiErrorMessage(
   fallback = "Erro inesperado."
 ): string {
   return getApiErrorInfo(error, fallback).message;
+}
+
+export function isCanceledRequestError(error: unknown): boolean {
+  return (
+    axios.isCancel(error) ||
+    (axios.isAxiosError(error) && error.code === "ERR_CANCELED")
+  );
+}
+
+export function logApiError(label: string, error: unknown): void {
+  const errorInfo = getApiErrorInfo(error, "Erro inesperado.");
+
+  console.error(label, {
+    message: errorInfo.message,
+    httpCode: errorInfo.httpCode,
+    errorCode: errorInfo.errorCode,
+    raw: errorInfo.raw,
+  });
 }

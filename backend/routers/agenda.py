@@ -128,7 +128,8 @@ def query_tasks_by_date(
                 project_id,
                 title,
                 status,
-                rt_date,
+                priority,
+                start_date,
                 due_date,
                 projects (
                     id,

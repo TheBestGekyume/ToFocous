@@ -4,7 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { useProjects } from "./useProjects";
 import { useTasks } from "./useTasks";
 
-import type { TSubTask, TTask } from "../types/TTask";
+import type {
+  TUpdateSubTaskDTO,
+  TUpdateTaskDTO,
+} from "../types/TTask";
 import {
   type AgendaItem,
   formatDateKey,
@@ -15,6 +18,7 @@ import {
   getAgendaItems,
   type AgendaItemResponse,
 } from "../services/agenda/agendaService";
+import { getApiErrorMessage, logApiError } from "../utils/apiError";
 
 const getAgendaCacheKey = (
   year: number,
@@ -52,6 +56,7 @@ export const useAgenda = () => {
   const [selectedProjectId, setSelectedProjectId] = useState("all");
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const agendaCacheRef = useRef<Record<string, AgendaItem[]>>({});
 
@@ -75,9 +80,10 @@ export const useAgenda = () => {
         return;
       }
 
-      try {
-        setLoading(true);
+      setLoading(true);
+      setError(null);
 
+      try {
         const response = await getAgendaItems({
           year: currentYear,
           month: currentMonthNumber,
@@ -90,6 +96,13 @@ export const useAgenda = () => {
 
         agendaCacheRef.current[cacheKey] = mappedItems;
         setAgendaItems(mappedItems);
+      } catch (error: unknown) {
+        logApiError("Erro ao carregar agenda", error);
+
+        if (!isMounted) return;
+
+        setAgendaItems([]);
+        setError(getApiErrorMessage(error, "Não foi possível carregar a agenda."));
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -165,37 +178,49 @@ export const useAgenda = () => {
   const updateAgendaItemDate = async (item: AgendaItem, newDate: string) => {
     if (!newDate || item.date === newDate) return;
 
-    if (item.type === "task") {
-      const payload: Partial<Pick<TTask, "start_date" | "due_date">> = {
-        [item.dateType]: newDate,
-      };
+    setError(null);
 
-      await updateTask(item.id, payload);
-    } else {
-      const payload: Partial<Pick<TSubTask, "start_date" | "due_date">> = {
-        [item.dateType]: newDate,
-      };
-
-      await updateSubTask(item.taskId, item.id, payload);
-    }
-
-    setAgendaItems((prevItems) => {
-      return prevItems.map((agendaItem) => {
-        const isSameItem =
-          agendaItem.id === item.id &&
-          agendaItem.type === item.type &&
-          agendaItem.dateType === item.dateType;
-
-        if (!isSameItem) return agendaItem;
-
-        return {
-          ...agendaItem,
-          date: newDate,
+    try {
+      if (item.type === "task") {
+        const payload: TUpdateTaskDTO = {
+          [item.dateType]: newDate,
         };
-      });
-    });
 
-    agendaCacheRef.current = {};
+        await updateTask(item.id, payload);
+      } else {
+        const payload: TUpdateSubTaskDTO = {
+          [item.dateType]: newDate,
+        };
+
+        await updateSubTask(item.taskId, item.id, payload);
+      }
+
+      setAgendaItems((prevItems) => {
+        return prevItems.map((agendaItem) => {
+          const isSameItem =
+            agendaItem.id === item.id &&
+            agendaItem.type === item.type &&
+            agendaItem.dateType === item.dateType;
+
+          if (!isSameItem) return agendaItem;
+
+          return {
+            ...agendaItem,
+            date: newDate,
+          };
+        });
+      });
+
+      agendaCacheRef.current = {};
+    } catch (error: unknown) {
+      logApiError("Erro ao atualizar data do item da agenda", error);
+
+      setError(
+        getApiErrorMessage(error, "Não foi possível atualizar a data do item.")
+      );
+
+      throw error;
+    }
   };
 
   const navigateToAgendaItem = (item: AgendaItem) => {
@@ -204,6 +229,8 @@ export const useAgenda = () => {
 
   return {
     loading,
+    error,
+
     currentMonth,
     agendaItemsByDate,
     activeDateKey,

@@ -1,9 +1,13 @@
 import { api, resetAuthState } from "../api/api";
 import { setTokens } from "../../utils/tokenUtils";
-import type { TApiResponse } from "../../types/TApi";
-import { requireApiContent } from "../../types/TApi";
-import type { LoginPayload, LoginResponse, SignUpPayload, SignUpResponse } from "../../types/TAuth";
-
+import type { TApiResponse, TApiSuccess } from "../../types/TApi";
+import { getApiSuccessOrThrow } from "../../types/TApi";
+import type {
+  LoginPayload,
+  LoginResponse,
+  SignUpPayload,
+  SignUpResponse,
+} from "../../types/TAuth";
 
 export const loginUser = async (
   payload: LoginPayload
@@ -15,7 +19,11 @@ export const loginUser = async (
     payload
   );
 
-  const content = requireApiContent(response.data);
+  const success = getApiSuccessOrThrow(response.data, {
+    contentRequired: true,
+  });
+
+  const content = success.content;
 
   setTokens(content.access_token, content.refresh_token);
   localStorage.setItem("user_id", content.user_id);
@@ -25,11 +33,13 @@ export const loginUser = async (
 
 export const signUpUser = async (
   payload: SignUpPayload
-): Promise<SignUpResponse> => {
+): Promise<TApiSuccess<SignUpResponse>> => {
   const response = await api.post<TApiResponse<SignUpResponse>>(
     "/auth/signup/",
     payload
   );
 
-  return requireApiContent(response.data);
+  return getApiSuccessOrThrow(response.data, {
+    contentRequired: true,
+  });
 };

@@ -3,28 +3,36 @@ import { loginUser } from "../../services/auth/authService";
 import { useNavigate } from "react-router-dom";
 import { LoadingDots } from "../_Common/LoadingDots";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
-import { getApiErrorMessage } from "../../utils/apiError";
+import { getApiErrorMessage, logApiError } from "../../utils/apiError";
 import { GoogleLoginButton } from "./GoogleLoginButton";
 import { PasswordInput } from "../_Common/PasswordInput";
 
 export const Login = ({ onSwitch }: { onSwitch: () => void }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setError(null);
     setLoading(true);
 
     try {
-      await loginUser({ email, password });
+      await loginUser({
+        email,
+        password,
+      });
+
       navigate("/");
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, "Erro ao entrar na conta"));
-      console.error(err);
+    } catch (error: unknown) {
+      logApiError("Erro ao fazer login", error);
+
+      setError(getApiErrorMessage(error, "Erro ao entrar na conta."));
     } finally {
       setLoading(false);
     }
@@ -55,7 +63,7 @@ export const Login = ({ onSwitch }: { onSwitch: () => void }) => {
           placeholder="Senha"
           required
           className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
-  border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"
+          border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"
         />
 
         {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -86,6 +94,7 @@ export const Login = ({ onSwitch }: { onSwitch: () => void }) => {
           </button>
         </p>
       </form>
+
       <div className="flex justify-center mt-5">
         <GoogleLoginButton />
       </div>

@@ -1,9 +1,18 @@
 import { api } from "./api";
 import { supabaseAuthClient } from "../auth/supabaseAuthClient";
-import { requireApiContent, type TApiResponse } from "../../types/TApi";
+import { getApiSuccessOrThrow, type TApiResponse } from "../../types/TApi";
 
-type FinalizeEmailChangeResponse = {
-  should_logout?: boolean;
+type GoogleIdentityResultResponse = {
+  google_unlinked: boolean;
+  reason: string;
+};
+
+export type FinalizeEmailChangeResponse = {
+  email_change_finalized: boolean;
+  should_logout: boolean;
+  current_email?: string | null;
+  expected_email?: string | null;
+  google_identity?: GoogleIdentityResultResponse | null;
 };
 
 export const checkAndFinalizeEmailChange =
@@ -12,12 +21,19 @@ export const checkAndFinalizeEmailChange =
     const session = sessionResult.data.session;
 
     if (!session) {
-      return { should_logout: false };
+      return {
+        email_change_finalized: false,
+        should_logout: false,
+      };
     }
 
     const response = await api.post<TApiResponse<FinalizeEmailChangeResponse>>(
       "/usuarios/me/email/finalize"
     );
 
-    return requireApiContent(response.data);
+    const success = getApiSuccessOrThrow(response.data, {
+      contentRequired: true,
+    });
+
+    return success.content;
   };
