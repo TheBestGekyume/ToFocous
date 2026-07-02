@@ -1,4 +1,5 @@
-import { UserRound } from "lucide-react";
+import { useState } from "react";
+import { Check, Copy, UserRound } from "lucide-react";
 import { LoadingDots } from "../components/_Common/LoadingDots";
 import { ProfileEditableField } from "../components/Profile/ProfileEditableField";
 import { useProfile } from "../hooks/useProfile";
@@ -7,6 +8,21 @@ import { CreatePasswordSection } from "../components/Profile/CreatePasswordSecti
 import { PasswordManagementSection } from "../components/Profile/PasswordManegmantSection";
 
 export const ProfilePage = () => {
+  const [copiedUserId, setCopiedUserId] = useState(false);
+
+  const handleCopyUserId = async (userId: string) => {
+    try {
+      await navigator.clipboard.writeText(userId);
+      setCopiedUserId(true);
+
+      window.setTimeout(() => {
+        setCopiedUserId(false);
+      }, 3000);
+    } catch {
+      setCopiedUserId(false);
+    }
+  };
+
   const {
     userState,
     nameState,
@@ -100,14 +116,35 @@ export const ProfilePage = () => {
             Não foi possível carregar os dados do usuário.
           </p>
         ) : (
-          <div className="flex flex-col gap-6">
-            <div className="flex bg-background-body border border-secondary/40 rounded-xl p-4">
+          <div className="flex flex-col gap-6 w-auto">
+            <div className="flex flex-col gap-3 bg-background-body border border-secondary/40 rounded-xl py-2 px-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-primary">
-                ID do usuário: {" "}
-                <span className="text-sm break-all text-zinc-300">
+                ID do usuário:{" "}
+                <span className="text-sm break-all text-text/90">
                   {user.id}
                 </span>
               </p>
+
+              <button
+                type="button"
+                disabled={copiedUserId}
+                onClick={() => void handleCopyUserId(user.id)}
+                className="flex w-fit items-center gap-2 rounded-lg bg-secondary/50 px-3 py-2 text-sm font-semibold text-accent transition hover:bg-secondary/20"
+                aria-label="Copiar ID do usuário"
+                title="Copiar ID do usuário"
+              >
+                {copiedUserId ? (
+                  <>
+                    <Check size={16} />
+                    <span className="text-text">Copiado </span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={16} />
+                    <span className="text-text">Copiar ID </span>
+                  </>
+                )}
+              </button>
             </div>
 
             <ProfileEditableField
