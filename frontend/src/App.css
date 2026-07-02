@@ -78,44 +78,99 @@ button {
   font-family: "Inter", sans-serif;
 }
 
-.hide-date-icon {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: textfield;
-}
-
-.hide-date-icon::-webkit-calendar-picker-indicator {
-  display: none;
-}
-
-.hide-date-icon::-webkit-inner-spin-button,
-.hide-date-icon::-webkit-clear-button {
-  display: none;
-}
 
 .tofocous-day-picker {
-  --rdp-day-width: 2rem;
-  --rdp-day-height: 2rem;
-  --rdp-day_button-width: 2rem;
-  --rdp-day_button-height: 2rem;
-  --rdp-day_button-border-radius: 0.4rem;
+  --rdp-accent-color: var(--color-accent);
+  --rdp-background-color: transparent;
 
-  font-size: 0.9rem;
+  margin: 0;
+  width: 100%;
+  font-size: 0.875rem;
 }
 
-.tofocous-day-picker .rdp-month_caption {
-  font-size: 1rem;
+.tofocous-day-picker .rdp-months,
+.tofocous-day-picker .rdp-month,
+.tofocous-day-picker .rdp-table {
+  width: 100%;
+}
+
+/* Remove o mês/ano nativo do DayPicker */
+.tofocous-day-picker .rdp-caption,
+.tofocous-day-picker .rdp-month_caption,
+.tofocous-day-picker .rdp-nav {
+  display: none;
+}
+
+/* Cabeçalho dos dias da semana */
+.tofocous-day-picker .rdp-weekday {
+  height: 1.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgb(212 212 216);
+  text-align: center;
+}
+
+/* Células */
+.tofocous-day-picker .rdp-cell,
+.tofocous-day-picker .rdp-day {
+  text-align: center;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+/* Botão de cada dia */
+.tofocous-day-picker .rdp-day_button {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  transition: background-color 150ms, color 150ms, border-color 150ms;
+}
+
+/* Hover */
+.tofocous-day-picker .rdp-day_button:hover {
+  background-color: rgb(63 63 70);
+}
+
+/* Dia selecionado */
+.tofocous-day-picker .rdp-selected .rdp-day_button {
+  border: 2px solid var(--color-accent);
+  background-color: transparent;
+  color: var(--color-text);
   font-weight: 700;
 }
 
-.tofocous-day-picker .rdp-weekday {
-  font-size: 0.8rem;
+/* Hoje */
+.tofocous-day-picker .rdp-today .rdp-day_button {
+  color: var(--color-accent);
+  font-weight: 700;
 }
 
-.tofocous-day-picker .rdp-nav {
-  transform: scale(0.85);
-  transform-origin: right center;
+/* Hoje selecionado */
+.tofocous-day-picker .rdp-today.rdp-selected .rdp-day_button {
+  color: white;
+  background-color: var(--color-accent);
 }
+
+/* Esconde dias de outros meses */
+.tofocous-day-picker .rdp-outside {
+  visibility: hidden;
+}
+
+/* Ajusta espaçamento geral */
+.tofocous-day-picker .rdp-week,
+.tofocous-day-picker .rdp-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.tofocous-day-picker .rdp-day,
+.tofocous-day-picker .rdp-weekday {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 
 @keyframes fadeIn {
   from {

@@ -36,6 +36,19 @@ export const ResetPasswordPage = () => {
   const [canResetPassword, setCanResetPassword] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const { data } = supabaseAuthClient.auth.onAuthStateChange(
+      (event, session) => {
+        if (!isMounted) return;
+
+        if (event === "PASSWORD_RECOVERY" && session) {
+          setCanResetPassword(true);
+          setLoadingSession(false);
+        }
+      }
+    );
+
     const loadRecoverySession = async (): Promise<void> => {
       try {
         const url = new URL(window.location.href);
@@ -83,6 +96,14 @@ export const ResetPasswordPage = () => {
           return;
         }
 
+        const { data: sessionData } =
+          await supabaseAuthClient.auth.getSession();
+
+        if (sessionData.session) {
+          setCanResetPassword(true);
+          return;
+        }
+
         setFeedback({
           type: "error",
           message:
@@ -90,14 +111,21 @@ export const ResetPasswordPage = () => {
         });
 
         window.setTimeout(() => {
-          navigate("/");
-        }, 2000);
+          navigate("/acesso");
+        }, 2200);
       } finally {
-        setLoadingSession(false);
+        if (isMounted) {
+          setLoadingSession(false);
+        }
       }
     };
 
     void loadRecoverySession();
+
+    return () => {
+      isMounted = false;
+      data.subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const handleUpdatePassword = async (): Promise<void> => {
