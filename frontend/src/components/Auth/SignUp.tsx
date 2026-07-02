@@ -4,8 +4,14 @@ import { LoadingDots } from "../_Common/LoadingDots";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
 import { getApiErrorMessage, logApiError } from "../../utils/apiError";
 import { PasswordInput } from "../_Common/PasswordInput";
+import type { SetAppFeedback } from "../../types/TFeedback";
 
-export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
+type SignUpProps = {
+  onSwitch: () => void;
+  setFeedback: SetAppFeedback;
+};
+
+export const SignUp = ({ onSwitch, setFeedback }: SignUpProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
@@ -13,17 +19,16 @@ export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    setError(null);
-    setSuccess(null);
+    setFeedback(null);
 
     if (password !== confirmPassword) {
-      setError("As senhas não coincidem.");
+      setFeedback({
+        type: "error",
+        message: "As senhas não coincidem.",
+      });
       return;
     }
 
@@ -36,15 +41,24 @@ export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
         password,
       });
 
-      setSuccess(`${response.message}\nAtive sua conta pelo email ${email}.`);
-
+      setFeedback({
+        type: "success",
+        message: (
+          <span className="whitespace-pre-line">
+            {`${response.message}\nAtive sua conta pelo email ${email}.`}
+          </span>
+        ),
+      });
       window.setTimeout(() => {
         onSwitch();
       }, 5000);
     } catch (error: unknown) {
       logApiError("Erro ao criar conta", error);
 
-      setError(getApiErrorMessage(error, "Erro ao criar conta."));
+      setFeedback({
+        type: "error",
+        message: getApiErrorMessage(error, "Erro ao criar conta."),
+      });
     } finally {
       setLoading(false);
     }
@@ -64,8 +78,9 @@ export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
           placeholder="Nome de usuário"
           value={name}
           onChange={(e) => setName(e.target.value)}
- className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
-          border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"          required
+          className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
+          border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"
+          required
         />
 
         <input
@@ -73,8 +88,9 @@ export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
- className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
-          border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"          required
+          className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
+          border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"
+          required
         />
 
         <PasswordInput
@@ -82,7 +98,7 @@ export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
           onChange={setPassword}
           placeholder="Senha"
           required
-           className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
+          className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
           border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"
         />
 
@@ -91,17 +107,11 @@ export const SignUp = ({ onSwitch }: { onSwitch: () => void }) => {
           onChange={setConfirmPassword}
           placeholder="Confirmar senha"
           required
-           className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
+          className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
           border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"
         />
 
-        {error && <p className="text-red-400 text-sm">{error}</p>}
-
-        {success && (
-          <p className="whitespace-pre-line text-sm text-green-400">
-            {success}
-          </p>
-        )}
+    
 
         <button
           type="submit"
