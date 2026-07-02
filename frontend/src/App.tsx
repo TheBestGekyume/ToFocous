@@ -19,24 +19,25 @@ import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 
 function App() {
   useEffect(() => {
-  const alreadyCheckedApi = sessionStorage.getItem("api_health_checked");
+    const alreadyCheckedApi = sessionStorage.getItem("api_health_checked");
 
-  if (alreadyCheckedApi) return;
+    if (alreadyCheckedApi) return;
 
-  health()
-    .then(() => {
-      sessionStorage.setItem("api_health_checked", "true");
-    })
-    .catch((err) => {
-      console.error("Erro ao verificar API:", err);
-    });
-}, []);
+    health()
+      .then(() => {
+        sessionStorage.setItem("api_health_checked", "true");
+      })
+      .catch((err) => {
+        console.error("Erro ao verificar API:", err);
+      });
+  }, []);
 
   return (
     <div id="app" className="d-flex bg-background-task-section min-h-full">
       <Routes>
         <Route path="/acesso" element={<AuthPage />} />
         <Route path="/acesso/callback" element={<AuthCallbackPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route
           element={
@@ -62,7 +63,6 @@ function App() {
           <Route path="/configuracoes" element={<TaskSettingsPage />} />
           <Route path="/perfil" element={<ProfilePage />} />
           <Route path="/kanban" element={<KanbanPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
         </Route>
       </Routes>
     </div>

@@ -1,48 +1,62 @@
-import { useState } from "react";
-import { loginUser } from "../../services/auth/authService";
-import { useNavigate } from "react-router-dom";
+import { useState, type FormEvent } from "react";
 import { LoadingDots } from "../_Common/LoadingDots";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
+import { requestPasswordReset } from "../../services/users/userService";
 import { getApiErrorMessage, logApiError } from "../../utils/apiError";
-import { GoogleLoginButton } from "./GoogleLoginButton";
-import { PasswordInput } from "../_Common/PasswordInput";
 import type { SetAppFeedback } from "../../types/TFeedback";
 
-type LoginProps = {
-  onSwitch: () => void;
-  onForgotPassword: () => void;
+type ForgotPasswordProps = {
+  onBackToLogin: () => void;
   setFeedback: SetAppFeedback;
 };
 
-export const Login = ({
-  onSwitch,
-  onForgotPassword,
+export const ForgotPassword = ({
+  onBackToLogin,
   setFeedback,
-}: LoginProps) => {
+}: ForgotPasswordProps) => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      setFeedback({
+        type: "error",
+        message: "Informe o e-mail da conta.",
+      });
+      return;
+    }
+
     setFeedback(null);
     setLoading(true);
 
     try {
-      await loginUser({
-        email,
-        password,
+      const response = await requestPasswordReset({
+        email: trimmedEmail,
       });
 
-      navigate("/");
+      setFeedback({
+        type: "success",
+        message: (
+          <span className="whitespace-pre-line">
+            {`${response.message}\nVerifique a caixa de entrada do e-mail ${trimmedEmail}.`}
+          </span>
+        ),
+      });
     } catch (error: unknown) {
+      logApiError("Erro ao solicitar redefinição de senha", error);
+
       setFeedback({
         type: "error",
-        message: getApiErrorMessage(error, "Erro ao entrar na conta."),
+        message: getApiErrorMessage(
+          error,
+          "Não foi possível enviar o e-mail de redefinição."
+        ),
       });
-      logApiError("Erro ao fazer login", error);
     } finally {
       setLoading(false);
     }
@@ -61,19 +75,10 @@ export const Login = ({
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(event) => setEmail(event.target.value)}
           className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
           border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"
           required
-        />
-
-        <PasswordInput
-          value={password}
-          onChange={setPassword}
-          placeholder="Senha"
-          required
-          className="w-full rounded-md bg-zinc-900 text-text px-3 py-2 outline-none border
-          border-transparent hover:bg-zinc-800 focus:bg-zinc-950 focus:border-accent transition"
         />
 
         <button
@@ -83,40 +88,25 @@ export const Login = ({
         >
           {loading ? (
             <span className="inline-flex items-center justify-center gap-1">
-              Entrando
+              Enviando
               <LoadingDots />
             </span>
           ) : (
-            "Entrar"
+            "Redefinir senha"
           )}
         </button>
 
         <p className="text-sm text-center text-text">
-          Não tem conta?{" "}
+          Sabe sua senha?{" "}
           <button
             type="button"
-            onClick={onSwitch}
+            onClick={onBackToLogin}
             className="text-accent font-semibold hover:underline"
           >
-            Criar agora
-          </button>
-        </p>
-
-        <p className="text-sm text-center text-text">
-          Esqueceu a senha?{" "}
-          <button
-            type="button"
-            onClick={onForgotPassword}
-            className="text-accent font-semibold hover:underline"
-          >
-            Redefinir Senha
+            Entrar
           </button>
         </p>
       </form>
-
-      <div className="flex justify-center mt-5">
-        <GoogleLoginButton />
-      </div>
     </>
   );
 };
