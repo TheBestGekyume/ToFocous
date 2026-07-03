@@ -42,7 +42,7 @@ export const ProjectItem = ({
     <>
       <div
         className={`relative h-full min-h-28 p-4 rounded-xl shadow-md duration-300 hover:scale-[1.02] cursor-pointer ${
-          singleProjectItem ? "w-fit max-w-full mx-auto" : ""
+          singleProjectItem ? "w-fit max-w-full mx-auto flex items-center" : ""
         }`}
         style={{
           backgroundColor: project.color + "75",
