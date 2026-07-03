@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { authenticatedApi } from "./api";
 import { supabaseAuthClient } from "../auth/supabaseAuthClient";
 import { getApiSuccessOrThrow, type TApiResponse } from "../../types/TApi";
 
@@ -27,7 +27,7 @@ export const checkAndFinalizeEmailChange =
       };
     }
 
-    const response = await api.post<TApiResponse<FinalizeEmailChangeResponse>>(
+    const response = await authenticatedApi.post<TApiResponse<FinalizeEmailChangeResponse>>(
       "/usuarios/me/email/finalize"
     );
 

@@ -1,4 +1,4 @@
-import { api } from "../api/api";
+import { authenticatedApi } from "../api/api";
 import type {
   TCreateProjectDTO,
   TProject,
@@ -12,7 +12,7 @@ type ProjectListResponse = {
 
 export const projectService = {
   async getProjectById(id: string): Promise<TProject> {
-    const response = await api.get<TApiResponse<TProject>>(`/projects/${id}/`);
+    const response = await authenticatedApi.get<TApiResponse<TProject>>(`/projects/${id}/`);
 
     const success = getApiSuccessOrThrow(response.data, {
       contentRequired: true,
@@ -22,7 +22,7 @@ export const projectService = {
   },
 
   async getAllProjects(): Promise<TProject[]> {
-    const response = await api.get<TApiResponse<ProjectListResponse>>(
+    const response = await authenticatedApi.get<TApiResponse<ProjectListResponse>>(
       "/projects/"
     );
 
@@ -34,7 +34,7 @@ export const projectService = {
   },
 
   async createProject(payload: TCreateProjectDTO): Promise<TProject> {
-    const response = await api.post<TApiResponse<TProject>>(
+    const response = await authenticatedApi.post<TApiResponse<TProject>>(
       "/projects/",
       payload
     );
@@ -50,7 +50,7 @@ export const projectService = {
     id: string,
     payload: TUpdateProjectDTO
   ): Promise<TProject> {
-    const response = await api.patch<TApiResponse<TProject>>(
+    const response = await authenticatedApi.patch<TApiResponse<TProject>>(
       `/projects/${id}/`,
       payload
     );
@@ -63,7 +63,7 @@ export const projectService = {
   },
 
   async deleteProject(id: string): Promise<void> {
-    const response = await api.delete<TApiResponse<unknown>>(
+    const response = await authenticatedApi.delete<TApiResponse<unknown>>(
       `/projects/${id}/`
     );
 

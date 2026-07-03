@@ -1,4 +1,4 @@
-import { api } from "../api/api";
+import { authenticatedApi } from "../api/api";
 import type {
   TAddProjectUserDTO,
   TProjectUser,
@@ -12,7 +12,7 @@ type ProjectUsersListResponse = {
 
 export const projectUserService = {
   async getProjectUsers(projectId: string): Promise<TProjectUser[]> {
-    const response = await api.get<TApiResponse<ProjectUsersListResponse>>(
+    const response = await authenticatedApi.get<TApiResponse<ProjectUsersListResponse>>(
       `/project-users/${projectId}/`
     );
 
@@ -24,7 +24,7 @@ export const projectUserService = {
   },
 
   async addProjectUser(payload: TAddProjectUserDTO): Promise<TProjectUser> {
-    const response = await api.post<TApiResponse<TProjectUser>>(
+    const response = await authenticatedApi.post<TApiResponse<TProjectUser>>(
       "/project-users/",
       payload
     );
@@ -37,7 +37,7 @@ export const projectUserService = {
   },
 
   async removeProjectUser(payload: TRemoveProjectUserDTO): Promise<void> {
-    const response = await api.delete<TApiResponse<unknown>>(
+    const response = await authenticatedApi.delete<TApiResponse<unknown>>(
       "/project-users/",
       {
         data: payload,
@@ -48,7 +48,7 @@ export const projectUserService = {
   },
 
   async leaveProject(projectId: string): Promise<void> {
-    const response = await api.delete<TApiResponse<unknown>>(
+    const response = await authenticatedApi.delete<TApiResponse<unknown>>(
       `/project-users/leave/${projectId}/`
     );
 

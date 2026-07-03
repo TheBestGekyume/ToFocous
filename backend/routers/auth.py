@@ -187,7 +187,7 @@ def login(data: LoginData):
 
 
 @router.post(
-    "/refresh",
+    "/refresh/",
     response_model=ApiResponse[RefreshTokenResponse],
 )
 def refresh_session(data: RefreshTokenRequest):

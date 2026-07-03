@@ -1,5 +1,6 @@
-import { api } from "./api";
+import { publicApi } from "./api";
 
-export const health = async (): Promise<void> => {
-  await api.get("/health/");
+export const health = async () => {
+  const response = await publicApi.get("/health/");
+  return response.data;
 };

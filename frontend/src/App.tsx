@@ -16,6 +16,7 @@ import { health } from "./services/api/healthService";
 import { AuthCallbackPage } from "./pages/AuthCallbackPage";
 import { KanbanPage } from "./pages/KanbanPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
+import { AuthSessionExpiredHandler } from "./components/_Common/AuthSessionExpiredHandler";
 
 function App() {
   useEffect(() => {
@@ -34,6 +35,8 @@ function App() {
 
   return (
     <div id="app" className="d-flex bg-background-task-section min-h-full">
+      <AuthSessionExpiredHandler />
+
       <Routes>
         <Route path="/acesso" element={<AuthPage />} />
         <Route path="/acesso/callback" element={<AuthCallbackPage />} />

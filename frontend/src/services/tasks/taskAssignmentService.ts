@@ -1,4 +1,4 @@
-import { api } from "../api/api";
+import { authenticatedApi } from "../api/api";
 import type {
   TCreateTaskAssignmentDTO,
   TDeleteTaskAssignmentDTO,
@@ -12,7 +12,7 @@ type TaskAssignmentListResponse = {
 
 export const taskAssignmentService = {
   async getProjectAssignments(projectId: string): Promise<TTaskAssignment[]> {
-    const response = await api.get<TApiResponse<TaskAssignmentListResponse>>(
+    const response = await authenticatedApi.get<TApiResponse<TaskAssignmentListResponse>>(
       `/task-assignments/project/${projectId}/`
     );
 
@@ -24,7 +24,7 @@ export const taskAssignmentService = {
   },
 
   async getTaskAssignments(taskId: string): Promise<TTaskAssignment[]> {
-    const response = await api.get<TApiResponse<TaskAssignmentListResponse>>(
+    const response = await authenticatedApi.get<TApiResponse<TaskAssignmentListResponse>>(
       `/task-assignments/task/${taskId}/`
     );
 
@@ -36,7 +36,7 @@ export const taskAssignmentService = {
   },
 
   async getSubTaskAssignments(subtaskId: string): Promise<TTaskAssignment[]> {
-    const response = await api.get<TApiResponse<TaskAssignmentListResponse>>(
+    const response = await authenticatedApi.get<TApiResponse<TaskAssignmentListResponse>>(
       `/task-assignments/subtask/${subtaskId}/`
     );
 
@@ -50,7 +50,7 @@ export const taskAssignmentService = {
   async createAssignment(
     payload: TCreateTaskAssignmentDTO
   ): Promise<TTaskAssignment> {
-    const response = await api.post<TApiResponse<TTaskAssignment>>(
+    const response = await authenticatedApi.post<TApiResponse<TTaskAssignment>>(
       "/task-assignments/",
       payload
     );
@@ -63,7 +63,7 @@ export const taskAssignmentService = {
   },
 
   async deleteAssignment(payload: TDeleteTaskAssignmentDTO): Promise<void> {
-    const response = await api.delete<TApiResponse<unknown>>(
+    const response = await authenticatedApi.delete<TApiResponse<unknown>>(
       "/task-assignments/",
       {
         data: payload,
