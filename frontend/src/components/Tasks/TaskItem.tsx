@@ -220,7 +220,7 @@ export const TaskItem = ({
               className="bg-indigo-600 hover:bg-indigo-800 duration-150 p-2 rounded-full"
               title="SubTarefas"
             >
-              <PictureInPicture size={24} />
+              <PictureInPicture size={22} />
             </button>
           )}
         </div>
@@ -244,7 +244,7 @@ export const TaskItem = ({
             className="bg-red-600 hover:bg-red-800 duration-150 p-2 rounded-full"
             title="Excluir Tarefa"
           >
-            <Trash2 size={24} />
+            <Trash2 size={22} />
           </button>
         </div>
       </aside>

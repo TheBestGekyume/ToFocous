@@ -92,7 +92,7 @@ export const AssignmentControl = ({
         {assignments.map((assignment) => (
           <div
             key={assignment.id}
-            className="flex shrink-0 items-center gap-1 rounded-full border border-zinc-600 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
+            className="flex shrink-0 items-center gap-1 rounded-full bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
           >
             <span>{assignment.assigned_user.name}</span>
 
@@ -100,7 +100,7 @@ export const AssignmentControl = ({
               <button
                 type="button"
                 onClick={() => void handleRemove(assignment.id)}
-                className="rounded-full p-0.5 hover:bg-zinc-700"
+                className="rounded-full p-0.5 hover:bg-red-500/75 duration-100"
                 title="Remover responsável"
               >
                 <X size={12} />

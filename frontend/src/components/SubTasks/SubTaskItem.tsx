@@ -99,7 +99,7 @@ export const SubTaskItem = ({
     }
   `}
       >
-        {isDone && <Check size={16} className="text-white" />}
+        {isDone && <Check size={22} className="text-white" />}
       </button>
 
       <div className="flex min-w-0 flex-col gap-3">
@@ -232,13 +232,13 @@ export const SubTaskItem = ({
         )}
       </div>
 
-      <div className="flex shrink-0 flex-col items-end gap-3">
+      <div className="place-self-center flex shrink-0 flex-col items-end gap-3">
         <button
           className="rounded-full bg-red-600 p-2 hover:bg-red-800"
           onClick={handleDelete}
           title="Excluir subtarefa"
         >
-          <Trash2 size={18} />
+          <Trash2 size={22} />
         </button>
       </div>
     </div>
