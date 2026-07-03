@@ -1,6 +1,6 @@
 import { getApiSuccessOrThrow, type TApiResponse } from "../../types/TApi";
 import type { TPriority, TStatus } from "../../types/TTask";
-import { api } from "../api/api";
+import { authenticatedApi } from "../api/api";
 
 export type AgendaItemType = "task" | "subtask";
 export type AgendaDateType = "start_date" | "due_date";
@@ -36,7 +36,7 @@ export const getAgendaItems = async ({
   month,
   projectId,
 }: GetAgendaItemsParams): Promise<AgendaItemResponse[]> => {
-  const response = await api.get<TApiResponse<AgendaResponse>>("/agenda/", {
+  const response = await authenticatedApi.get<TApiResponse<AgendaResponse>>("/agenda/", {
     params: {
       year,
       month,

@@ -1,4 +1,4 @@
-import { api } from "../api/api";
+import { authenticatedApi } from "../api/api";
 import type { TApiResponse } from "../../types/TApi";
 import { getApiSuccessOrThrow } from "../../types/TApi";
 
@@ -23,7 +23,7 @@ export const taskService = {
   // TASKS
 
   async getTasksByProject(projectId: string): Promise<TTask[]> {
-    const response = await api.get<TApiResponse<TaskListResponse>>("/tasks/", {
+    const response = await authenticatedApi.get<TApiResponse<TaskListResponse>>("/tasks/", {
       params: { project_id: projectId },
     });
 
@@ -35,7 +35,7 @@ export const taskService = {
   },
 
   async getTasks(): Promise<TTask[]> {
-    const response = await api.get<TApiResponse<TaskListResponse>>("/tasks/");
+    const response = await authenticatedApi.get<TApiResponse<TaskListResponse>>("/tasks/");
 
     const success = getApiSuccessOrThrow(response.data, {
       contentRequired: true,
@@ -45,7 +45,7 @@ export const taskService = {
   },
 
   async createTask(data: TCreateTaskDTO): Promise<TTask> {
-    const response = await api.post<TApiResponse<TTask>>("/tasks/", data);
+    const response = await authenticatedApi.post<TApiResponse<TTask>>("/tasks/", data);
 
     const success = getApiSuccessOrThrow(response.data, {
       contentRequired: true,
@@ -55,7 +55,7 @@ export const taskService = {
   },
 
   async updateTask(id: string, data: TUpdateTaskDTO): Promise<TTask> {
-    const response = await api.patch<TApiResponse<TTask>>(
+    const response = await authenticatedApi.patch<TApiResponse<TTask>>(
       `/tasks/${id}/`,
       data
     );
@@ -68,7 +68,7 @@ export const taskService = {
   },
 
   async deleteTask(id: string): Promise<void> {
-    const response = await api.delete<TApiResponse<unknown>>(`/tasks/${id}/`);
+    const response = await authenticatedApi.delete<TApiResponse<unknown>>(`/tasks/${id}/`);
 
     getApiSuccessOrThrow(response.data);
   },
@@ -76,7 +76,7 @@ export const taskService = {
   // SUBTASKS
 
   async getSubTasks(taskId: string): Promise<TSubTask[]> {
-    const response = await api.get<TApiResponse<SubTaskListResponse>>(
+    const response = await authenticatedApi.get<TApiResponse<SubTaskListResponse>>(
       `/subtasks/${taskId}/`
     );
 
@@ -91,7 +91,7 @@ export const taskService = {
     taskId: string,
     data: TCreateSubTaskDTO
   ): Promise<TSubTask> {
-    const response = await api.post<TApiResponse<TSubTask>>(
+    const response = await authenticatedApi.post<TApiResponse<TSubTask>>(
       `/subtasks/${taskId}/`,
       data
     );
@@ -108,7 +108,7 @@ export const taskService = {
     taskId: string,
     data: TUpdateSubTaskDTO
   ): Promise<TSubTask> {
-    const response = await api.patch<TApiResponse<TSubTask>>(
+    const response = await authenticatedApi.patch<TApiResponse<TSubTask>>(
       `/subtasks/${subtaskId}/`,
       data,
       {
@@ -124,7 +124,7 @@ export const taskService = {
   },
 
   async deleteSubTask(subtaskId: string, taskId: string): Promise<void> {
-    const response = await api.delete<TApiResponse<unknown>>(
+    const response = await authenticatedApi.delete<TApiResponse<unknown>>(
       `/subtasks/${subtaskId}/`,
       {
         params: { task_id: taskId },

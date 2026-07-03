@@ -1,10 +1,10 @@
-import { api } from "../api/api";
+import { authenticatedApi } from "../api/api";
 import type { TApiResponse } from "../../types/TApi";
 import { getApiSuccessOrThrow } from "../../types/TApi";
 import type { ITaskSettings } from "../../types/TSettings";
 
 export async function getTaskSettings(): Promise<ITaskSettings> {
-  const response = await api.get<TApiResponse<ITaskSettings>>("/settings/");
+  const response = await authenticatedApi.get<TApiResponse<ITaskSettings>>("/settings/");
 
   const success = getApiSuccessOrThrow(response.data, {
     contentRequired: true,
@@ -16,7 +16,7 @@ export async function getTaskSettings(): Promise<ITaskSettings> {
 export async function updateTaskSettings(
   data: Partial<ITaskSettings>
 ): Promise<ITaskSettings> {
-  const response = await api.patch<TApiResponse<ITaskSettings>>(
+  const response = await authenticatedApi.patch<TApiResponse<ITaskSettings>>(
     "/settings/",
     data
   );

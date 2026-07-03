@@ -1,4 +1,4 @@
-import { CheckCircle, XCircle} from "lucide-react";
+import { CheckCircle, CircleAlert } from "lucide-react";
 import type { ReactNode } from "react";
 
 export type FeedbackType = "success" | "error";
@@ -21,7 +21,7 @@ export const FeedbackToast = ({ type, message }: FeedbackToastProps) => {
         }`}
       >
         <div className="mt-0.5 shrink-0">
-          {isSuccess ? <CheckCircle size={20} /> : <XCircle size={20} />}
+          {isSuccess ? <CheckCircle size={20} /> : <CircleAlert size={20} />}
         </div>
 
         <p className="flex-1 text-sm leading-5">{message}</p>
