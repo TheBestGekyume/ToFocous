@@ -232,7 +232,7 @@ export const SubTaskItem = ({
         )}
       </div>
 
-      <div className="place-self-center flex shrink-0 flex-col items-end gap-3">
+      <div className="place-self-center flex shrink-0 flex-col items-end gap-3 mt-4">
         <button
           className="rounded-full bg-red-600 p-2 hover:bg-red-800"
           onClick={handleDelete}

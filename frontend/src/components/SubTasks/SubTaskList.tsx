@@ -19,7 +19,7 @@ export const SubTaskList = ({
     return (
       <p className="text-zinc-500 text-center italic py-5">
         Nenhuma SubTarefa adicionada ainda. <br />
-        Clique em <span className="text-green-300/70 font-medium"> +SubTarefa </span>para adicionar!
+        Clique em <span className="text-green-300/70 font-medium"> + SubTarefa </span>para adicionar!
       </p>
     );
   }
