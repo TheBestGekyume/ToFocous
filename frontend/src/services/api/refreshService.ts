@@ -1,35 +1,54 @@
 import axios from "axios";
 import { getRefreshToken, setTokens } from "../../utils/tokenUtils";
+import type { TApiResponse } from "../../types/TApi";
+import { getApiSuccessOrThrow } from "../../types/TApi";
+
 const apiUrl = import.meta.env.VITE_API_URL;
 
+if (!apiUrl) {
+  throw new Error("VITE_API_URL não foi definida.");
+}
 
-const apiRefresh = axios.create({
-    baseURL: apiUrl,
+const refreshApi = axios.create({
+  baseURL: apiUrl,
 });
+
+type RefreshResponse = {
+  access_token: string;
+  refresh_token: string;
+};
 
 let refreshPromise: Promise<string> | null = null;
 
 export async function handleRefresh(): Promise<string> {
-    if (!refreshPromise) {
-        refreshPromise = (async () => {
-            const refresh_token = getRefreshToken();
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      const refreshToken = getRefreshToken();
 
-            if (!refresh_token) throw new Error("No refresh token");
+      if (!refreshToken) {
+        throw new Error("Refresh token não encontrado.");
+      }
 
-            const response = await apiRefresh.post("/auth/refresh/", {
-                refresh_token,
-            });
+      const response = await refreshApi.post<TApiResponse<RefreshResponse>>(
+        "/auth/refresh/",
+        {
+          refresh_token: refreshToken,
+        }
+      );
 
-            const newAccess = response.data.access_token;
-            const newRefresh = response.data.refresh_token;
+      const success = getApiSuccessOrThrow(response.data, {
+        contentRequired: true,
+      });
 
-            setTokens(newAccess, newRefresh);
+      const { access_token, refresh_token } = success.content;
 
-            return newAccess;
-        })().finally(() => {
-            refreshPromise = null;
-        });
-    }
+      setTokens(access_token, refresh_token);
 
-    return refreshPromise;
+      return access_token;
+    })().finally(() => {
+      refreshPromise = null;
+    });
+  }
+
+  return refreshPromise;
 }

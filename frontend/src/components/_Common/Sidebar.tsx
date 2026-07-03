@@ -12,6 +12,8 @@ import { useEffect, type Dispatch, type SetStateAction } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
 import { LoadingDots } from "./LoadingDots";
+import { supabaseAuthClient } from "../../services/auth/supabaseAuthClient";
+import { clearTokens } from "../../utils/tokenUtils";
 
 type SidebarProps = {
   open: boolean;
@@ -26,10 +28,9 @@ export const Sidebar = ({ open, setOpen }: SidebarProps) => {
     fetchMyUser();
   }, [fetchMyUser]);
 
-  const logOut = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("user_id");
+  const logOut = async () => {
+    clearTokens();
+    await supabaseAuthClient.auth.signOut();
     navigate("/acesso", { replace: true });
   };
 
