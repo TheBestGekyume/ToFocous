@@ -2,7 +2,8 @@ import {
   AlarmClockCheck,
   AlarmClockPlus,
   Check,
-  Eye,
+  // Eye,
+  PictureInPicture,
   Play,
   Trash2,
 } from "lucide-react";
@@ -93,172 +94,175 @@ export const TaskItem = ({
   if (!settings) return <LoadingOverlay show />;
 
   return (
-    <>
-      <LoadingOverlay show={loading} />
+  <>
+    <LoadingOverlay show={loading} />
 
-      <div
-        className={`flex justify-between items-center p-3 border-2
-          ${currentPriority.border} rounded-lg bg-zinc-800`}
-      >
-        <div className="flex flex-col gap-4 w-full">
-          <div className="flex gap-4 flex-wrap">
-            {showStartDate && !isDone && (
-              <DatePicker
-                value={localData.start_date}
-                onChange={(date) =>
-                  handleImmediateChange("start_date", date || "")
-                }
-                icon={Play}
-                title="Data de início"
-              />
-            )}
+    <div
+      className={`grid gap-4 p-3 border-2 ${currentPriority.border} rounded-lg bg-zinc-800
+      md:grid-cols-[minmax(0,1fr)_auto]`}
+    >
+      <div className="flex min-w-0 flex-col gap-4">
+        <div className="flex flex-wrap gap-4">
+          {showStartDate && !isDone && (
+            <DatePicker
+              value={localData.start_date}
+              onChange={(date) =>
+                handleImmediateChange("start_date", date || "")
+              }
+              icon={Play}
+              title="Data de início"
+            />
+          )}
 
-            {!isDone && (
-              <DatePicker
-                value={localData.due_date}
-                onChange={(date) =>
-                  handleImmediateChange("due_date", date || "")
-                }
-                icon={Check}
-                title="Data de prazo"
-                required
-              />
-            )}
+          {!isDone && (
+            <DatePicker
+              value={localData.due_date}
+              onChange={(date) =>
+                handleImmediateChange("due_date", date || "")
+              }
+              icon={Check}
+              title="Data de prazo"
+              required
+            />
+          )}
 
-            {showStartTime && !isDone && (
-              <TimeInput
-                value={localData.start_time}
-                onChange={(time) => handleImmediateChange("start_time", time)}
-                title="Hora de início"
-                icon={AlarmClockPlus}
-              />
-            )}
+          {showStartTime && !isDone && (
+            <TimeInput
+              value={localData.start_time}
+              onChange={(time) => handleImmediateChange("start_time", time)}
+              title="Hora de início"
+              icon={AlarmClockPlus}
+            />
+          )}
 
-            {showTime && !isDone && (
-              <TimeInput
-                value={localData.due_time}
-                onChange={(time) => handleImmediateChange("due_time", time)}
-                title="Hora de prazo"
-                icon={AlarmClockCheck}
-              />
-            )}
-          </div>
+          {showTime && !isDone && (
+            <TimeInput
+              value={localData.due_time}
+              onChange={(time) => handleImmediateChange("due_time", time)}
+              title="Hora de prazo"
+              icon={AlarmClockCheck}
+            />
+          )}
+        </div>
 
+        <textarea
+          ref={titleRef}
+          value={localData.title}
+          onChange={(e) => {
+            handleChange("title", e.target.value);
+            requestAnimationFrame(resizeTitle);
+          }}
+          disabled={isDone}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          placeholder="Insira o título"
+          rows={1}
+          spellCheck={false}
+          className={`w-full text-xl font-semibold outline-none border border-transparent
+          duration-100 focus:bg-zinc-900 focus:border-accent
+          hover:bg-zinc-700 rounded-md p-1 resize-none overflow-hidden
+          ${isDone ? "line-through text-zinc-400" : ""}`}
+        />
+
+        <div className="relative w-full">
           <textarea
-            ref={titleRef}
-            value={localData.title}
+            ref={textareaRef}
+            value={localData.description ?? ""}
             onChange={(e) => {
-              handleChange("title", e.target.value);
-              requestAnimationFrame(resizeTitle);
+              handleChange("description", e.target.value);
+              requestAnimationFrame(checkDescriptionOverflow);
             }}
             disabled={isDone}
             onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            placeholder="Insira o título"
-            rows={1}
+            onFocus={checkDescriptionOverflow}
+            onMouseEnter={checkDescriptionOverflow}
+            onMouseDown={startResizeTracking}
+            onKeyDown={handleDescriptionKeyDown}
             spellCheck={false}
-            className={`w-9/10 text-xl font-semibold outline-none border border-transparent
-    duration-100 focus:bg-zinc-900 focus:border-accent
-    hover:bg-zinc-700 rounded-md p-1 resize-none overflow-hidden
-    ${isDone ? "line-through text-zinc-400" : ""}
-    "`}
+            rows={2}
+            className={`w-full resize-none overflow-hidden rounded-sm border border-transparent px-1 m-0 text-text outline-none duration-100
+            focus:bg-zinc-900 focus:border-accent focus:resize-y hover:resize-y
+            hover:bg-zinc-700 ${isDone ? "line-through text-zinc-500" : ""}`}
           />
 
-          <div className="relative w-9/10">
-            <textarea
-              ref={textareaRef}
-              value={localData.description ?? ""}
-              onChange={(e) => {
-                handleChange("description", e.target.value);
-                requestAnimationFrame(checkDescriptionOverflow);
-              }}
-              disabled={isDone}
-              onBlur={handleBlur}
-              onFocus={checkDescriptionOverflow}
-              onMouseEnter={checkDescriptionOverflow}
-              onMouseDown={startResizeTracking}
-              onKeyDown={handleDescriptionKeyDown}
-              spellCheck={false}
-              rows={2}
-              className={`w-full resize-none overflow-hidden rounded-sm border border-transparent px-1 m-0 text-text outline-none duration-100
-      focus:bg-zinc-900 focus:border-accent focus:resize-y hover:resize-y
-      hover:bg-zinc-700  ${isDone ? "line-through text-zinc-500" : ""}`}
-            />
-
-            {descriptionOverflow && (
-              <div className="pointer-events-none absolute bottom-0 left-0 right-0 flex h-7 items-center justify-end rounded-b-sm bg-linear-to-t from-zinc-800 via-zinc-800/50 to-transparent px-3 pb-0.5">
-                <span className="text-[10px] text-zinc-300">
-                  arraste para ver mais
-                </span>
-              </div>
-            )}
-          </div>
-
-          {!isDone && (
-            <p className={`px-1 text-xs ${timeColor}`}>{timeMessage}</p>
-          )}
-        </div>
-
-        <div className="flex flex-col items-end justify-center gap-4 text-sm ms-5">
-          <div className="flex gap-4 w-max">
-            {!isDone && (
-              <Dropdown
-                value={localData.priority}
-                options={priorityOptions}
-                onChange={changePriority}
-                buttonClass={`font-bold px-2 py-1 hover:bg-zinc-700 rounded-sm duration-100
-                ${currentPriority.color}`}
-                renderLabel={(value) =>
-                  `Prioridade: ${priorityMap[value].label}`
-                }
-              />
-            )}
-            {!isDetailsPage && (
-              <button
-                onClick={navigateToDetails}
-                className="bg-indigo-600 hover:bg-indigo-800 duration-150 p-2 rounded-full"
-              >
-                <Eye size={20} />
-              </button>
-            )}
-          </div>
-
-          <div
-            className={`flex ${
-              isDetailsPage ? "flex-col" : "flex-row"
-            } items-end gap-4`}
-          >
-            <Dropdown
-              value={localData.status}
-              options={statusOptions}
-              onChange={changeStatus}
-              buttonClass={`flex items-center gap-2 rounded-sm px-2 py-1 duration-100 border
-                border-transparent hover:bg-zinc-950
-                ${currentStatus.bg} ${currentStatus.color}`}
-            />
-
-            <button
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-800 duration-150 p-2 rounded-full"
-            >
-              <Trash2 size={20} />
-            </button>
-          </div>
-          {projectMembers.length >= 2 &&  (
-            <div>
-              <AssignmentControl
-                assignments={taskAssignments}
-                members={projectMembers}
-                canManage={canManageAssignments}
-                onAssign={async (userId) => {
-                  await assignUserToTask(task.id, userId);
-                }}
-                onRemove={removeTaskAssignment}
-              />
+          {descriptionOverflow && (
+            <div className="pointer-events-none absolute bottom-0 left-0 right-0 flex h-7 items-center justify-end rounded-b-sm bg-linear-to-t from-zinc-800 via-zinc-800/50 to-transparent px-3 pb-0.5">
+              <span className="text-[10px] text-zinc-300">
+                arraste para ver mais
+              </span>
             </div>
           )}
         </div>
+
+        {!isDone && (
+          <p className={`px-1 text-xs ${timeColor}`}>{timeMessage}</p>
+        )}
       </div>
-    </>
-  );
+
+      <aside className="flex shrink-0 flex-col items-end justify-center gap-4 text-sm">
+        <div className="flex w-max items-center gap-4">
+          {!isDone && (
+            <Dropdown
+              value={localData.priority}
+              options={priorityOptions}
+              onChange={changePriority}
+              buttonClass={`font-bold px-2 py-1 hover:bg-zinc-700 rounded-sm duration-100
+              ${currentPriority.color}`}
+              renderLabel={(value) =>
+                `Prioridade: ${priorityMap[value].label}`
+              }
+            />
+          )}
+
+          {!isDetailsPage && (
+            <button
+              onClick={navigateToDetails}
+              className="bg-indigo-600 hover:bg-indigo-800 duration-150 p-2 rounded-full"
+              title="SubTarefas"
+            >
+              <PictureInPicture size={22} />
+            </button>
+          )}
+        </div>
+
+        <div
+          className={`flex ${
+            isDetailsPage ? "flex-col" : "flex-row"
+          } items-end gap-4`}
+        >
+          <Dropdown
+            value={localData.status}
+            options={statusOptions}
+            onChange={changeStatus}
+            buttonClass={`flex items-center gap-2 rounded-sm px-2 py-1 duration-100 border
+            border-transparent hover:bg-zinc-950
+            ${currentStatus.bg} ${currentStatus.color}`}
+          />
+
+          <button
+            onClick={handleDelete}
+            className="bg-red-600 hover:bg-red-800 duration-150 p-2 rounded-full"
+            title="Excluir Tarefa"
+          >
+            <Trash2 size={22} />
+          </button>
+        </div>
+      </aside>
+
+      {projectMembers.length >= 2 && (
+        <div className="md:col-span-2 border-t border-zinc-700 pt-3">
+          <AssignmentControl
+            assignments={taskAssignments}
+            members={projectMembers}
+            canManage={canManageAssignments}
+            onAssign={async (userId) => {
+              await assignUserToTask(task.id, userId);
+            }}
+            onRemove={removeTaskAssignment}
+          />
+        </div>
+      )}
+    </div>
+  </>
+);
 };

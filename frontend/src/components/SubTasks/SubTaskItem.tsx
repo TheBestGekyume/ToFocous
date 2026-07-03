@@ -60,6 +60,7 @@ export const SubTaskItem = ({
   } = useSubTaskItem({ subtask, taskId, setLoading });
 
   const currentPriority = priorityMap[localData.priority];
+
   const {
     textareaRef,
     hasOverflow: descriptionOverflow,
@@ -82,47 +83,28 @@ export const SubTaskItem = ({
   );
 
   const canManageAssignments = isProjectOwner && projectMembers.length >= 2;
+  const shouldShowAssignments = projectMembers.length >= 2;
 
   return (
-    <div className="flex items-center gap-5 p-3 bg-zinc-800 border border-zinc-600 rounded-md">
+    <div className="grid gap-3 rounded-md border border-zinc-600 bg-zinc-800 p-3 md:grid-cols-[auto_minmax(0,1fr)_auto]">
       <button
         onClick={toggleStatus}
         className={`
-          w-6 h-6 flex items-center justify-center rounded-md border
-          transition-all duration-300 mt-1
-          ${
-            isDone
-              ? "bg-purple-700 border-purple-700"
-              : "bg-zinc-900 border-zinc-600 hover:border-zinc-400"
-          }
-        `}
+    place-self-center flex h-6 w-6 items-center justify-center rounded-md border
+    transition-all duration-300 mt-4
+    ${
+      isDone
+        ? "border-purple-700 bg-purple-700"
+        : "border-zinc-600 bg-zinc-900 hover:border-zinc-400"
+    }
+  `}
       >
-        {isDone && <Check size={16} className="text-white" />}
+        {isDone && <Check size={22} className="text-white" />}
       </button>
 
-      <div className="flex flex-1 flex-col gap-2">
-        <div className="flex gap-5">
-          <textarea
-            value={localData.title}
-            ref={titleRef}
-            onChange={(e) => {
-              handleChange("title", e.target.value);
-              requestAnimationFrame(resizeTitle);
-            }}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            placeholder="Título da subtarefa"
-            rows={1}
-            spellCheck={false}
-            disabled={isDone}
-            className={`text-xl outline-none border border-transparent
-            duration-100 hover:bg-zinc-700 focus:bg-zinc-900 flex-1
-            focus:border-accent rounded-md p-1 resize-none overflow-hidden
-            ${isDone ? "line-through text-zinc-400" : ""}
-          `}
-          />
-
-          {projectMembers.length >= 2 && (
+      <div className="flex min-w-0 flex-col gap-3">
+        {shouldShowAssignments && (
+          <div className="border-b border-zinc-700 pb-3">
             <AssignmentControl
               assignments={subtaskAssignments}
               members={projectMembers}
@@ -132,8 +114,26 @@ export const SubTaskItem = ({
               }}
               onRemove={removeTaskAssignment}
             />
-          )}
-        </div>
+          </div>
+        )}
+
+        <textarea
+          value={localData.title}
+          ref={titleRef}
+          onChange={(e) => {
+            handleChange("title", e.target.value);
+            requestAnimationFrame(resizeTitle);
+          }}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          placeholder="Título da subtarefa"
+          rows={1}
+          spellCheck={false}
+          disabled={isDone}
+          className={`w-full resize-none overflow-hidden rounded-md border border-transparent p-1 text-xl outline-none
+          duration-100 hover:bg-zinc-700 focus:border-accent focus:bg-zinc-900
+          ${isDone ? "line-through text-zinc-400" : ""}`}
+        />
 
         <div className="relative">
           <textarea
@@ -151,10 +151,9 @@ export const SubTaskItem = ({
             spellCheck={false}
             disabled={isDone}
             rows={2}
-            className={`w-full resize-none overflow-hidden outline-none border border-transparent duration-100
-      hover:bg-zinc-700 focus:bg-zinc-900 focus:border-accent focus:resize-y hover:resize-y rounded-md p-1
-      ${isDone ? "line-through text-zinc-500" : ""}
-    `}
+            className={`w-full resize-none overflow-hidden rounded-md border border-transparent p-1 outline-none duration-100
+            hover:bg-zinc-700 hover:resize-y focus:border-accent focus:bg-zinc-900 focus:resize-y
+            ${isDone ? "line-through text-zinc-500" : ""}`}
           />
 
           {descriptionOverflow && (
@@ -167,57 +166,55 @@ export const SubTaskItem = ({
         </div>
 
         {!isDone && (
-          <>
-            <div className="flex justify-between">
-              <div className="flex items-baseline flex-wrap gap-3">
-                {showStartDate && (
-                  <DatePicker
-                    value={localData.start_date}
-                    onChange={(date) =>
-                      handleImmediateChange("start_date", date || "")
-                    }
-                    title="Data de início"
-                    icon={Play}
-                  />
-                )}
-
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-baseline gap-3">
+              {showStartDate && (
                 <DatePicker
-                  value={localData.due_date}
+                  value={localData.start_date}
                   onChange={(date) =>
-                    handleImmediateChange("due_date", date || "")
+                    handleImmediateChange("start_date", date || "")
                   }
-                  title="Data de prazo"
-                  icon={Check}
+                  title="Data de início"
+                  icon={Play}
                 />
+              )}
 
-                {showStartTime && (
-                  <TimeInput
-                    value={localData.start_time}
-                    onChange={(time) =>
-                      handleImmediateChange("start_time", time || "")
-                    }
-                    title="Hora de início"
-                    icon={AlarmClockPlus}
-                  />
-                )}
+              <DatePicker
+                value={localData.due_date}
+                onChange={(date) =>
+                  handleImmediateChange("due_date", date || "")
+                }
+                title="Data de prazo"
+                icon={Check}
+              />
 
-                {showTime && (
-                  <TimeInput
-                    value={localData.due_time}
-                    onChange={(time) =>
-                      handleImmediateChange("due_time", time || "")
-                    }
-                    title="Hora de prazo"
-                    icon={AlarmClockCheck}
-                  />
-                )}
+              {showStartTime && (
+                <TimeInput
+                  value={localData.start_time}
+                  onChange={(time) =>
+                    handleImmediateChange("start_time", time || "")
+                  }
+                  title="Hora de início"
+                  icon={AlarmClockPlus}
+                />
+              )}
 
-                <p className={`px-1 pt-2 text-xs ${timeColor}`}>
-                  {timeMessage}
-                </p>
-              </div>
+              {showTime && (
+                <TimeInput
+                  value={localData.due_time}
+                  onChange={(time) =>
+                    handleImmediateChange("due_time", time || "")
+                  }
+                  title="Hora de prazo"
+                  icon={AlarmClockCheck}
+                />
+              )}
 
-              {showPriority && (
+              <p className={`px-1 pt-2 text-xs ${timeColor}`}>{timeMessage}</p>
+            </div>
+
+            {showPriority && (
+              <div className="shrink-0">
                 <Dropdown
                   value={localData.priority}
                   options={priorityOptions}
@@ -229,18 +226,19 @@ export const SubTaskItem = ({
                     `Prioridade: ${priorityMap[value].label}`
                   }
                 />
-              )}
-            </div>
-          </>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
-      <div className="flex flex-col items-end gap-3">
+      <div className="place-self-center flex shrink-0 flex-col items-end gap-3 mt-4">
         <button
-          className="p-2 bg-red-600 hover:bg-red-800 rounded-full"
+          className="rounded-full bg-red-600 p-2 hover:bg-red-800"
           onClick={handleDelete}
+          title="Excluir subtarefa"
         >
-          <Trash2 size={18} />
+          <Trash2 size={22} />
         </button>
       </div>
     </div>
