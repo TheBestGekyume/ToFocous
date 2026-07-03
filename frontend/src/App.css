@@ -146,7 +146,7 @@ button {
   font-weight: 700;
 }
 
-/* Hoje selecionado */
+/* Dia selecionado */
 .tofocous-day-picker .rdp-today.rdp-selected .rdp-day_button {
   color: white;
   background-color: var(--color-accent);

@@ -18,7 +18,8 @@ export const SubTaskList = ({
   if (!task.subtasks || task.subtasks.length === 0) {
     return (
       <p className="text-zinc-500 text-center italic py-5">
-        Nenhuma subtarefa adicionada ainda.
+        Nenhuma SubTarefa adicionada ainda. <br />
+        Clique em <span className="text-green-300/70 font-medium"> +SubTarefa </span>para adicionar!
       </p>
     );
   }

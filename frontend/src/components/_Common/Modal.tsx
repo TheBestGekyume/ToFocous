@@ -42,7 +42,7 @@ export const Modal = ({
 
   const content = (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 px-4 py-10 backdrop-blur-xs"
+      className="fixed inset-0 z-100 flex items-start justify-center overflow-y-auto bg-black/50 px-4 py-10 backdrop-blur-xs"
       onMouseDown={closeOnOverlayClick ? onClose : undefined}
     >
       <div

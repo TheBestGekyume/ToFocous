@@ -11,7 +11,7 @@ export const LoadingLocal = ({
 }: LoadingLocalProps) => {
   return (
     <div
-      className={`flex w-full items-center justify-center rounded-xl p-8 ${className}`}
+      className={`flex items-center justify-center rounded-xl ${className}`}
     >
       <div className="flex items-center gap-2 text-text">
         <span className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-400 border-t-accent" />
