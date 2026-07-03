@@ -24,6 +24,9 @@ class UsuarioResponse(BaseModel):
     name: str
     email: str | None = None
     created_at: str | None = None
+    has_google_auth: bool
+    has_password: bool
+
 
 
 class UpdateUsuarioResponse(BaseModel):
