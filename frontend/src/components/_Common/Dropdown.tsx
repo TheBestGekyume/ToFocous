@@ -56,7 +56,7 @@ export function Dropdown<T>({
 
       {open && (
         <div
-          className={`absolute right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg overflow-hidden z-10 ${menuClass}`}
+          className={`absolute right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg overflow-hidden z-20 ${menuClass}`}
         >
           {options.map((option) => (
             <button

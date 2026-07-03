@@ -28,12 +28,12 @@ export const Footer = () => {
           </a>
         </h5>
 
-        <div className="text-center">
+        <div className="text-center -order-1 md:order-0">
           <p className="text-lg font-semibold text-white">
             To<span className="text-accent">Focous</span>
           </p>
 
-          <p className="text-xs text-text/70">
+          <p className="text-xs text-text/70 hidden md:block">
             Organização simples para projetos e tarefas do cotidiano.
           </p>
         </div>

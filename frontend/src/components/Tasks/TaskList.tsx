@@ -62,7 +62,10 @@ export const TaskList = ({ projectMembers, isProjectOwner }: TaskListProps) => {
           ))
         ) : (
           <p className="text-zinc-500 text-center italic py-5">
-            Nenhuma tarefa adicionada ainda.
+            Nenhuma Tarefa adicionada ainda. <br />
+            Clique em{" "}
+            <span className="text-green-300/70 font-medium"> + Adicionar </span>
+            para adicionar!
           </p>
         )}
       </div>

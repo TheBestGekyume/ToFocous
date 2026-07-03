@@ -90,8 +90,8 @@ export const TaskForm = ({
             type="text"
             placeholder={
               isCreatingSubTask
-                ? "Adicionar nova subtarefa..."
-                : "Adicionar nova tarefa..."
+                ? "Título da nova subtarefa..."
+                : "Título da nova tarefa..."
             }
             value={formData.title}
             onChange={handleChange}
