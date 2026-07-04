@@ -1,4 +1,4 @@
-import { CodeXml } from "lucide-react";
+// import { CodeXml } from "lucide-react";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -6,7 +6,7 @@ export const Footer = () => {
   return (
     <footer className="bg-background-header border-t-2 border-black px-4 py-4 text-text mt-8">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
-        <h5 className="flex flex-wrap items-center justify-start gap-1.5 text-sm font-normal">
+        {/* <h5 className="flex flex-wrap items-center justify-start gap-1.5 text-sm font-normal">
           <CodeXml size={18} className="text-accent/80" />
           <span>Desenvolvido por</span>
           <a
@@ -26,7 +26,7 @@ export const Footer = () => {
           >
             Jonathan
           </a>
-        </h5>
+        </h5> */}
 
         <div className="text-center -order-1 md:order-0">
           <p className="text-lg font-semibold text-white">
