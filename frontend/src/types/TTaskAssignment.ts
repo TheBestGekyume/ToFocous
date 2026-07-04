@@ -10,7 +10,6 @@ export type TTaskAssignment = {
   assigned_by_user_id: string;
   task_id: string | null;
   subtask_id: string | null;
-  created_at: string;
   assigned_user: TAssignedUser;
   assigned_by_user?: TAssignedUser;
 };

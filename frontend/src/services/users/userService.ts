@@ -3,16 +3,21 @@ import type { TApiResponse, TApiSuccess } from "../../types/TApi";
 import { getApiSuccessOrThrow } from "../../types/TApi";
 import type {
   TCreatePasswordDTO,
+  TEmailChangeRequestResponse,
+  TFinalizeEmailChangeResponse,
   TResetPasswordDTO,
   TUpdateEmailDTO,
   TUpdatePasswordDTO,
   TUpdateUserDTO,
+  TUpdateUserResponse,
   TUser,
 } from "../../types/TUser";
 import { supabaseAuthClient } from "../auth/supabaseAuthClient";
 
 export const getMyUser = async (): Promise<TUser> => {
-  const response = await authenticatedApi.get<TApiResponse<TUser>>("/usuarios/me/");
+  const response =
+    await authenticatedApi.get<TApiResponse<TUser>>("/usuarios/me/");
+
   const success = getApiSuccessOrThrow(response.data, {
     contentRequired: true,
   });
@@ -22,11 +27,10 @@ export const getMyUser = async (): Promise<TUser> => {
 
 export const updateMyUser = async (
   payload: TUpdateUserDTO
-): Promise<TUser> => {
-  const response = await authenticatedApi.patch<TApiResponse<TUser>>(
-    "/usuarios/me/",
-    payload
-  );
+): Promise<TUpdateUserResponse> => {
+  const response = await authenticatedApi.patch<
+    TApiResponse<TUpdateUserResponse>
+  >("/usuarios/me/", payload);
 
   const success = getApiSuccessOrThrow(response.data, {
     contentRequired: true,
@@ -59,13 +63,26 @@ export const requestPasswordReset = async (
 
 export const updateMyEmail = async (
   payload: TUpdateEmailDTO
-): Promise<TApiSuccess<unknown | null>> => {
-  const response = await authenticatedApi.patch<TApiResponse<unknown>>(
-    "/usuarios/me/email",
-    payload
-  );
+): Promise<TApiSuccess<TEmailChangeRequestResponse>> => {
+  const response = await authenticatedApi.patch<
+    TApiResponse<TEmailChangeRequestResponse>
+  >("/usuarios/me/email", payload);
 
-  return getApiSuccessOrThrow(response.data);
+  return getApiSuccessOrThrow(response.data, {
+    contentRequired: true,
+  });
+};
+
+export const finalizeMyEmailChange = async (): Promise<
+  TApiSuccess<TFinalizeEmailChangeResponse>
+> => {
+  const response = await authenticatedApi.post<
+    TApiResponse<TFinalizeEmailChangeResponse>
+  >("/usuarios/me/email/finalize");
+
+  return getApiSuccessOrThrow(response.data, {
+    contentRequired: true,
+  });
 };
 
 export const createMyPassword = async (
