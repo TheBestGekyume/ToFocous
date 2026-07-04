@@ -177,13 +177,7 @@ export const ProfilePage = () => {
               onSave={handleUpdateEmail}
             />
 
-            {hasPassword === null ? (
-              <div className="flex flex-col gap-3 border-t border-secondary/50 pt-5">
-                <p className="text-sm text-primary/80">
-                  Verificando métodos de login <LoadingDots />
-                </p>
-              </div>
-            ) : hasPassword === false && hasGoogleAuth ? (
+            {!hasPassword && hasGoogleAuth ? (
               <CreatePasswordSection
                 createPassword={createPassword}
                 setCreatePassword={setCreatePassword}

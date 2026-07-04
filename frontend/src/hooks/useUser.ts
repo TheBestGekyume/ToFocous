@@ -1,13 +1,15 @@
 import { useCallback, useState } from "react";
-import type { TUpdateUserDTO, TUser } from "../types/TUser";
+import type {
+  TUpdateUserDTO,
+  TUpdateUserResponse,
+  TUser,
+} from "../types/TUser";
 import { getMyUser, updateMyUser } from "../services/users/userService";
 
 export const useUser = () => {
   const [user, setUser] = useState<TUser | null>(null);
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
-
-  // console.log("User", user);
 
   const fetchMyUser = useCallback(async () => {
     setLoading(true);
@@ -20,18 +22,29 @@ export const useUser = () => {
     }
   }, []);
 
-  const updateUser = useCallback(async (payload: TUpdateUserDTO) => {
-    setUpdating(true);
+  const updateUser = useCallback(
+    async (payload: TUpdateUserDTO): Promise<TUpdateUserResponse> => {
+      setUpdating(true);
 
-    try {
-      const updatedUser = await updateMyUser(payload);
-      setUser(updatedUser);
+      try {
+        const updatedUser = await updateMyUser(payload);
 
-      return updatedUser;
-    } finally {
-      setUpdating(false);
-    }
-  }, []);
+        setUser((currentUser) => {
+          if (!currentUser) return currentUser;
+
+          return {
+            ...currentUser,
+            ...updatedUser,
+          };
+        });
+
+        return updatedUser;
+      } finally {
+        setUpdating(false);
+      }
+    },
+    []
+  );
 
   return {
     user,
