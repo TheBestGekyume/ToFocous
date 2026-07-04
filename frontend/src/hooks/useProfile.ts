@@ -6,14 +6,12 @@ import {
   updateMyPassword,
   createMyPassword,
 } from "../services/users/userService";
-import { supabaseAuthClient } from "../services/auth/supabaseAuthClient";
 import { getApiErrorInfo } from "../utils/apiError";
+
 type ProfileFeedback = {
   type: "success" | "error";
   message: string;
 };
-
-
 
 export const useProfile = () => {
   const { user, loading, updating, fetchMyUser, updateUser } = useUser();
@@ -47,12 +45,14 @@ export const useProfile = () => {
 
   const [feedback, setFeedback] = useState<ProfileFeedback | null>(null);
 
-  const [hasPassword, setHasPassword] = useState<boolean | null>(null);
-  const [hasGoogleAuth, setHasGoogleAuth] = useState(false);
+  const [hasPasswordOverride, setHasPasswordOverride] =
+    useState<boolean | null>(null);
 
+  const hasPassword = hasPasswordOverride ?? user?.has_password ?? false;
+  const hasGoogleAuth = user?.has_google_auth ?? false;
 
   useEffect(() => {
-    fetchMyUser();
+    void fetchMyUser();
   }, [fetchMyUser]);
 
   useEffect(() => {
@@ -70,33 +70,13 @@ export const useProfile = () => {
   useEffect(() => {
     if (!user) return;
 
+    const userEmail = user.email ?? "";
+
     setName(user.name);
-
-    if (user.email) {
-      setEmail(user.email);
-      setNewEmail(user.email);
-      setResetEmail(user.email);
-    }
+    setEmail(userEmail);
+    setNewEmail(userEmail);
+    setResetEmail(userEmail);
   }, [user]);
-
-  useEffect(() => {
-    async function loadAuthInfo() {
-      const { data, error } = await supabaseAuthClient.auth.getUserIdentities();
-
-      if (error) {
-        setHasPassword(null);
-        return;
-      }
-
-      const providers = data.identities.map((identity) => identity.provider);
-
-      setHasPassword(providers.includes("email"));
-      setHasGoogleAuth(providers.includes("google"));
-    }
-
-    void loadAuthInfo();
-  }, []);
-
 
   const setErrorFeedback = (error: unknown, fallback: string) => {
     const errorInfo = getApiErrorInfo(error, fallback);
@@ -113,7 +93,6 @@ export const useProfile = () => {
       message: errorInfo.message,
     });
   };
-
 
   const handleCancelNameEdit = () => {
     if (!user) return;
@@ -302,15 +281,19 @@ export const useProfile = () => {
 
       setCreatePassword("");
       setConfirmCreatePassword("");
+      setHasPasswordOverride(true);
 
-      setHasPassword(true);
+      try {
+        await fetchMyUser();
+      } catch (error: unknown) {
+        console.error("Atualização de perfil após erro de criação de senha:", error);
+      }
     } catch (error: unknown) {
       setErrorFeedback(error, "Não foi possível criar a senha.");
     } finally {
       setIsCreatingPassword(false);
     }
   };
-
 
   return {
     userState: {
