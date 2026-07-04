@@ -33,8 +33,9 @@ FRONTEND_URL = settings.FRONTEND_URL
     "/me/",
     response_model=ApiResponse[UsuarioResponse],
 )
-def get_my_user(
+async def get_my_user(
     current_user=Depends(get_current_user),
+    access_token: str = Depends(get_bearer_token),
     supabase=Depends(get_db),
 ):
     try:
@@ -50,12 +51,23 @@ def get_my_user(
                 error_code="USER_NOT_FOUND",
             )
 
+        auth_methods_result = await get_user_auth_methods(access_token)
+
+        if auth_methods_result["error"]:
+            raise AppException(
+                message=auth_methods_result["message"],
+                http_code=auth_methods_result["http_code"],
+                error_code="USER_AUTH_METHODS_GET_ERROR",
+            )
+
         return success(
             content=UsuarioResponse(
                 id=usuario["id"],
                 name=usuario["name"],
                 email=usuario.get("email"),
                 created_at=usuario.get("created_at"),
+                has_google_auth=auth_methods_result["has_google_auth"],
+                has_password=auth_methods_result["has_password"],
             ),
             message="Usuário encontrado com sucesso.",
         )
@@ -720,4 +732,71 @@ async def unlink_google_identity_if_possible(access_token: str) -> dict:
             "google_unlinked": True,
             "reason": "Login Google desvinculado com sucesso.",
         },
+    }
+
+
+async def get_user_auth_methods(access_token: str) -> dict:
+    url = f"{SUPABASE_URL}/auth/v1/user"
+
+    headers = {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+    }
+
+    async with httpx.AsyncClient(timeout=20) as client:
+        response = await client.get(
+            url,
+            headers=headers,
+        )
+
+    if response.status_code >= 400:
+        return {
+            "error": True,
+            "http_code": response.status_code,
+            "message": str(safe_response_detail(response)),
+            "has_google_auth": False,
+            "has_password": False,
+        }
+
+    data = response.json()
+
+    app_metadata = data.get("app_metadata") or {}
+    providers = app_metadata.get("providers") or []
+
+    providers = [
+        str(provider).strip().lower()
+        for provider in providers
+        if provider
+    ]
+
+    has_google_auth = "google" in providers
+
+    has_password = (
+        "email" in providers
+        or "password" in providers
+    )
+
+    if not providers:
+        identities = data.get("identities") or []
+
+        identity_providers = [
+            str(identity.get("provider")).strip().lower()
+            for identity in identities
+            if identity.get("provider")
+        ]
+
+        has_google_auth = "google" in identity_providers
+
+        has_password = (
+            "email" in identity_providers
+            or "password" in identity_providers
+        )
+
+    return {
+        "error": False,
+        "http_code": 200,
+        "message": "Métodos de autenticação encontrados com sucesso.",
+        "has_google_auth": has_google_auth,
+        "has_password": has_password,
     }
