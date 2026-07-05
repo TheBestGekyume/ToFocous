@@ -24,6 +24,39 @@ import { isCanceledRequestError, logApiError } from "../utils/apiError";
 type TaskRealtimePayload = RealtimePostgresChangesPayload<TTask>;
 type SubTaskRealtimePayload = RealtimePostgresChangesPayload<TSubTask>;
 
+const upsertSubTaskInTasks = (
+  currentTasks: TTask[],
+  taskId: string,
+  incomingSubTask: TSubTask
+): TTask[] =>
+  currentTasks.map((task) => {
+    if (task.id !== taskId) {
+      return task;
+    }
+
+    const currentSubTasks = task.subtasks ?? [];
+
+    const alreadyExists = currentSubTasks.some(
+      (subtask) => subtask.id === incomingSubTask.id
+    );
+
+    if (!alreadyExists) {
+      return {
+        ...task,
+        subtasks: [...currentSubTasks, incomingSubTask],
+      };
+    }
+
+    return {
+      ...task,
+      subtasks: currentSubTasks.map((subtask) =>
+        subtask.id === incomingSubTask.id
+          ? { ...subtask, ...incomingSubTask }
+          : subtask
+      ),
+    };
+  });
+
 export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   const [tasks, setTasks] = useState<TTask[]>([]);
   const [loading, setLoading] = useState(false);
@@ -94,12 +127,37 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   const createTask = useCallback(async (payload: TCreateTaskDTO) => {
     try {
       const created = await taskService.createTask(payload);
-      setTasks((prev) => [created, ...prev]);
+
+      setTasks((previousTasks) => {
+        const alreadyExists = previousTasks.some(
+          (task) => task.id === created.id
+        );
+
+        if (!alreadyExists) {
+          return [
+            {
+              ...created,
+              subtasks: created.subtasks ?? [],
+            },
+            ...previousTasks,
+          ];
+        }
+
+        return previousTasks.map((task) =>
+          task.id === created.id
+            ? {
+                ...task,
+                ...created,
+                subtasks: task.subtasks ?? created.subtasks ?? [],
+              }
+            : task
+        );
+      });
 
       return created;
     } catch (error: unknown) {
       logApiError("Erro ao criar task", error);
-      throw error;
+      throw error;  
     }
   }, []);
 
@@ -158,15 +216,8 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const created = await taskService.createSubTask(taskId, payload);
 
-        setTasks((prev) =>
-          prev.map((task) =>
-            task.id === taskId
-              ? {
-                  ...task,
-                  subtasks: [...(task.subtasks ?? []), created],
-                }
-              : task
-          )
+        setTasks((previousTasks) =>
+          upsertSubTaskInTasks(previousTasks, taskId, created)
         );
 
         return created;
@@ -352,31 +403,12 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const upsertSubTaskFromRealtime = useCallback((incomingSubTask: TSubTask) => {
-    setTasks((prev) =>
-      prev.map((task) => {
-        if (task.id !== incomingSubTask.task_id) return task;
-
-        const currentSubTasks = task.subtasks ?? [];
-        const alreadyExists = currentSubTasks.some(
-          (subtask) => subtask.id === incomingSubTask.id
-        );
-
-        if (!alreadyExists) {
-          return {
-            ...task,
-            subtasks: [...currentSubTasks, incomingSubTask],
-          };
-        }
-
-        return {
-          ...task,
-          subtasks: currentSubTasks.map((subtask) =>
-            subtask.id === incomingSubTask.id
-              ? { ...subtask, ...incomingSubTask }
-              : subtask
-          ),
-        };
-      })
+    setTasks((previousTasks) =>
+      upsertSubTaskInTasks(
+        previousTasks,
+        incomingSubTask.task_id,
+        incomingSubTask
+      )
     );
   }, []);
 
