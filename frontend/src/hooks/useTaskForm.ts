@@ -1,227 +1,179 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { useTasks } from "./useTasks";
 import type {
-    TTask,
-    TSubTask,
-    TCreateTaskDTO,
-    TCreateSubTaskDTO,
-    TUpdateTaskDTO,
-    TUpdateSubTaskDTO,
+  TTask,
+  TSubTask,
+  TCreateTaskDTO,
+  TCreateSubTaskDTO,
 } from "../types/TTask";
-import { useParams } from "react-router-dom";
 
 type UseTaskFormProps = {
-    initialTask?: TTask | TSubTask;
-    parentTask?: TTask;
-    isCreating: boolean;
-    isCreatingSubTask?: boolean;
-    onClose?: () => void;
+  parentTask?: TTask;
+  isCreatingSubTask?: boolean;
+  onClose?: () => void;
 };
 
 type TaskFormData = Omit<TTask, "subtasks">;
 type SubTaskFormData = TSubTask;
 
-type FormData =
-    | { kind: "task"; data: TaskFormData }
-    | { kind: "subtask"; data: SubTaskFormData };
+type TaskFormState =
+  | {
+      kind: "task";
+      data: TaskFormData;
+    }
+  | {
+      kind: "subtask";
+      data: SubTaskFormData;
+    };
 
 const emptyTaskForm: TaskFormData = {
-    id: "",
-    project_id: "",
-    title: "",
-    description: "",
-    due_date: "",
-    priority: "low",
-    status: "unstarted",
-    start_date: "",
-    start_time: "",
-    due_time: "",
+  id: "",
+  project_id: "",
+  title: "",
+  description: "",
+  due_date: "",
+  priority: "low",
+  status: "unstarted",
+  start_date: "",
+  start_time: "",
+  due_time: "",
 };
 
 const emptySubTaskForm: SubTaskFormData = {
-    id: "",
-    title: "",
-    description: "",
-    due_date: "",
-    priority: "low",
-    status: "unstarted",
-    task_id: "",
-    start_date: "",
-    start_time: "",
-    due_time: "",
+  id: "",
+  task_id: "",
+  title: "",
+  description: "",
+  due_date: "",
+  priority: "low",
+  status: "unstarted",
+  start_date: "",
+  start_time: "",
+  due_time: "",
+};
+
+const createEmptyForm = (
+  isCreatingSubTask: boolean
+): TaskFormState => {
+  if (isCreatingSubTask) {
+    return {
+      kind: "subtask",
+      data: { ...emptySubTaskForm },
+    };
+  }
+
+  return {
+    kind: "task",
+    data: { ...emptyTaskForm },
+  };
 };
 
 export const useTaskForm = ({
-    initialTask,
-    parentTask,
-    isCreating,
-    isCreatingSubTask = false,
-    onClose,
+  parentTask,
+  isCreatingSubTask = false,
+  onClose,
 }: UseTaskFormProps) => {
+  const { createTask, createSubTask } = useTasks();
+  const { projectId } = useParams();
 
-    const {
-        createTask,
-        updateTask,
-        createSubTask,
-        updateSubTask,
-    } = useTasks();
+  const [formData, setFormData] = useState<TaskFormState>(() =>
+    createEmptyForm(isCreatingSubTask)
+  );
 
-    const { projectId } = useParams();
+  const normalizeCreateTaskPayload = (
+    data: TaskFormData,
+    currentProjectId: string
+  ): TCreateTaskDTO => ({
+    title: data.title,
+    due_date: data.due_date,
+    project_id: currentProjectId,
+    status: "unstarted",
+    description: data.description.trim() || undefined,
+    priority: data.priority || undefined,
+    start_date: data.start_date || null,
+    start_time: data.start_time || null,
+    due_time: data.due_time || null,
+  });
 
-    const [formData, setFormData] = useState<FormData>(() =>
-        isCreatingSubTask
-            ? { kind: "subtask", data: emptySubTaskForm }
-            : { kind: "task", data: emptyTaskForm }
-    );
+  const normalizeCreateSubTaskPayload = (
+    data: SubTaskFormData
+  ): TCreateSubTaskDTO => ({
+    title: data.title,
+    due_date: data.due_date,
+    status: "unstarted",
+    description: data.description.trim() || undefined,
+    priority: data.priority || undefined,
+    start_date: data.start_date || null,
+    start_time: data.start_time || null,
+    due_time: data.due_time || null,
+  });
 
-    useEffect(() => {
-        if (!isCreating && initialTask) {
-            if (isCreatingSubTask) {
-                setFormData({
-                    kind: "subtask",
-                    data: { ...(initialTask as TSubTask) },
-                });
-            } else {
-                setFormData({
-                    kind: "task",
-                    data: { ...(initialTask as TaskFormData) },
-                });
-            }
+  const handleChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = event.target;
+
+    setFormData((previousForm) => {
+      if (previousForm.kind === "task") {
+        return {
+          kind: "task",
+          data: {
+            ...previousForm.data,
+            [name]: value,
+          },
+        };
+      }
+
+      return {
+        kind: "subtask",
+        data: {
+          ...previousForm.data,
+          [name]: value,
+        },
+      };
+    });
+  };
+
+  const handleSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+
+    try {
+      if (formData.kind === "subtask") {
+        if (!parentTask) {
+          throw new Error(
+            "A tarefa principal não foi informada para a subtarefa."
+          );
         }
-    }, [isCreating, isCreatingSubTask, initialTask]);
 
-    const getEmptyForm = (isSubTask: boolean): FormData =>
-        isSubTask
-            ? { kind: "subtask", data: emptySubTaskForm }
-            : { kind: "task", data: emptyTaskForm };
-
-    const normalizeCreateTaskPayload = (data: TaskFormData): TCreateTaskDTO => ({
-        title: data.title,
-        due_date: data.due_date,
-        project_id: projectId!,
-        status: "unstarted",
-
-        description: data.description.trim() || undefined,
-        priority: data.priority || undefined,
-        start_date: data.start_date || null,
-        start_time: data.start_time || null,
-        due_time: data.due_time || null,
-    });
-
-    const normalizeCreateSubTaskPayload = (
-        data: TSubTask
-    ): TCreateSubTaskDTO => ({
-        title: data.title,
-        due_date: data.due_date,
-        status: "unstarted",
-
-        description: data.description.trim() || undefined,
-        priority: data.priority || undefined,
-        start_date: data.start_date || null,
-        start_time: data.start_time || null,
-        due_time: data.due_time || null,
-    });
-
-    const normalizeUpdateTaskPayload = (
-        data: TaskFormData
-    ): TUpdateTaskDTO => ({
-        title: data.title,
-        description: data.description.trim(),
-        due_date: data.due_date,
-        priority: data.priority,
-        status: data.status,
-        start_date: data.start_date || null,
-        start_time: data.start_time || null,
-        due_time: data.due_time || null,
-    });
-
-    const normalizeUpdateSubTaskPayload = (
-        data: TSubTask
-    ): TUpdateSubTaskDTO => ({
-        title: data.title,
-        description: data.description.trim(),
-        due_date: data.due_date,
-        priority: data.priority,
-        status: data.status,
-        start_date: data.start_date || null,
-        start_time: data.start_time || null,
-        due_time: data.due_time || null,
-    });
-
-    const handleChange = (
-        e: React.ChangeEvent<
-            HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-        >
-    ) => {
-        const { name, value } = e.target;
-
-        setFormData((prev) => {
-            if (prev.kind === "task") {
-                return {
-                    kind: "task",
-                    data: {
-                        ...prev.data,
-                        [name]: value,
-                    },
-                };
-            }
-
-            return {
-                kind: "subtask",
-                data: {
-                    ...prev.data,
-                    [name]: value,
-                },
-            };
-        });
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        try {
-            if (formData.kind === "subtask") {
-                if (!parentTask) return;
-
-                if (isCreating) {
-                    await createSubTask(
-                        parentTask.id,
-                        normalizeCreateSubTaskPayload(formData.data)
-                    );
-                } else {
-                    await updateSubTask(
-                        parentTask.id,
-                        formData.data.id,
-                        normalizeUpdateSubTaskPayload(formData.data)
-                    );
-                }
-            }
-
-            if (formData.kind === "task") {
-                if (isCreating) {
-                    if (!projectId) {
-                        throw new Error("Project ID não encontrado");
-                    }
-
-                    await createTask(normalizeCreateTaskPayload(formData.data));
-                } else {
-                    await updateTask(
-                        formData.data.id,
-                        normalizeUpdateTaskPayload(formData.data)
-                    );
-                }
-            }
-
-            setFormData(getEmptyForm(isCreatingSubTask));
-            onClose?.();
-        } catch (err) {
-            console.error("Erro ao salvar tarefa", err);
+        await createSubTask(
+          parentTask.id,
+          normalizeCreateSubTaskPayload(formData.data)
+        );
+      } else {
+        if (!projectId) {
+          throw new Error("Project ID não encontrado.");
         }
-    };
 
-    return {
-        formData: formData.data,
-        handleChange,
-        handleSubmit,
-    };
+        await createTask(
+          normalizeCreateTaskPayload(formData.data, projectId)
+        );
+      }
+
+      setFormData(createEmptyForm(isCreatingSubTask));
+      onClose?.();
+    } catch (error: unknown) {
+      console.error("Erro ao criar tarefa:", error);
+    }
+  };
+
+  return {
+    formData: formData.data,
+    handleChange,
+    handleSubmit,
+  };
 };
