@@ -45,7 +45,6 @@ export const TaskForm = ({
 }: TaskFormProps) => {
   const { formData, handleChange, handleSubmit } = useTaskForm({
     parentTask,
-    isCreating: true,
     isCreatingSubTask,
     onClose: onSuccess,
   });
@@ -73,7 +72,6 @@ export const TaskForm = ({
     }
   };
 
-  
   return (
     <>
       <LoadingOverlay show={loading} />
@@ -81,7 +79,7 @@ export const TaskForm = ({
       <form onSubmit={submitForm} className="flex flex-wrap items-start gap-4">
         <fieldset className="flex flex-col flex-1 min-w-[250px]">
           <label htmlFor="title" className="font-semibold mb-1">
-            Título
+            Título <span className="text-red-500">*</span>
           </label>
 
           <input
@@ -104,7 +102,7 @@ export const TaskForm = ({
         {!isCreatingSubTask && (
           <fieldset className="flex flex-col flex-1 min-w-[250px]">
             <label htmlFor="priority" className="font-semibold mb-1">
-              Prioridade
+              Prioridade <span className="text-red-500">*</span>
             </label>
 
             <select
@@ -122,7 +120,9 @@ export const TaskForm = ({
         )}
 
         <fieldset className="flex flex-col">
-          <label className="font-semibold mb-1">Data</label>
+          <label className="font-semibold mb-1">
+            Data de Prazo <span className="text-red-500">*</span>
+          </label>
 
           <div className={`relative ${datePickerClass}`}>
             <DatePicker
@@ -148,7 +148,7 @@ export const TaskForm = ({
 
         <fieldset className="flex flex-col basis-full min-w-40">
           <label htmlFor="description" className="font-semibold mb-1">
-            Descrição
+            Descrição <span className="text-zinc-400">(Opcional)</span>
           </label>
 
           <textarea
