@@ -156,7 +156,11 @@ export const SubTasksPage = () => {
   }
 
   if (notFound || !task || !currentProject) {
-    return <p className="text-center mt-10">Tarefa não encontrada</p>;
+    return (
+      <div className="flex items-center justify-center w-full h-full">
+        <p className="text-center mt-10">Tarefa não encontrada.</p>
+      </div>
+    );
   }
 
   return (
