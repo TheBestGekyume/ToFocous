@@ -69,6 +69,31 @@ button {
   cursor: pointer;
 }
 
+
+* {
+  scrollbar-color: var(--color-secondary) black;
+}
+
+*::-webkit-scrollbar {
+  width: 100px;
+  height: 100px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--color-background-body);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-secondary);
+  border: 2px solid var(--color-background-body);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-primary);
+}
+
+
 .font-hewitt-bold {
   font-family: "Hewitt", sans-serif;
   font-weight: 700;

@@ -115,6 +115,22 @@ export const TaskPage = () => {
       <p className="mt-10 text-center text-zinc-500">Projeto não encontrado.</p>
     );
   }
+  const projectTitle = currentProject.title.trim();
+  const titleLimit = 32;
+  const isTitleTruncated = projectTitle.length > titleLimit;
+
+  const formattedProjectTitle = (() => {
+    if (!isTitleTruncated) {
+      return projectTitle;
+    }
+
+    const partialTitle = projectTitle.slice(0, titleLimit);
+    const lastSpaceIndex = partialTitle.lastIndexOf(" ");
+
+    return lastSpaceIndex > 0
+      ? partialTitle.slice(0, lastSpaceIndex).trimEnd()
+      : partialTitle.trimEnd();
+  })();
 
   return (
     <div className="flex flex-col w-full max-w-5xl mx-auto pb-8">
@@ -128,7 +144,7 @@ export const TaskPage = () => {
 
       <div
         className="flex flex-col bg-background-header/50 
-        border-2 border-secondary rounded-xl p-5 pb-8 gap-8"
+            border-2 border-secondary rounded-xl p-5 pb-8 gap-8"
       >
         <div className="w-full transition-all duration-300">
           <TaskForm />
@@ -138,9 +154,10 @@ export const TaskPage = () => {
           <div className="px-2">
             <div className="flex flex-wrap justify-between items-center pb-4">
               <h4 className="text-2xl font-medium text-accent">
-                <span className="text-white">Tarefas de</span>{" "}
-                {currentProject.title[0].toUpperCase() +
-                  currentProject.title.substring(1)}
+                <span className="text-text">Tarefas de</span>{" "}
+                {formattedProjectTitle.charAt(0).toUpperCase() +
+                  formattedProjectTitle.slice(1)}
+                {isTitleTruncated && <span className="text-text">...</span>}
               </h4>
 
               <div className="flex flex-wrap gap-4">
@@ -159,7 +176,7 @@ export const TaskPage = () => {
         isOpen={!!editingProject}
         onClose={closeEditModal}
         title="Editar Projeto"
-        size="md"
+        size="lg"
       >
         {editingProject && (
           <ProjectForm

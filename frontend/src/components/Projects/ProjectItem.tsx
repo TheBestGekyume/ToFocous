@@ -26,6 +26,15 @@ export const ProjectItem = ({
   const { deleteProject, fetchProjects } = useProjects();
 
   const [showUsersModal, setShowUsersModal] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
+  const descriptionLimit = 200;
+  const hasLongDescription = project.description.length > descriptionLimit;
+
+  const visibleDescription =
+    singleProjectItem && hasLongDescription && !showFullDescription
+      ? `${project.description.slice(0, descriptionLimit).trimEnd()}...`
+      : project.description;
 
   const isOwner = project.is_owner;
 
@@ -41,14 +50,23 @@ export const ProjectItem = ({
   return (
     <>
       <div
-        className={`relative h-full min-h-28 p-4 rounded-xl shadow-md duration-300 hover:scale-[1.02] cursor-pointer ${
-          singleProjectItem ? "w-fit max-w-full mx-auto flex items-center" : ""
-        }`}
+        className={`relative h-full min-h-28 p-4 rounded-xl 
+          shadow-md duration-300 cursor-pointer border-2
+          ${
+            singleProjectItem
+              ? "w-fit max-w-full mx-auto flex items-center hover:shadow-[0px_0px_15px_1px_#fff]"
+              : "hover:scale-[1.02]"
+          }`}
         style={{
           backgroundColor: project.color + "75",
-          border: `2px solid ${project.color}`,
+          borderColor: `${project.color}`,
         }}
         onClick={handleProjectClick}
+        title={
+          singleProjectItem
+            ? `Abrir Usuários do Projeto ${project.title}`
+            : `Abrir Projeto ${project.title}`
+        }
       >
         <div className="flex h-full justify-between gap-3">
           <div className="flex min-w-0 items-center">
@@ -92,13 +110,28 @@ export const ProjectItem = ({
                 {project.title[0].toUpperCase() + project.title.substring(1)}
               </h2>
 
-              <p
-                className={`text-sm text-zinc-300 ${
-                  singleProjectItem ? "text-wrap" : "line-clamp-2"
-                }`}
-              >
-                {project.description}
-              </p>
+              <div className="text-sm text-zinc-300">
+                <p
+                  className={`whitespace-pre-wrap break-words ${
+                    singleProjectItem ? "" : "line-clamp-2"
+                  }`}
+                >
+                  {visibleDescription}
+                </p>
+
+                {singleProjectItem && hasLongDescription && (
+                  <button
+                    type="button"
+                    className="mt-2 font-semibold text-primary transition hover:text-accent duration-150"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setShowFullDescription((current) => !current);
+                    }}
+                  >
+                    {showFullDescription ? "Ver menos" : "Ver mais"}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
