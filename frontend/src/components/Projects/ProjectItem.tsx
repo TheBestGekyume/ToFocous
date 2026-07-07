@@ -94,9 +94,9 @@ export const ProjectItem = ({
                 title={isOwner ? "Gerenciar usuários" : "Ver usuários"}
               >
                 {isOwner ? (
-                  <UserRoundCog size={18} />
+                  <UserRoundCog size={22} />
                 ) : (
-                  <UsersRound size={18} />
+                  <UsersRound size={22} />
                 )}
               </button>
             )}
@@ -146,7 +146,7 @@ export const ProjectItem = ({
                 }}
                 title="Editar projeto"
               >
-                <Pencil size={18} />
+                <Pencil size={22} />
               </button>
 
               <button
@@ -165,7 +165,7 @@ export const ProjectItem = ({
                 }}
                 title="Excluir projeto"
               >
-                <Trash2 size={18} className="text-white" />
+                <Trash2 size={22} className="text-white" />
               </button>
             </div>
           )}
