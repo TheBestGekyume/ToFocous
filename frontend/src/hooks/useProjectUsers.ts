@@ -27,26 +27,29 @@ export const useProjectUsers = (projectId: string) => {
   }, [projectId]);
 
   const addProjectUser = useCallback(
-    async (userId: string): Promise<TProjectUser | null> => {
+    async (userId: string): Promise<string | null> => {
       if (!projectId) return null;
 
       try {
-        const created = await projectUserService.addProjectUser({
+        const result = await projectUserService.addProjectUser({
           project_id: projectId,
           user_id: userId,
         });
 
-        setProjectUsers((prev) => {
-          const alreadyExists = prev.some(
-            (projectUser) => projectUser.user_id === created.user_id
+        setProjectUsers((previousProjectUsers) => {
+          const alreadyExists = previousProjectUsers.some(
+            (projectUser) =>
+              projectUser.user_id === result.content.user_id
           );
 
-          if (alreadyExists) return prev;
+          if (alreadyExists) {
+            return previousProjectUsers;
+          }
 
-          return [...prev, created];
+          return [...previousProjectUsers, result.content];
         });
 
-        return created;
+        return result.message;
       } catch (error: unknown) {
         logApiError("Erro ao adicionar usuário ao projeto", error);
         throw error;
@@ -56,18 +59,22 @@ export const useProjectUsers = (projectId: string) => {
   );
 
   const removeProjectUser = useCallback(
-    async (userId: string): Promise<void> => {
-      if (!projectId) return;
+    async (userId: string): Promise<string | null> => {
+      if (!projectId) return null;
 
       try {
-        await projectUserService.removeProjectUser({
+        const message = await projectUserService.removeProjectUser({
           project_id: projectId,
           user_id: userId,
         });
 
-        setProjectUsers((prev) =>
-          prev.filter((projectUser) => projectUser.user_id !== userId)
+        setProjectUsers((previousProjectUsers) =>
+          previousProjectUsers.filter(
+            (projectUser) => projectUser.user_id !== userId
+          )
         );
+
+        return message;
       } catch (error: unknown) {
         logApiError("Erro ao remover usuário do projeto", error);
         throw error;
@@ -76,11 +83,11 @@ export const useProjectUsers = (projectId: string) => {
     [projectId]
   );
 
-  const leaveProject = useCallback(async (): Promise<void> => {
-    if (!projectId) return;
+  const leaveProject = useCallback(async (): Promise<string | null> => {
+    if (!projectId) return null;
 
     try {
-      await projectUserService.leaveProject(projectId);
+      return await projectUserService.leaveProject(projectId);
     } catch (error: unknown) {
       logApiError("Erro ao sair do projeto", error);
       throw error;
