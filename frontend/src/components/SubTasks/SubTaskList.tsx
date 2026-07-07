@@ -17,15 +17,18 @@ export const SubTaskList = ({
 }: Props) => {
   if (!task.subtasks || task.subtasks.length === 0) {
     return (
-      <p className="text-zinc-500 text-center italic py-5">
-        Nenhuma SubTarefa adicionada ainda. <br />
-        Clique em <span className="text-green-300/70 font-medium"> + SubTarefa </span>para adicionar!
+      <p className="py-5 text-center italic text-zinc-500">
+        Nenhuma SubTarefa adicionada ainda.
+        <br />
+        Clique em{" "}
+        <span className="font-medium text-green-300/70">+ SubTarefa</span> para
+        adicionar!
       </p>
     );
   }
 
   return (
-    <section className="flex flex-col gap-2">
+    <section className="flex w-full min-w-0 flex-col gap-3">
       {task.subtasks.map((subtask) => (
         <SubTaskItem
           key={subtask.id}
