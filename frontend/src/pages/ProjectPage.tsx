@@ -46,7 +46,7 @@ export const ProjectsPage = () => {
           isOpen={openCreate}
           onClose={closeCreateModal}
           title="Novo Projeto"
-          size="md"
+          size="lg"
         >
           <ProjectForm mode="create" onClose={closeCreateModal} />
         </Modal>
@@ -55,7 +55,7 @@ export const ProjectsPage = () => {
           isOpen={!!editingProject}
           onClose={closeEditModal}
           title="Editar Projeto"
-          size="md"
+          size="lg"
         >
           {editingProject && (
             <ProjectForm

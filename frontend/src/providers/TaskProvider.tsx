@@ -61,6 +61,10 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   const [tasks, setTasks] = useState<TTask[]>([]);
   const [loading, setLoading] = useState(false);
   const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
+
+  const assignmentRefreshTimeoutRef = useRef<number | null>(null);
+  const realtimeProjectIdRef = useRef<string | null>(null);
+
   const [assignments, setAssignments] = useState<TTaskAssignment[]>([]);
 
   const [sortConfig, setSortConfig] = useState<{
@@ -157,7 +161,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       return created;
     } catch (error: unknown) {
       logApiError("Erro ao criar task", error);
-      throw error;  
+      throw error;
     }
   }, []);
 
@@ -306,6 +310,39 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     []
   );
 
+  const refreshProjectAssignmentsSilently = useCallback(
+    async (projectId: string): Promise<void> => {
+      try {
+        const data =
+          await taskAssignmentService.getProjectAssignments(projectId);
+
+        if (realtimeProjectIdRef.current !== projectId) {
+          return;
+        }
+
+        setAssignments(data);
+      } catch (error: unknown) {
+        logApiError("Erro ao sincronizar responsáveis em tempo real", error);
+      }
+    },
+    []
+  );
+
+  const scheduleProjectAssignmentsRefresh = useCallback(
+    (projectId: string) => {
+      if (assignmentRefreshTimeoutRef.current !== null) {
+        window.clearTimeout(assignmentRefreshTimeoutRef.current);
+      }
+
+      assignmentRefreshTimeoutRef.current = window.setTimeout(() => {
+        assignmentRefreshTimeoutRef.current = null;
+
+        void refreshProjectAssignmentsSilently(projectId);
+      }, 150);
+    },
+    [refreshProjectAssignmentsSilently]
+  );
+
   const assignUserToTask = useCallback(
     async (taskId: string, assignedUserId: string) => {
       try {
@@ -425,19 +462,22 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
 
   const subscribeToProjectRealtime = useCallback(
     (projectId: string) => {
-      // console.log("[TaskProvider] subscribeToProjectRealtime chamado:", projectId);
       const token = getAccessToken();
 
-      // console.log("[Realtime] iniciando subscribe do projeto:", projectId);
-      // console.log("[Realtime] token existe?", Boolean(token));
+      realtimeProjectIdRef.current = projectId;
 
       if (token) {
         supabaseRealtimeClient.realtime.setAuth(token);
       }
 
+      if (assignmentRefreshTimeoutRef.current !== null) {
+        window.clearTimeout(assignmentRefreshTimeoutRef.current);
+        assignmentRefreshTimeoutRef.current = null;
+      }
+
       if (realtimeChannelRef.current) {
-        // console.log("[Realtime] removendo canal anterior");
-        supabaseRealtimeClient.removeChannel(realtimeChannelRef.current);
+        void supabaseRealtimeClient.removeChannel(realtimeChannelRef.current);
+
         realtimeChannelRef.current = null;
       }
 
@@ -452,8 +492,6 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
             filter: `project_id=eq.${projectId}`,
           },
           (payload: TaskRealtimePayload) => {
-            // console.log("[Realtime] evento em tasks:", payload);
-
             if (payload.eventType === "DELETE") {
               const deletedTaskId = payload.old.id;
 
@@ -475,8 +513,6 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
             table: "subtasks",
           },
           (payload: SubTaskRealtimePayload) => {
-            // console.log("[Realtime] evento em subtasks:", payload);
-
             if (payload.eventType === "DELETE") {
               const deletedSubTaskId = payload.old.id;
 
@@ -490,9 +526,18 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
             upsertSubTaskFromRealtime(payload.new);
           }
         )
-        .subscribe((status, err) => {
-          // console.log("[Realtime] status:", status, (err || "Nenhum erro detectado"));
-
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "task_assignments",
+          },
+          () => {
+            scheduleProjectAssignmentsRefresh(projectId);
+          }
+        )
+        .subscribe((status, error) => {
           if (status === "SUBSCRIBED") {
             console.log("[Realtime] conectado no projeto:", projectId);
           }
@@ -501,7 +546,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
             console.error(
               "[Realtime] erro no canal do projeto:",
               projectId,
-              err
+              error
             );
           }
 
@@ -518,7 +563,18 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
 
       return () => {
         console.log("[Realtime] removendo canal do projeto:", projectId);
-        supabaseRealtimeClient.removeChannel(channel);
+
+        if (assignmentRefreshTimeoutRef.current !== null) {
+          window.clearTimeout(assignmentRefreshTimeoutRef.current);
+
+          assignmentRefreshTimeoutRef.current = null;
+        }
+
+        if (realtimeProjectIdRef.current === projectId) {
+          realtimeProjectIdRef.current = null;
+        }
+
+        void supabaseRealtimeClient.removeChannel(channel);
 
         if (realtimeChannelRef.current === channel) {
           realtimeChannelRef.current = null;
@@ -530,6 +586,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       removeTaskFromRealtime,
       upsertSubTaskFromRealtime,
       upsertTaskFromRealtime,
+      scheduleProjectAssignmentsRefresh,
     ]
   );
 

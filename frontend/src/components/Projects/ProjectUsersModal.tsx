@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
 import { LogOut, Trash2, UsersRound, UserRoundCog } from "lucide-react";
-import { useProjectUsers } from "../../hooks/useProjectUsers";
 import { LoadingDots } from "../_Common/LoadingDots";
 import { Modal } from "../_Common/Modal";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
+import { FeedbackToast } from "../_Common/FeedbackToast";
+import { useProjectUsersModal } from "../../hooks/useProjectUsersModal";
 
 type Props = {
   isOpen: boolean;
@@ -25,81 +25,53 @@ export const ProjectUsersModal = ({
   const {
     projectUsers,
     loading,
-    fetchProjectUsers,
-    addProjectUser,
-    removeProjectUser,
-    leaveProject,
-  } = useProjectUsers(projectId);
-
-  const [userId, setUserId] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [leaving, setLeaving] = useState(false);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    fetchProjectUsers();
-  }, [isOpen, fetchProjectUsers]);
-
-  const handleAddUser = async () => {
-    const trimmedUserId = userId.trim();
-
-    if (!trimmedUserId || !isOwner) return;
-
-    setSubmitting(true);
-
-    try {
-      await addProjectUser(trimmedUserId);
-      setUserId("");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleRemoveUser = async (targetUserId: string) => {
-    if (!isOwner) return;
-
-    const confirmed = confirm("Remover este usuário do projeto?");
-
-    if (!confirmed) return;
-
-    await removeProjectUser(targetUserId);
-  };
-
-  const handleLeaveProject = async () => {
-    if (isOwner) return;
-
-    const confirmed = confirm("Deseja sair deste projeto?");
-
-    if (!confirmed) return;
-
-    setLeaving(true);
-
-    try {
-      await leaveProject();
-      onLeaveProject?.();
-      onClose();
-    } finally {
-      setLeaving(false);
-    }
-  };
+    userId,
+    setUserId,
+    submitting,
+    leaving,
+    feedback,
+    handleAddUser,
+    handleRemoveUser,
+    handleLeaveProject,
+    handleClose,
+  } = useProjectUsersModal({
+    isOpen,
+    projectId,
+    isOwner,
+    onClose,
+    onLeaveProject,
+  });
 
   return (
     <>
       <LoadingOverlay show={loading} showOnlyAfterDelay />
 
+      {feedback && (
+        <FeedbackToast
+          type={feedback.type}
+          message={feedback.message}
+        />
+      )}
+
       <Modal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         title="Usuários do projeto"
         subtitle={projectTitle}
         size="sm"
       >
         <div className="flex flex-col gap-5">
           <div className="flex items-center gap-2 text-primary">
-            {isOwner ? <UserRoundCog size={22} /> : <UsersRound size={22} />}
+            {isOwner ? (
+              <UserRoundCog size={22} />
+            ) : (
+              <UsersRound size={22} />
+            )}
+
             <span className="font-semibold">
-              {isOwner ? "Gerenciar usuários" : "Usuários do projeto"}
+              {isOwner
+                ? "Gerenciar usuários"
+                : "Usuários do projeto"}
             </span>
           </div>
 
@@ -109,10 +81,12 @@ export const ProjectUsersModal = ({
                 value={userId}
                 onChange={(event) => setUserId(event.target.value)}
                 placeholder="ID do usuário"
+                disabled={submitting}
                 className="
-                  w-full rounded-md border border-transparent bg-zinc-800
-                  p-2 text-text outline-none transition focus:border-accent
-                  hover:bg-zinc-700 focus:bg-zinc-900
+                  w-full rounded-md border border-transparent
+                  bg-zinc-800 p-2 text-text outline-none transition
+                  hover:bg-zinc-700 focus:border-accent focus:bg-zinc-900
+                  disabled:cursor-not-allowed disabled:opacity-50
                 "
               />
 
@@ -121,11 +95,12 @@ export const ProjectUsersModal = ({
                 onClick={handleAddUser}
                 disabled={submitting || !userId.trim()}
                 className="
-                  rounded-md bg-accent px-4 py-2 font-semibold text-white
-                  transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50
+                  rounded-md bg-accent px-4 py-2 font-semibold
+                  text-white transition hover:opacity-80
+                  disabled:cursor-not-allowed disabled:opacity-50
                 "
               >
-                Adicionar
+                {submitting ? "Adicionando..." : "Adicionar"}
               </button>
             </div>
           )}
@@ -144,8 +119,9 @@ export const ProjectUsersModal = ({
                 <div
                   key={projectUser.id}
                   className="
-                    flex items-center justify-between gap-3 rounded-md
-                    border border-secondary/20 bg-background-body p-3
+                    flex items-center justify-between gap-3
+                    rounded-md border border-secondary/20
+                    bg-background-body p-3
                   "
                 >
                   <div className="min-w-0">
@@ -161,10 +137,12 @@ export const ProjectUsersModal = ({
                   {isOwner && (
                     <button
                       type="button"
-                      onClick={() => handleRemoveUser(projectUser.user_id)}
+                      onClick={() =>
+                        handleRemoveUser(projectUser.user_id)
+                      }
                       className="
-                        shrink-0 rounded-full bg-red-500 p-2 text-white
-                        transition hover:bg-red-700
+                        shrink-0 rounded-full bg-red-500 p-2
+                        text-white transition hover:bg-red-700
                       "
                       title="Remover usuário"
                     >
@@ -184,10 +162,12 @@ export const ProjectUsersModal = ({
               className="
                 flex items-center justify-center gap-2 rounded-md
                 bg-red-500 px-4 py-2 font-semibold text-white
-                transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50
+                transition hover:bg-red-700
+                disabled:cursor-not-allowed disabled:opacity-50
               "
             >
               <LogOut size={18} />
+
               {leaving ? "Saindo..." : "Sair do projeto"}
             </button>
           )}
