@@ -57,18 +57,33 @@
   --font-hewitt: "Hewitt", sans-serif;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
 body {
+  min-width: 320px;
   min-height: 100vh;
-  max-height: 100%;
+  overflow-x: clip;
   background-color: var(--color-background-body);
   color: #fff;
   font-family: "Inter", sans-serif;
 }
 
+/* body {
+  min-height: 100vh;
+  max-height: 100%;
+  background-color: var(--color-background-body);
+  color: #fff;
+  font-family: "Inter", sans-serif;
+} */
+
 button {
   cursor: pointer;
 }
-
 
 * {
   scrollbar-color: var(--color-secondary) black;
@@ -93,7 +108,6 @@ button {
   background-color: var(--color-primary);
 }
 
-
 .font-hewitt-bold {
   font-family: "Hewitt", sans-serif;
   font-weight: 700;
@@ -102,7 +116,6 @@ button {
 .font-inter {
   font-family: "Inter", sans-serif;
 }
-
 
 .tofocous-day-picker {
   --rdp-accent-color: var(--color-accent);
@@ -149,7 +162,10 @@ button {
   height: 2rem;
   border-radius: 9999px;
   font-size: 0.875rem;
-  transition: background-color 150ms, color 150ms, border-color 150ms;
+  transition:
+    background-color 150ms,
+    color 150ms,
+    border-color 150ms;
 }
 
 /* Hover */
@@ -195,7 +211,6 @@ button {
   align-items: center;
   justify-content: center;
 }
-
 
 @keyframes fadeIn {
   from {

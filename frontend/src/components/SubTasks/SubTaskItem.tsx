@@ -86,25 +86,42 @@ export const SubTaskItem = ({
   const shouldShowAssignments = projectMembers.length >= 2;
 
   return (
-    <div className="grid gap-3 rounded-md border border-zinc-600 bg-zinc-800 p-3 md:grid-cols-[auto_minmax(0,1fr)_auto]">
+    <div
+      className="
+      grid w-full min-w-0
+      grid-cols-[auto_minmax(0,1fr)]
+      gap-x-3 gap-y-3
+      rounded-md border border-zinc-600
+      bg-zinc-800 p-3
+
+      md:grid-cols-[auto_minmax(0,1fr)_auto]
+      md:gap-4
+      md:p-4
+    "
+    >
       <button
+        type="button"
         onClick={toggleStatus}
         className={`
-    place-self-center flex h-6 w-6 items-center justify-center rounded-md border
-    transition-all duration-300 mt-4
-    ${
-      isDone
-        ? "border-purple-700 bg-purple-700"
-        : "border-zinc-600 bg-zinc-900 hover:border-zinc-400"
-    }
-  `}
+        mt-1 flex h-6 w-6 shrink-0 items-center justify-center
+        self-start rounded-md border
+        transition-all duration-300
+
+        ${
+          isDone
+            ? "border-purple-700 bg-purple-700"
+            : "border-zinc-600 bg-zinc-900 hover:border-zinc-400"
+        }
+      `}
+        aria-label={isDone ? "Reabrir subtarefa" : "Concluir subtarefa"}
+        title={isDone ? "Reabrir subtarefa" : "Concluir subtarefa"}
       >
-        {isDone && <Check size={22} className="text-white" />}
+        {isDone && <Check size={20} className="text-white" />}
       </button>
 
       <div className="flex min-w-0 flex-col gap-3">
         {shouldShowAssignments && (
-          <div className="border-b border-zinc-700 pb-3">
+          <div className="min-w-0 border-b border-zinc-700 pb-3">
             <AssignmentControl
               assignments={subtaskAssignments}
               members={projectMembers}
@@ -120,8 +137,8 @@ export const SubTaskItem = ({
         <textarea
           value={localData.title}
           ref={titleRef}
-          onChange={(e) => {
-            handleChange("title", e.target.value);
+          onChange={(event) => {
+            handleChange("title", event.target.value);
             requestAnimationFrame(resizeTitle);
           }}
           onBlur={handleBlur}
@@ -130,17 +147,24 @@ export const SubTaskItem = ({
           rows={1}
           spellCheck={false}
           disabled={isDone}
-          className={`w-full resize-none overflow-hidden rounded-md border border-transparent p-1 text-xl outline-none
-          duration-100 hover:bg-zinc-700 focus:border-accent focus:bg-zinc-900
-          ${isDone ? "line-through text-zinc-400" : ""}`}
+          className={`
+          w-full resize-none overflow-hidden
+          rounded-md border border-transparent p-1
+          text-lg outline-none duration-100
+          hover:bg-zinc-700
+          focus:border-accent focus:bg-zinc-900
+          sm:text-xl
+
+          ${isDone ? "line-through text-zinc-400" : ""}
+        `}
         />
 
-        <div className="relative">
+        <div className="relative min-w-0">
           <textarea
             ref={textareaRef}
             value={localData.description ?? ""}
-            onChange={(e) => {
-              handleChange("description", e.target.value);
+            onChange={(event) => {
+              handleChange("description", event.target.value);
               requestAnimationFrame(checkDescriptionOverflow);
             }}
             onBlur={handleBlur}
@@ -151,13 +175,28 @@ export const SubTaskItem = ({
             spellCheck={false}
             disabled={isDone}
             rows={2}
-            className={`w-full resize-none overflow-hidden rounded-md border border-transparent p-1 outline-none duration-100
-            hover:bg-zinc-700 hover:resize-y focus:border-accent focus:bg-zinc-900 focus:resize-y
-            ${isDone ? "line-through text-zinc-500" : ""}`}
+            className={`
+            w-full resize-none overflow-hidden
+            rounded-md border border-transparent p-1
+            outline-none duration-100
+            hover:bg-zinc-700 hover:resize-y
+            focus:border-accent focus:bg-zinc-900 focus:resize-y
+
+            ${isDone ? "line-through text-zinc-500" : ""}
+          `}
           />
 
           {descriptionOverflow && (
-            <div className="pointer-events-none absolute bottom-0 left-0 right-0 flex h-7 items-center justify-end rounded-b-md bg-linear-to-t from-zinc-800 via-zinc-800/50 to-transparent px-3 pb-0.5">
+            <div
+              className="
+              pointer-events-none absolute inset-x-0 bottom-0
+              flex h-7 items-center justify-end
+              rounded-b-md
+              bg-linear-to-t
+              from-zinc-800 via-zinc-800/50 to-transparent
+              px-2 pb-0.5
+            "
+            >
               <span className="text-[10px] text-zinc-300">
                 arraste para ver mais
               </span>
@@ -166,8 +205,14 @@ export const SubTaskItem = ({
         </div>
 
         {!isDone && (
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-baseline gap-3">
+          <div
+            className="
+            flex min-w-0 flex-col gap-3
+            sm:flex-row sm:flex-wrap sm:items-end
+            sm:justify-between
+          "
+          >
+            <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
               {showStartDate && (
                 <DatePicker
                   value={localData.start_date}
@@ -210,18 +255,23 @@ export const SubTaskItem = ({
                 />
               )}
 
-              <p className={`px-1 pt-2 text-xs ${timeColor}`}>{timeMessage}</p>
+              <p className={`w-full px-1 pt-1 text-xs sm:w-auto ${timeColor}`}>
+                {timeMessage}
+              </p>
             </div>
 
             {showPriority && (
-              <div className="shrink-0">
+              <div className="min-w-0 self-start sm:ml-auto sm:self-auto">
                 <Dropdown
                   value={localData.priority}
                   options={priorityOptions}
                   onChange={changePriority}
-                  buttonClass={`px-2 py-1 rounded-sm text-sm font-semibold
+                  buttonClass={`
+                  max-w-full rounded-sm px-2 py-1
+                  text-left text-sm font-semibold
+                  duration-100 hover:bg-zinc-700
                   ${currentPriority.color}
-                  hover:bg-zinc-700 duration-100`}
+                `}
                   renderLabel={(value) =>
                     `Prioridade: ${priorityMap[value].label}`
                   }
@@ -232,13 +282,33 @@ export const SubTaskItem = ({
         )}
       </div>
 
-      <div className="place-self-center flex shrink-0 flex-col items-end gap-3 mt-4">
+      <div
+        className="
+    col-span-2 flex justify-end
+    border-t border-zinc-700 pt-3
+
+    md:col-span-1 md:self-center
+    md:border-0 md:pt-0
+  "
+      >
         <button
-          className="rounded-full bg-red-600 p-2 hover:bg-red-800"
+          type="button"
           onClick={handleDelete}
+          className="
+      flex h-10 w-fit items-center justify-center gap-2
+      rounded-md bg-red-600 px-3 py-2
+      text-sm font-medium duration-150
+      hover:bg-red-800
+
+      md:h-10 md:w-10 md:shrink-0
+      md:rounded-full md:p-2
+    "
           title="Excluir subtarefa"
+          aria-label="Excluir subtarefa"
         >
-          <Trash2 size={22} />
+          <Trash2 size={20} />
+
+          <span className="md:hidden">Excluir</span>
         </button>
       </div>
     </div>

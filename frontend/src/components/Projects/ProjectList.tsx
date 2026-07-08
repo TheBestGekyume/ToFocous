@@ -7,10 +7,10 @@ type Props = {
 };
 
 export const ProjectList = ({ onEdit }: Props) => {
-  const { projects } = useProjects();
+  const { projects, loading } = useProjects();
   
 
-  if (!projects || projects.length === 0) {
+  if ((!projects || projects.length === 0) && !loading) {
     return (
       <p className="text-zinc-500 text-center italic py-5">
         Nenhum Projeto adicionada ainda. <br />
