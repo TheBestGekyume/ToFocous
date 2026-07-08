@@ -133,34 +133,36 @@ export const TaskPage = () => {
   })();
 
   return (
-    <div className="flex flex-col w-full max-w-5xl mx-auto pb-8">
-      <div className="py-10">
+    <div className="mx-auto flex w-full max-w-5xl min-w-0 flex-col px-3 pb-8 sm:px-4 lg:px-0">
+      <div className="py-6 sm:py-10">
         <ProjectItem
           project={currentProject}
           singleProjectItem={true}
           onEdit={setEditingProject}
         />
       </div>
-
       <div
-        className="flex flex-col bg-background-header/50 
-            border-2 border-secondary rounded-xl p-5 pb-8 gap-8"
+        className="flex min-w-0 flex-col gap-6 rounded-xl
+        border-2 border-secondary bg-background-header/50
+        p-3 pb-6 sm:gap-8 sm:p-5 sm:pb-8"
       >
         <div className="w-full transition-all duration-300">
           <TaskForm />
 
-          <hr className="text-zinc-700 my-10" />
-
-          <div className="px-2">
-            <div className="flex flex-wrap justify-between items-center pb-4">
-              <h4 className="text-2xl font-medium text-accent">
+          <hr className="my-6 border-zinc-700 sm:my-10" />
+          <div className="min-w-0 px-0 sm:px-2">
+            <div
+              className="flex flex-col items-start gap-2 pb-4
+                sm:flex-row sm:flex-wrap sm:items-center    sm:justify-between sm:gap-4"
+            >
+              <h4 className="min-w-0 max-w-full break-words text-xl font-medium text-accent sm:text-2xl">
                 <span className="text-text">Tarefas de</span>{" "}
                 {formattedProjectTitle.charAt(0).toUpperCase() +
                   formattedProjectTitle.slice(1)}
                 {isTitleTruncated && <span className="text-text">...</span>}
               </h4>
 
-              <div className="flex flex-wrap gap-4">
+              <div className="flex w-full min-w-0 flex-wrap gap-2 sm:w-auto sm:gap-4">
                 <SortTasks />
               </div>
             </div>
