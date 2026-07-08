@@ -143,6 +143,8 @@ def post_task(
         postdata = data.model_dump(mode="json")
         postdata["user_id"] = current_user.id
 
+        validate_task_dates(postdata)
+
         project_id = postdata.get("project_id")
 
         if project_id:
@@ -365,6 +367,13 @@ def patch_task(
                 error_code="TASK_EDIT_DENIED",
             )
 
+        merged_task_data = {
+            **task,
+            **patchdata,
+        }
+
+        validate_task_dates(merged_task_data)
+
         response = (
             supabase
             .table("tasks")
@@ -461,4 +470,75 @@ def delete_task(
             message="Erro ao deletar tarefa.",
             http_code=500,
             error_code="TASK_DELETE_ERROR",
+        )
+
+
+def parse_date_value(value):
+    if not value:
+        return None
+
+    if hasattr(value, "isoformat") and not isinstance(value, str):
+        value = value.isoformat()
+
+    value = str(value)
+
+    try:
+        return datetime.strptime(value[:10], "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
+def parse_time_value(value):
+    if not value:
+        return None
+
+    if isinstance(value, time_type):
+        return value
+
+    value = str(value)
+    value = value.split("+")[0]
+    value = value.split(".")[0]
+
+    if "T" in value:
+        value = value.replace("Z", "")
+        try:
+            return datetime.fromisoformat(value).time()
+        except ValueError:
+            return None
+
+    for time_format in ("%H:%M:%S", "%H:%M"):
+        try:
+            return datetime.strptime(value, time_format).time()
+        except ValueError:
+            continue
+
+    return None
+
+
+def validate_task_dates(data: dict):
+    start_date = parse_date_value(data.get("start_date"))
+    due_date = parse_date_value(data.get("due_date"))
+
+    start_time = parse_time_value(data.get("start_time"))
+    due_time = parse_time_value(data.get("due_time"))
+
+    if start_date and due_date and due_date < start_date:
+        raise AppException(
+            message="A data de entrega deve ser posterior ou igual à data de início.",
+            http_code=400,
+            error_code="INVALID_TASK_DUE_DATE",
+        )
+
+    if (
+        start_date
+        and due_date
+        and start_date == due_date
+        and start_time
+        and due_time
+        and due_time <= start_time
+    ):
+        raise AppException(
+            message="O horário de entrega deve ser posterior ao horário de início quando as datas são iguais.",
+            http_code=400,
+            error_code="INVALID_TASK_DUE_TIME",
         )
