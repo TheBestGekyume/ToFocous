@@ -1,3 +1,5 @@
+import type { ITaskSettings } from "../types/TSettings";
+
 type DateTimeFields = {
   start_date?: string | null;
   start_time?: string | null;
@@ -25,14 +27,39 @@ const parseTimeMinutes = (value?: string | null): number | null => {
   return hours * 60 + minutes;
 };
 
+const canValidateStartDate = (settings: ITaskSettings | null): boolean => {
+  return Boolean(settings?.use_start_date);
+};
+
+const canValidateTime = (settings: ITaskSettings | null): boolean => {
+  return Boolean(settings?.use_time);
+};
+
+const canValidateStartTime = (settings: ITaskSettings | null): boolean => {
+  return Boolean(settings?.use_time && settings?.use_start_date);
+};
+
 export const validateTaskDateTime = (
-  task: DateTimeFields
+  task: DateTimeFields,
+  settings: ITaskSettings | null
 ): string | null => {
-  const startDate = parseDateNumber(task.start_date);
+  const shouldUseStartDate = canValidateStartDate(settings);
+  const shouldUseTime = canValidateTime(settings);
+  const shouldUseStartTime = canValidateStartTime(settings);
+
+  const startDate = shouldUseStartDate
+    ? parseDateNumber(task.start_date)
+    : null;
+
   const dueDate = parseDateNumber(task.due_date);
 
-  const startTime = parseTimeMinutes(task.start_time);
-  const dueTime = parseTimeMinutes(task.due_time);
+  const startTime = shouldUseStartTime
+    ? parseTimeMinutes(task.start_time)
+    : null;
+
+  const dueTime = shouldUseTime
+    ? parseTimeMinutes(task.due_time)
+    : null;
 
   if (startDate && dueDate && dueDate < startDate) {
     return "A data de entrega deve ser posterior ou igual à data de início.";
@@ -54,19 +81,40 @@ export const validateTaskDateTime = (
 
 export const validateSubTaskDateTime = (
   subtask: DateTimeFields,
-  parentTask: DateTimeFields
+  parentTask: DateTimeFields,
+  settings: ITaskSettings | null
 ): string | null => {
-  const subtaskStartDate = parseDateNumber(subtask.start_date);
+  const shouldUseStartDate = canValidateStartDate(settings);
+  const shouldUseTime = canValidateTime(settings);
+  const shouldUseStartTime = canValidateStartTime(settings);
+
+  const subtaskStartDate = shouldUseStartDate
+    ? parseDateNumber(subtask.start_date)
+    : null;
+
   const subtaskDueDate = parseDateNumber(subtask.due_date);
 
-  const subtaskStartTime = parseTimeMinutes(subtask.start_time);
-  const subtaskDueTime = parseTimeMinutes(subtask.due_time);
+  const subtaskStartTime = shouldUseStartTime
+    ? parseTimeMinutes(subtask.start_time)
+    : null;
 
-  const taskStartDate = parseDateNumber(parentTask.start_date);
+  const subtaskDueTime = shouldUseTime
+    ? parseTimeMinutes(subtask.due_time)
+    : null;
+
+  const taskStartDate = shouldUseStartDate
+    ? parseDateNumber(parentTask.start_date)
+    : null;
+
   const taskDueDate = parseDateNumber(parentTask.due_date);
 
-  const taskStartTime = parseTimeMinutes(parentTask.start_time);
-  const taskDueTime = parseTimeMinutes(parentTask.due_time);
+  const taskStartTime = shouldUseStartTime
+    ? parseTimeMinutes(parentTask.start_time)
+    : null;
+
+  const taskDueTime = shouldUseTime
+    ? parseTimeMinutes(parentTask.due_time)
+    : null;
 
   if (
     subtaskStartDate &&
