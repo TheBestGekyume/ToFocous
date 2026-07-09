@@ -142,8 +142,13 @@ def post_task(
     try:
         postdata = data.model_dump(mode="json")
         postdata["user_id"] = current_user.id
+        
+        settings = get_task_settings_from_db(
+            supabase=supabase,
+            user_id=current_user.id,
+        )
 
-        validate_task_dates(postdata)
+        validate_task_dates(postdata, settings)
 
         project_id = postdata.get("project_id")
 
@@ -372,7 +377,14 @@ def patch_task(
             **patchdata,
         }
 
-        validate_task_dates(merged_task_data)
+        
+        settings = get_task_settings_from_db(
+            supabase=supabase,
+            user_id=current_user.id,
+        )
+
+        validate_task_dates(merged_task_data, settings)
+
 
         response = (
             supabase
@@ -515,14 +527,17 @@ def parse_time_value(value):
     return None
 
 
-def validate_task_dates(data: dict):
-    start_date = parse_date_value(data.get("start_date"))
+def validate_task_dates(data: dict, settings: dict):
+    use_start_date = settings.get("use_start_date", True)
+    use_time = settings.get("use_time", True)
+
+    start_date = parse_date_value(data.get("start_date")) if use_start_date else None
     due_date = parse_date_value(data.get("due_date"))
 
-    start_time = parse_time_value(data.get("start_time"))
-    due_time = parse_time_value(data.get("due_time"))
+    start_time = parse_time_value(data.get("start_time")) if use_start_date and use_time else None
+    due_time = parse_time_value(data.get("due_time")) if use_time else None
 
-    if start_date and due_date and due_date < start_date:
+    if use_start_date and start_date and due_date and due_date < start_date:
         raise AppException(
             message="A data de entrega deve ser posterior ou igual à data de início.",
             http_code=400,
@@ -530,7 +545,9 @@ def validate_task_dates(data: dict):
         )
 
     if (
-        start_date
+        use_start_date
+        and use_time
+        and start_date
         and due_date
         and start_date == due_date
         and start_time
@@ -542,3 +559,26 @@ def validate_task_dates(data: dict):
             http_code=400,
             error_code="INVALID_TASK_DUE_TIME",
         )
+
+def get_task_settings_from_db(
+    supabase,
+    user_id: str,
+) -> dict:
+    response = (
+        supabase
+        .table("task_settings")
+        .select("*")
+        .eq("user_id", user_id)
+        .execute()
+    )
+
+    settings = response.data or []
+
+    if not settings:
+        raise AppException(
+            message="Configurações de tarefas não encontradas.",
+            http_code=404,
+            error_code="SETTINGS_NOT_FOUND",
+        )
+
+    return settings[0]
