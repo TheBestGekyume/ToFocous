@@ -7,6 +7,7 @@ type TimeInputProps = {
   title: string;
   placeholder?: string;
   icon: LucideIcon;
+  resetSignal?: number;
 };
 
 const formatTimeToHHMM = (time?: string | null): string => {
@@ -21,13 +22,14 @@ export const TimeInput = ({
   title,
   placeholder = "hh:mm",
   icon: Icon,
+  resetSignal = 0,
 }: TimeInputProps) => {
   const [internalValue, setInternalValue] = useState<string>("");
   const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     setInternalValue(formatTimeToHHMM(value));
-  }, [value]);
+  }, [value, resetSignal]);
 
   const isEmpty = !internalValue;
   const inputType = !isFocused && isEmpty ? "text" : "time";
