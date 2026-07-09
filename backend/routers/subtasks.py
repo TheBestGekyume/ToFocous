@@ -40,6 +40,49 @@ def format_time(value):
     return value
 
 
+def parse_date_value(value):
+    if not value:
+        return None
+
+    if hasattr(value, "isoformat") and not isinstance(value, str):
+        value = value.isoformat()
+
+    value = str(value)
+
+    try:
+        return datetime.strptime(value[:10], "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
+def parse_time_value(value):
+    if not value:
+        return None
+
+    if isinstance(value, time_type):
+        return value
+
+    value = str(value)
+    value = value.split("+")[0]
+    value = value.split(".")[0]
+
+    if "T" in value:
+        value = value.replace("Z", "")
+
+        try:
+            return datetime.fromisoformat(value).time()
+        except ValueError:
+            return None
+
+    for time_format in ("%H:%M:%S", "%H:%M"):
+        try:
+            return datetime.strptime(value, time_format).time()
+        except ValueError:
+            continue
+
+    return None
+
+
 def build_subtask_response(subtask: dict) -> SubTaskResponse:
     return SubTaskResponse(
         id=subtask["id"],
@@ -62,7 +105,7 @@ def get_task_by_id_from_db(
     response = (
         supabase
         .table("tasks")
-        .select("id, user_id")
+        .select("*")
         .eq("id", task_id)
         .eq("user_id", user_id)
         .execute()
@@ -74,6 +117,151 @@ def get_task_by_id_from_db(
         return None
 
     return tasks[0]
+
+
+def get_subtask_by_id_from_db(
+    supabase,
+    subtask_id: str,
+    task_id: str,
+) -> dict | None:
+    response = (
+        supabase
+        .table("subtasks")
+        .select("*")
+        .eq("id", subtask_id)
+        .eq("task_id", task_id)
+        .execute()
+    )
+
+    subtasks = response.data or []
+
+    if not subtasks:
+        return None
+
+    return subtasks[0]
+
+
+def validate_subtask_dates(data: dict):
+    start_date = parse_date_value(data.get("start_date"))
+    due_date = parse_date_value(data.get("due_date"))
+
+    start_time = parse_time_value(data.get("start_time"))
+    due_time = parse_time_value(data.get("due_time"))
+
+    if start_date and due_date and due_date < start_date:
+        raise AppException(
+            message="A data de entrega da subtarefa deve ser posterior ou igual à data de início.",
+            http_code=400,
+            error_code="INVALID_SUBTASK_DUE_DATE",
+        )
+
+    if (
+        start_date
+        and due_date
+        and start_date == due_date
+        and start_time
+        and due_time
+        and due_time <= start_time
+    ):
+        raise AppException(
+            message="O horário de entrega da subtarefa deve ser posterior ao horário de início quando as datas são iguais.",
+            http_code=400,
+            error_code="INVALID_SUBTASK_DUE_TIME",
+        )
+
+
+def validate_subtask_inside_task(subtask_data: dict, task: dict):
+    subtask_start_date = parse_date_value(subtask_data.get("start_date"))
+    subtask_due_date = parse_date_value(subtask_data.get("due_date"))
+
+    subtask_start_time = parse_time_value(subtask_data.get("start_time"))
+    subtask_due_time = parse_time_value(subtask_data.get("due_time"))
+
+    task_start_date = parse_date_value(task.get("start_date"))
+    task_due_date = parse_date_value(task.get("due_date"))
+
+    task_start_time = parse_time_value(task.get("start_time"))
+    task_due_time = parse_time_value(task.get("due_time"))
+
+    if task_start_date and subtask_start_date:
+        if subtask_start_date < task_start_date:
+            raise AppException(
+                message="A data de início da subtarefa não pode ser anterior à data de início da tarefa pai.",
+                http_code=400,
+                error_code="SUBTASK_START_BEFORE_TASK_START",
+            )
+
+        if (
+            subtask_start_date == task_start_date
+            and task_start_time
+            and subtask_start_time
+            and subtask_start_time < task_start_time
+        ):
+            raise AppException(
+                message="O horário de início da subtarefa não pode ser anterior ao horário de início da tarefa pai.",
+                http_code=400,
+                error_code="SUBTASK_START_TIME_BEFORE_TASK_START_TIME",
+            )
+
+    if task_due_date and subtask_due_date:
+        if subtask_due_date > task_due_date:
+            raise AppException(
+                message="A data de entrega da subtarefa não pode ser posterior à data de entrega da tarefa pai.",
+                http_code=400,
+                error_code="SUBTASK_DUE_AFTER_TASK_DUE",
+            )
+
+        if (
+            subtask_due_date == task_due_date
+            and task_due_time
+            and subtask_due_time
+            and subtask_due_time > task_due_time
+        ):
+            raise AppException(
+                message="O horário de entrega da subtarefa não pode ser posterior ao horário de entrega da tarefa pai.",
+                http_code=400,
+                error_code="SUBTASK_DUE_TIME_AFTER_TASK_DUE_TIME",
+            )
+
+    if task_due_date and subtask_start_date:
+        if subtask_start_date > task_due_date:
+            raise AppException(
+                message="A data de início da subtarefa não pode ser posterior à data de entrega da tarefa pai.",
+                http_code=400,
+                error_code="SUBTASK_START_AFTER_TASK_DUE",
+            )
+
+        if (
+            subtask_start_date == task_due_date
+            and task_due_time
+            and subtask_start_time
+            and subtask_start_time > task_due_time
+        ):
+            raise AppException(
+                message="O horário de início da subtarefa não pode ser posterior ao horário de entrega da tarefa pai.",
+                http_code=400,
+                error_code="SUBTASK_START_TIME_AFTER_TASK_DUE_TIME",
+            )
+
+    if task_start_date and subtask_due_date:
+        if subtask_due_date < task_start_date:
+            raise AppException(
+                message="A data de entrega da subtarefa não pode ser anterior à data de início da tarefa pai.",
+                http_code=400,
+                error_code="SUBTASK_DUE_BEFORE_TASK_START",
+            )
+
+        if (
+            subtask_due_date == task_start_date
+            and task_start_time
+            and subtask_due_time
+            and subtask_due_time < task_start_time
+        ):
+            raise AppException(
+                message="O horário de entrega da subtarefa não pode ser anterior ao horário de início da tarefa pai.",
+                http_code=400,
+                error_code="SUBTASK_DUE_TIME_BEFORE_TASK_START_TIME",
+            )
 
 
 @router.get(
@@ -158,6 +346,9 @@ def post_subtask(
         subtask_data = data.model_dump(mode="json")
         subtask_data["task_id"] = task_id
 
+        validate_subtask_dates(subtask_data)
+        validate_subtask_inside_task(subtask_data, task)
+
         response = (
             supabase
             .table("subtasks")
@@ -226,6 +417,25 @@ def patch_subtask(
                 message="Nenhuma alteração feita.",
             )
 
+        subtask = get_subtask_by_id_from_db(
+            supabase=supabase,
+            subtask_id=subtask_id,
+            task_id=task_id,
+        )
+
+        if not subtask:
+            raise AppException(
+                message="Subtarefa não encontrada.",
+                http_code=404,
+                error_code="SUBTASK_NOT_FOUND",
+            )
+
+        merged_subtask_data = subtask.copy()
+        merged_subtask_data.update(patchdata)
+
+        validate_subtask_dates(merged_subtask_data)
+        validate_subtask_inside_task(merged_subtask_data, task)
+
         response = (
             supabase
             .table("subtasks")
@@ -242,10 +452,10 @@ def patch_subtask(
                 error_code="SUBTASK_NOT_FOUND",
             )
 
-        subtask = response.data[0]
+        updated_subtask = response.data[0]
 
         return success(
-            content=build_subtask_response(subtask),
+            content=build_subtask_response(updated_subtask),
             message="Subtarefa atualizada com sucesso.",
         )
 
