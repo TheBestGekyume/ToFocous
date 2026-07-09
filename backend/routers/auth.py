@@ -74,6 +74,23 @@ def signup(data: SignUpData):
                 error_code="EMAIL_ALREADY_REGISTERED",
             )
 
+        password_update_response = (
+            supabase
+            .table("usuarios")
+            .update({
+                "has_password": True,
+            })
+            .eq("id", response.user.id)
+            .execute()
+        )
+
+        if not password_update_response.data:
+            raise AppException(
+                message="Usuário criado, mas não foi possível atualizar o status da senha.",
+                http_code=400,
+                error_code="USER_HAS_PASSWORD_UPDATE_ERROR",
+            )
+
         return created(
             content=MessageResponse(
                 message="Usuário criado com sucesso.",
