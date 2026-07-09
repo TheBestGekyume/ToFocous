@@ -3,6 +3,7 @@ import httpx
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
+from supabase import create_client
 
 from backend.core.config import settings
 from backend.core.excepcions import AppException
@@ -28,6 +29,11 @@ router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 SUPABASE_URL = settings.SUPABASE_URL
 SUPABASE_ANON_KEY = settings.SUPABASE_ANON_KEY
 FRONTEND_URL = settings.FRONTEND_URL
+
+public_supabase = create_client(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+)
 
 
 @router.get(
@@ -284,6 +290,144 @@ async def update_my_password(
 async def request_password_reset(
     data: ResetSenha,
 ):
+    try:
+        email = data.email.strip().lower()
+
+        usuario_response = (
+            public_supabase
+            .table("usuarios")
+            .select("id, has_password")
+            .eq("email", email)
+            .limit(1)
+            .execute()
+        )
+
+        if usuario_response.data:
+            usuario = usuario_response.data[0]
+
+            if not bool(usuario.get("has_password")):
+                raise AppException(
+                    message=(
+                        "Esta conta usa apenas login com Google. "
+                        "Entre usando o Google e crie uma senha no perfil para habilitar acesso por e-mail e senha."
+                    ),
+                    http_code=400,
+                    error_code="PASSWORD_RESET_UNAVAILABLE_FOR_GOOGLE_ONLY",
+                )
+
+        url = f"{SUPABASE_URL}/auth/v1/recover"
+
+        headers = {
+            "apikey": SUPABASE_ANON_KEY,
+            "Content-Type": "application/json",
+        }
+
+        params = {
+            "redirect_to": f"{FRONTEND_URL}/reset-password",
+        }
+
+        payload = {
+            "email": email,
+        }
+
+        async with httpx.AsyncClient(timeout=20) as client:
+            response = await client.post(
+                url,
+                headers=headers,
+                params=params,
+                json=payload,
+            )
+
+        if response.status_code >= 400:
+            raise AppException(
+                message=str(safe_response_detail(response)),
+                http_code=response.status_code,
+                error_code="PASSWORD_RESET_REQUEST_ERROR",
+            )
+
+        return success(
+            content=None,
+            message="Se o email estiver cadastrado, enviaremos instruções para redefinir a senha.",
+        )
+
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao solicitar redefinição de senha.",
+            http_code=500,
+            error_code="PASSWORD_RESET_ERROR",
+        )
+    try:
+        email = data.email.strip().lower()
+
+        usuario_response = (
+            supabase
+            .table("usuarios")
+            .select("id, has_password")
+            .eq("email", email)
+            .limit(1)
+            .execute()
+        )
+
+        if usuario_response.data:
+            usuario = usuario_response.data[0]
+
+            if not bool(usuario.get("has_password")):
+                raise AppException(
+                    message=(
+                        "Esta conta usa apenas login com Google. "
+                        "Entre usando o Google e crie uma senha no perfil para habilitar acesso por e-mail e senha."
+                    ),
+                    http_code=400,
+                    error_code="PASSWORD_RESET_UNAVAILABLE_FOR_GOOGLE_ONLY",
+                )
+
+        url = f"{SUPABASE_URL}/auth/v1/recover"
+
+        headers = {
+            "apikey": SUPABASE_ANON_KEY,
+            "Content-Type": "application/json",
+        }
+
+        params = {
+            "redirect_to": f"{FRONTEND_URL}/reset-password",
+        }
+
+        payload = {
+            "email": email,
+        }
+
+        async with httpx.AsyncClient(timeout=20) as client:
+            response = await client.post(
+                url,
+                headers=headers,
+                params=params,
+                json=payload,
+            )
+
+        if response.status_code >= 400:
+            raise AppException(
+                message=str(safe_response_detail(response)),
+                http_code=response.status_code,
+                error_code="PASSWORD_RESET_REQUEST_ERROR",
+            )
+
+        return success(
+            content=None,
+            message="Se o email estiver cadastrado, enviaremos instruções para redefinir a senha.",
+        )
+
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao solicitar redefinição de senha.",
+            http_code=500,
+            error_code="PASSWORD_RESET_ERROR",
+        )
     try:
         url = f"{SUPABASE_URL}/auth/v1/recover"
 

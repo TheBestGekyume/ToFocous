@@ -56,6 +56,10 @@ export const useProfile = () => {
   }, [fetchMyUser]);
 
   useEffect(() => {
+    setHasPasswordOverride(null);
+  }, [user?.id]);
+
+  useEffect(() => {
     if (!feedback) return;
 
     const timeoutId = window.setTimeout(() => {
@@ -286,7 +290,10 @@ export const useProfile = () => {
       try {
         await fetchMyUser();
       } catch (error: unknown) {
-        console.error("Atualização de perfil após erro de criação de senha:", error);
+        console.error(
+          "Erro ao atualizar perfil após criação de senha:",
+          error
+        );
       }
     } catch (error: unknown) {
       setErrorFeedback(error, "Não foi possível criar a senha.");

@@ -149,11 +149,11 @@ export const TaskPage = () => {
         <div className="w-full transition-all duration-300">
           <TaskForm />
 
-          <hr className="my-6 border-zinc-700 sm:my-10" />
+          <hr className="my-6 border-secondary sm:my-10" />
           <div className="min-w-0 px-0 sm:px-2">
             <div
               className="flex flex-col items-start gap-2 pb-4
-                sm:flex-row sm:flex-wrap sm:items-center    sm:justify-between sm:gap-4"
+                sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4"
             >
               <h4 className="min-w-0 max-w-full break-words text-xl font-medium text-accent sm:text-2xl">
                 <span className="text-text">Tarefas de</span>{" "}
