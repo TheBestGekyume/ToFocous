@@ -20,7 +20,10 @@ export const useProjectItem = (project: TProject) => {
       await deleteProject(project.id);
     },
 
-    validate: (currentProject) => Boolean(currentProject.title.trim()),
+    validate: (currentProject) =>
+      currentProject.title.trim()
+        ? null
+        : "O título do projeto é obrigatório.",
 
     hasChanged: (currentProject, previousProject) =>
       currentProject.title !== previousProject.title ||
