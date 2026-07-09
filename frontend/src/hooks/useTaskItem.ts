@@ -43,7 +43,7 @@ export const useTaskItem = (task: TTask) => {
         return "Informe a data de prazo da tarefa.";
       }
 
-      return validateTaskDateTime(currentTask);
+      return validateTaskDateTime(currentTask, settings);
     },
 
     hasChanged: (currentTask, previousTask) =>
@@ -55,7 +55,7 @@ export const useTaskItem = (task: TTask) => {
       currentTask.start_time !== previousTask.start_time ||
       currentTask.priority !== previousTask.priority ||
       currentTask.status !== previousTask.status,
-          
+
   });
 
   const isDone = editable.localData.status === "concluded";
