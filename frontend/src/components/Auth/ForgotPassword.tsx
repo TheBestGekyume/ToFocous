@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { LoadingDots } from "../_Common/LoadingDots";
 import { LoadingOverlay } from "../_Common/LoadingOverlay";
 import { requestPasswordReset } from "../../services/users/userService";
-import { getApiErrorMessage, logApiError } from "../../utils/apiError";
+import { getApiErrorInfo, logApiError } from "../../utils/apiError";
 import type { SetAppFeedback } from "../../types/TFeedback";
 
 type ForgotPasswordProps = {
@@ -10,18 +10,28 @@ type ForgotPasswordProps = {
   setFeedback: SetAppFeedback;
 };
 
+const googleOnlyResetErrorCodes: ReadonlySet<string> = new Set([
+  "PASSWORD_RESET_UNAVAILABLE_FOR_GOOGLE_ONLY",
+  "GOOGLE_IS_ONLY_LOGIN_METHOD",
+  "GOOGLE_ONLY_LOGIN_METHOD",
+  "USER_HAS_ONLY_GOOGLE_AUTH",
+]);
+
+const isGoogleOnlyResetError = (errorCode: string | null): boolean => {
+  return errorCode !== null && googleOnlyResetErrorCodes.has(errorCode);
+};
+
 export const ForgotPassword = ({
   onBackToLogin,
   setFeedback,
 }: ForgotPasswordProps) => {
   const [email, setEmail] = useState("");
-
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const trimmedEmail = email.trim();
+    const trimmedEmail = email.trim().toLowerCase();
 
     if (!trimmedEmail) {
       setFeedback({
@@ -50,12 +60,24 @@ export const ForgotPassword = ({
     } catch (error: unknown) {
       logApiError("Erro ao solicitar redefinição de senha", error);
 
+      const errorInfo = getApiErrorInfo(
+        error,
+        "Não foi possível enviar o e-mail de redefinição."
+      );
+
+      const message = isGoogleOnlyResetError(errorInfo.errorCode) ? (
+        <span className="whitespace-pre-line">
+          {
+            "Esta conta usa apenas login com Google.\nEntre usando o Google e, depois, crie uma senha em Meu perfil para habilitar o acesso por e-mail e senha."
+          }
+        </span>
+      ) : (
+        errorInfo.message
+      );
+
       setFeedback({
         type: "error",
-        message: getApiErrorMessage(
-          error,
-          "Não foi possível enviar o e-mail de redefinição."
-        ),
+        message,
       });
     } finally {
       setLoading(false);

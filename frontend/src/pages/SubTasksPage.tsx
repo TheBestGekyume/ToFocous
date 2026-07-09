@@ -11,6 +11,7 @@ import { useProjects } from "../hooks/useProjects";
 import { useProjectUsers } from "../hooks/useProjectUsers";
 import type { TProject } from "../types/TProject";
 import type { TProjectMember } from "../components/_Common/AssignmentControl";
+import { SortTasks } from "../components/Tasks/SortTasks";
 
 export const SubTasksPage = () => {
   const { projectId, taskId } = useParams<{
@@ -163,62 +164,99 @@ export const SubTasksPage = () => {
     );
   }
 
-  return (
-  <section className="w-full min-w-0 pt-4 sm:pt-6">
-    <LoadingOverlay show={loading} />
+  const taskTitle = task.title.trim();
+  const titleLimit = 32;
+  const isTitleTruncated = taskTitle.length > titleLimit;
 
-    <div
-      className="
+  const formattedTaskTitle = (() => {
+    if (!isTitleTruncated) {
+      return taskTitle;
+    }
+
+    const partialTitle = taskTitle.slice(0, titleLimit);
+    const lastSpaceIndex = partialTitle.lastIndexOf(" ");
+
+    return lastSpaceIndex > 0
+      ? partialTitle.slice(0, lastSpaceIndex).trimEnd()
+      : partialTitle.trimEnd();
+  })();
+
+  return (
+    <section className="w-full min-w-0 pt-4 sm:pt-6">
+      <LoadingOverlay show={loading} />
+
+      <div
+        className="
         mx-auto flex w-full max-w-5xl min-w-0 flex-col
         gap-5 px-3 pb-8
         sm:px-4
         lg:px-6
       "
-    >
-      <TaskHeader
-        task={task}
-        projectMembers={projectMembers}
-        isProjectOwner={currentProject.is_owner}
-      />
+      >
+        <TaskHeader
+          task={task}
+          projectMembers={projectMembers}
+          isProjectOwner={currentProject.is_owner}
+        />
 
-      <button
-        type="button"
-        className="
+        <button
+          type="button"
+          className="
           mx-auto w-fit rounded-md bg-green-600
           px-4 py-2 font-semibold duration-300
           hover:bg-green-800
         "
-        onClick={() => setIsCreatingSubTask(true)}
-      >
-        + SubTarefa
-      </button>
+          onClick={() => setIsCreatingSubTask(true)}
+        >
+          + SubTarefa
+        </button>
 
-      <hr className="my-3 w-full border-accent/75" />
+        {/* <hr className="my-3 w-full border-accent/75" /> */}
+        <hr className="my-6 border-primary/70 " />
+        <section className=" bg-background-header/50 p-4 sm:px-8 rounded-xl border-2 border-secondary">
+          <div
+            className="
+    flex min-w-0 flex-col items-start gap-2  my-4
+    sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4
+  "
+          >
+            <h4 className="min-w-0 max-w-full break-words text-xl font-medium text-accent sm:text-2xl">
+              <span className="text-text">SubTarefas de</span>{" "}
+              {formattedTaskTitle.charAt(0).toUpperCase() +
+                formattedTaskTitle.slice(1)}
+              {isTitleTruncated && <span className="text-text">...</span>}
+            </h4>
 
-      {subTasksLoading ? (
-        <LoadingLocal message="Carregando subtarefas" />
-      ) : (
-        <SubTaskList
-          task={task}
-          setLoading={setLoading}
-          projectMembers={projectMembers}
-          isProjectOwner={currentProject.is_owner}
-        />
-      )}
+            <div className="flex w-full min-w-0 flex-wrap gap-2 sm:w-auto sm:gap-4">
+              <SortTasks />
+            </div>
+          </div>
 
-      <Modal
-        isOpen={isCreatingSubTask}
-        onClose={() => setIsCreatingSubTask(false)}
-        title="Criar SubTarefa"
-        size="lg"
-      >
-        <TaskForm
-          isCreatingSubTask
-          parentTask={task}
-          onSuccess={() => setIsCreatingSubTask(false)}
-        />
-      </Modal>
-    </div>
-  </section>
-);
+          {subTasksLoading ? (
+            <LoadingLocal message="Carregando subtarefas" />
+          ) : (
+            <SubTaskList
+              task={task}
+              setLoading={setLoading}
+              projectMembers={projectMembers}
+              isProjectOwner={currentProject.is_owner}
+            />
+          )}
+
+          <Modal
+            isOpen={isCreatingSubTask}
+            onClose={() => setIsCreatingSubTask(false)}
+            title="Criar SubTarefa"
+            size="lg"
+          >
+            <TaskForm
+              isCreatingSubTask
+              parentTask={task}
+              onSuccess={() => setIsCreatingSubTask(false)}
+            />
+          </Modal>
+        </section>
+      </div>
+    </section>
+  );
 };
