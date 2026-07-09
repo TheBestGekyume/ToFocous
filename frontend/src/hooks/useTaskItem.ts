@@ -4,6 +4,7 @@ import { useTasks } from "./useTasks";
 import { useTaskVisibilitySettings } from "./useTaskVisibilitySettings";
 import { confirmDelete } from "../utils/confirmDelete";
 import type { TTask } from "../types/TTask";
+import { validateTaskDateTime } from "../utils/taskDateTimeValidation";
 
 export const useTaskItem = (task: TTask) => {
   const navigate = useNavigate();
@@ -37,8 +38,13 @@ export const useTaskItem = (task: TTask) => {
       await deleteTask(task.id);
     },
 
-    validate: (currentTask) =>
-      Boolean(currentTask.title.trim()) && Boolean(currentTask.due_date),
+    validate: (currentTask) => {
+      if (!currentTask.due_date) {
+        return "Informe a data de prazo da tarefa.";
+      }
+
+      return validateTaskDateTime(currentTask);
+    },
 
     hasChanged: (currentTask, previousTask) =>
       currentTask.title !== previousTask.title ||
@@ -49,6 +55,7 @@ export const useTaskItem = (task: TTask) => {
       currentTask.start_time !== previousTask.start_time ||
       currentTask.priority !== previousTask.priority ||
       currentTask.status !== previousTask.status,
+          
   });
 
   const isDone = editable.localData.status === "concluded";
@@ -79,7 +86,6 @@ export const useTaskItem = (task: TTask) => {
 
   return {
     ...editable,
-
     settings,
 
     isDone,
