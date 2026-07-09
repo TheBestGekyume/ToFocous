@@ -66,7 +66,7 @@ export const useSubTaskItem = ({
         return "Informe a data de prazo da subtarefa.";
       }
 
-      return validateSubTaskDateTime(currentSubtask, parentTask);
+      return validateSubTaskDateTime(currentSubtask, parentTask, settings);
     },
 
     hasChanged: (currentSubtask, previousSubtask) =>
