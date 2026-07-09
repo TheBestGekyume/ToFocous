@@ -141,14 +141,17 @@ def get_subtask_by_id_from_db(
     return subtasks[0]
 
 
-def validate_subtask_dates(data: dict):
-    start_date = parse_date_value(data.get("start_date"))
+def validate_subtask_dates(data: dict, settings: dict):
+    use_start_date = settings.get("use_start_date", True)
+    use_time = settings.get("use_time", True)
+
+    start_date = parse_date_value(data.get("start_date")) if use_start_date else None
     due_date = parse_date_value(data.get("due_date"))
 
-    start_time = parse_time_value(data.get("start_time"))
-    due_time = parse_time_value(data.get("due_time"))
+    start_time = parse_time_value(data.get("start_time")) if use_start_date and use_time else None
+    due_time = parse_time_value(data.get("due_time")) if use_time else None
 
-    if start_date and due_date and due_date < start_date:
+    if use_start_date and start_date and due_date and due_date < start_date:
         raise AppException(
             message="A data de entrega da subtarefa deve ser posterior ou igual à data de início.",
             http_code=400,
@@ -156,7 +159,9 @@ def validate_subtask_dates(data: dict):
         )
 
     if (
-        start_date
+        use_start_date
+        and use_time
+        and start_date
         and due_date
         and start_date == due_date
         and start_time
@@ -170,20 +175,47 @@ def validate_subtask_dates(data: dict):
         )
 
 
-def validate_subtask_inside_task(subtask_data: dict, task: dict):
-    subtask_start_date = parse_date_value(subtask_data.get("start_date"))
+def validate_subtask_inside_task(subtask_data: dict, task: dict, settings: dict):
+    use_start_date = settings.get("use_start_date", True)
+    use_time = settings.get("use_time", True)
+
+    subtask_start_date = (
+        parse_date_value(subtask_data.get("start_date"))
+        if use_start_date
+        else None
+    )
     subtask_due_date = parse_date_value(subtask_data.get("due_date"))
 
-    subtask_start_time = parse_time_value(subtask_data.get("start_time"))
-    subtask_due_time = parse_time_value(subtask_data.get("due_time"))
+    subtask_start_time = (
+        parse_time_value(subtask_data.get("start_time"))
+        if use_start_date and use_time
+        else None
+    )
+    subtask_due_time = (
+        parse_time_value(subtask_data.get("due_time"))
+        if use_time
+        else None
+    )
 
-    task_start_date = parse_date_value(task.get("start_date"))
+    task_start_date = (
+        parse_date_value(task.get("start_date"))
+        if use_start_date
+        else None
+    )
     task_due_date = parse_date_value(task.get("due_date"))
 
-    task_start_time = parse_time_value(task.get("start_time"))
-    task_due_time = parse_time_value(task.get("due_time"))
+    task_start_time = (
+        parse_time_value(task.get("start_time"))
+        if use_start_date and use_time
+        else None
+    )
+    task_due_time = (
+        parse_time_value(task.get("due_time"))
+        if use_time
+        else None
+    )
 
-    if task_start_date and subtask_start_date:
+    if use_start_date and task_start_date and subtask_start_date:
         if subtask_start_date < task_start_date:
             raise AppException(
                 message="A data de início da subtarefa não pode ser anterior à data de início da tarefa pai.",
@@ -192,7 +224,8 @@ def validate_subtask_inside_task(subtask_data: dict, task: dict):
             )
 
         if (
-            subtask_start_date == task_start_date
+            use_time
+            and subtask_start_date == task_start_date
             and task_start_time
             and subtask_start_time
             and subtask_start_time < task_start_time
@@ -212,7 +245,8 @@ def validate_subtask_inside_task(subtask_data: dict, task: dict):
             )
 
         if (
-            subtask_due_date == task_due_date
+            use_time
+            and subtask_due_date == task_due_date
             and task_due_time
             and subtask_due_time
             and subtask_due_time > task_due_time
@@ -223,7 +257,7 @@ def validate_subtask_inside_task(subtask_data: dict, task: dict):
                 error_code="SUBTASK_DUE_TIME_AFTER_TASK_DUE_TIME",
             )
 
-    if task_due_date and subtask_start_date:
+    if use_start_date and task_due_date and subtask_start_date:
         if subtask_start_date > task_due_date:
             raise AppException(
                 message="A data de início da subtarefa não pode ser posterior à data de entrega da tarefa pai.",
@@ -232,7 +266,8 @@ def validate_subtask_inside_task(subtask_data: dict, task: dict):
             )
 
         if (
-            subtask_start_date == task_due_date
+            use_time
+            and subtask_start_date == task_due_date
             and task_due_time
             and subtask_start_time
             and subtask_start_time > task_due_time
@@ -243,7 +278,7 @@ def validate_subtask_inside_task(subtask_data: dict, task: dict):
                 error_code="SUBTASK_START_TIME_AFTER_TASK_DUE_TIME",
             )
 
-    if task_start_date and subtask_due_date:
+    if use_start_date and task_start_date and subtask_due_date:
         if subtask_due_date < task_start_date:
             raise AppException(
                 message="A data de entrega da subtarefa não pode ser anterior à data de início da tarefa pai.",
@@ -252,7 +287,8 @@ def validate_subtask_inside_task(subtask_data: dict, task: dict):
             )
 
         if (
-            subtask_due_date == task_start_date
+            use_time
+            and subtask_due_date == task_start_date
             and task_start_time
             and subtask_due_time
             and subtask_due_time < task_start_time
@@ -346,8 +382,13 @@ def post_subtask(
         subtask_data = data.model_dump(mode="json")
         subtask_data["task_id"] = task_id
 
-        validate_subtask_dates(subtask_data)
-        validate_subtask_inside_task(subtask_data, task)
+        settings = get_task_settings_from_db(
+            supabase=supabase,
+            user_id=current_user.id,
+        )
+
+        validate_subtask_dates(subtask_data, settings)
+        validate_subtask_inside_task(subtask_data, task, settings)
 
         response = (
             supabase
@@ -433,8 +474,13 @@ def patch_subtask(
         merged_subtask_data = subtask.copy()
         merged_subtask_data.update(patchdata)
 
-        validate_subtask_dates(merged_subtask_data)
-        validate_subtask_inside_task(merged_subtask_data, task)
+        settings = get_task_settings_from_db(
+            supabase=supabase,
+            user_id=current_user.id,
+        )
+
+        validate_subtask_dates(merged_subtask_data, settings)
+        validate_subtask_inside_task(merged_subtask_data, task, settings)
 
         response = (
             supabase
@@ -526,3 +572,27 @@ def delete_subtask(
             http_code=500,
             error_code="SUBTASK_DELETE_ERROR",
         )
+    
+
+def get_task_settings_from_db(
+    supabase,
+    user_id: str,
+) -> dict:
+    response = (
+        supabase
+        .table("task_settings")
+        .select("*")
+        .eq("user_id", user_id)
+        .execute()
+    )
+
+    settings = response.data or []
+
+    if not settings:
+        raise AppException(
+            message="Configurações de tarefas não encontradas.",
+            http_code=404,
+            error_code="SETTINGS_NOT_FOUND",
+        )
+
+    return settings[0]
