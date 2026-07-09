@@ -3,15 +3,22 @@ import { useEditableItem } from "./useEditableItem";
 import { useTasks } from "./useTasks";
 import { useTaskVisibilitySettings } from "./useTaskVisibilitySettings";
 import { confirmDelete } from "../utils/confirmDelete";
-import type { TSubTask } from "../types/TTask";
+import type { TSubTask, TTask } from "../types/TTask";
+import { validateSubTaskDateTime } from "../utils/taskDateTimeValidation";
 
 type Props = {
   subtask: TSubTask;
   taskId: string;
+  parentTask: TTask;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const useSubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
+export const useSubTaskItem = ({
+  subtask,
+  taskId,
+  parentTask,
+  setLoading,
+}: Props) => {
   const { updateSubTask, deleteSubTask } = useTasks();
 
   const {
@@ -54,8 +61,13 @@ export const useSubTaskItem = ({ subtask, taskId, setLoading }: Props) => {
       }
     },
 
-    validate: (currentSubtask) =>
-      Boolean(currentSubtask.title.trim()) && Boolean(currentSubtask.due_date),
+    validate: (currentSubtask) => {
+      if (!currentSubtask.due_date) {
+        return "Informe a data de prazo da subtarefa.";
+      }
+
+      return validateSubTaskDateTime(currentSubtask, parentTask);
+    },
 
     hasChanged: (currentSubtask, previousSubtask) =>
       currentSubtask.title !== previousSubtask.title ||

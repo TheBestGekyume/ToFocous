@@ -33,6 +33,7 @@ export const SubTaskList = ({
         <SubTaskItem
           key={subtask.id}
           subtask={subtask}
+          parentTask={task}
           taskId={task.id}
           setLoading={setLoading}
           projectMembers={projectMembers}

@@ -2,7 +2,6 @@ import {
   AlarmClockCheck,
   AlarmClockPlus,
   Check,
-  // Eye,
   PictureInPicture,
   Play,
   Trash2,
@@ -27,6 +26,7 @@ import {
   type TProjectMember,
 } from "../_Common/AssignmentControl";
 import { useTasks } from "../../hooks/useTasks";
+import { FeedbackToast } from "../_Common/FeedbackToast";
 
 type TaskProps = {
   task: TTask;
@@ -42,6 +42,8 @@ export const TaskItem = ({
   const {
     localData,
     loading,
+    feedback,
+      resetSignal,
     settings,
     isDone,
     isDetailsPage,
@@ -86,11 +88,16 @@ export const TaskItem = ({
 
   const canManageAssignments = isProjectOwner && projectMembers.length >= 2;
 
+
   if (!settings) return <LoadingOverlay show />;
 
   return (
     <>
       <LoadingOverlay show={loading} />
+
+      {feedback && (
+        <FeedbackToast type={feedback.type} message={feedback.message} />
+      )}
 
       <div
         className={`grid w-full min-w-0 grid-cols-1 gap-3 rounded-lg border-2 bg-zinc-800 p-3
@@ -102,7 +109,7 @@ export const TaskItem = ({
               <DatePicker
                 value={localData.start_date}
                 onChange={(date) =>
-                  handleImmediateChange("start_date", date || "")
+                  handleImmediateChange("start_date", date ?? "")
                 }
                 icon={Play}
                 title="Data de início"
@@ -112,7 +119,7 @@ export const TaskItem = ({
               <DatePicker
                 value={localData.due_date}
                 onChange={(date) =>
-                  handleImmediateChange("due_date", date || "")
+                  handleImmediateChange("due_date", date ?? "")
                 }
                 icon={Check}
                 title="Data de prazo"
@@ -122,17 +129,23 @@ export const TaskItem = ({
             {showStartTime && !isDone && (
               <TimeInput
                 value={localData.start_time}
-                onChange={(time) => handleImmediateChange("start_time", time)}
+                onChange={(time) =>
+                  handleImmediateChange("start_time", time ?? "")
+                }
                 title="Hora de início"
                 icon={AlarmClockPlus}
+                  resetSignal={resetSignal}
               />
             )}
             {showTime && !isDone && (
               <TimeInput
                 value={localData.due_time}
-                onChange={(time) => handleImmediateChange("due_time", time)}
+                onChange={(time) =>
+                  handleImmediateChange("due_time", time ?? "")
+                }
                 title="Hora de prazo"
                 icon={AlarmClockCheck}
+                  resetSignal={resetSignal}
               />
             )}
           </div>
