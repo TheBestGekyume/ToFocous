@@ -52,3 +52,7 @@ class FinalizeEmailChangeResponse(BaseModel):
     google_identity: GoogleIdentityResultResponse | None = None
     current_email: str | None = None
     expected_email: str | None = None
+
+class CreateSenha(BaseModel):
+    new_password: str
+    confirm_new_password: str

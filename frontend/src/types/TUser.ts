@@ -1,4 +1,4 @@
-export type TUser = {
+export type   TUser = {
   id: string;
   name: string;
   email: string | null;

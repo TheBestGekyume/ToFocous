@@ -1,4 +1,4 @@
-import { authenticatedApi } from "../api/api";
+import { authenticatedApi, publicApi } from "../api/api";
 import type { TApiResponse, TApiSuccess } from "../../types/TApi";
 import { getApiSuccessOrThrow } from "../../types/TApi";
 import type {
@@ -12,7 +12,6 @@ import type {
   TUpdateUserResponse,
   TUser,
 } from "../../types/TUser";
-import { supabaseAuthClient } from "../auth/supabaseAuthClient";
 
 export const getMyUser = async (): Promise<TUser> => {
   const response =
@@ -53,7 +52,7 @@ export const updateMyPassword = async (
 export const requestPasswordReset = async (
   payload: TResetPasswordDTO
 ): Promise<TApiSuccess<null>> => {
-  const response = await authenticatedApi.post<TApiResponse<null>>(
+  const response = await publicApi.post<TApiResponse<null>>(
     "/usuarios/reset-password",
     payload
   );
@@ -88,18 +87,10 @@ export const finalizeMyEmailChange = async (): Promise<
 export const createMyPassword = async (
   payload: TCreatePasswordDTO
 ): Promise<TApiSuccess<null>> => {
-  const { error } = await supabaseAuthClient.auth.updateUser({
-    password: payload.new_password,
-  });
+  const response = await authenticatedApi.post<TApiResponse<null>>(
+    "/usuarios/me/password/create",
+    payload
+  );
 
-  if (error) {
-    throw error;
-  }
-
-  return {
-    content: null,
-    httpCode: 200,
-    message: "Senha criada com sucesso.",
-    errorCode: null,
-  };
+  return getApiSuccessOrThrow(response.data);
 };

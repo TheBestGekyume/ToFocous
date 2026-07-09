@@ -3,6 +3,7 @@ import httpx
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
+from supabase import create_client
 
 from backend.core.config import settings
 from backend.core.excepcions import AppException
@@ -10,6 +11,7 @@ from backend.core.responses import ApiResponse, success
 from backend.dependencies.auth import get_current_user, get_bearer_token
 from backend.dependencies.supabase import get_db
 from backend.models.usuarios import (
+    CreateSenha,
     EmailChangeRequestResponse,
     FinalizeEmailChangeResponse,
     GoogleIdentityResultResponse,
@@ -27,6 +29,11 @@ router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 SUPABASE_URL = settings.SUPABASE_URL
 SUPABASE_ANON_KEY = settings.SUPABASE_ANON_KEY
 FRONTEND_URL = settings.FRONTEND_URL
+
+public_supabase = create_client(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+)
 
 
 @router.get(
@@ -60,6 +67,11 @@ async def get_my_user(
                 error_code="USER_AUTH_METHODS_GET_ERROR",
             )
 
+        has_password = (
+            bool(usuario.get("has_password"))
+            or auth_methods_result["has_password"]
+        )
+
         return success(
             content=UsuarioResponse(
                 id=usuario["id"],
@@ -67,7 +79,7 @@ async def get_my_user(
                 email=usuario.get("email"),
                 created_at=usuario.get("created_at"),
                 has_google_auth=auth_methods_result["has_google_auth"],
-                has_password=auth_methods_result["has_password"],
+                has_password=has_password,
             ),
             message="Usuário encontrado com sucesso.",
         )
@@ -239,6 +251,23 @@ async def update_my_password(
                 error_code="PASSWORD_UPDATE_AUTH_ERROR",
             )
 
+        has_password_response = (
+            supabase
+            .table("usuarios")
+            .update({
+                "has_password": True,
+            })
+            .eq("id", current_user.id)
+            .execute()
+        )
+
+        if not has_password_response.data:
+            raise AppException(
+                message="Senha atualizada, mas não foi possível atualizar o status da senha do usuário.",
+                http_code=400,
+                error_code="USER_HAS_PASSWORD_UPDATE_ERROR",
+            )
+
         return success(
             content=None,
             message="Senha atualizada com sucesso.",
@@ -254,7 +283,6 @@ async def update_my_password(
             error_code="PASSWORD_UPDATE_ERROR",
         )
 
-
 @router.post(
     "/reset-password",
     response_model=ApiResponse[None],
@@ -262,6 +290,144 @@ async def update_my_password(
 async def request_password_reset(
     data: ResetSenha,
 ):
+    try:
+        email = data.email.strip().lower()
+
+        usuario_response = (
+            public_supabase
+            .table("usuarios")
+            .select("id, has_password")
+            .eq("email", email)
+            .limit(1)
+            .execute()
+        )
+
+        if usuario_response.data:
+            usuario = usuario_response.data[0]
+
+            if not bool(usuario.get("has_password")):
+                raise AppException(
+                    message=(
+                        "Esta conta usa apenas login com Google. "
+                        "Entre usando o Google e crie uma senha no perfil para habilitar acesso por e-mail e senha."
+                    ),
+                    http_code=400,
+                    error_code="PASSWORD_RESET_UNAVAILABLE_FOR_GOOGLE_ONLY",
+                )
+
+        url = f"{SUPABASE_URL}/auth/v1/recover"
+
+        headers = {
+            "apikey": SUPABASE_ANON_KEY,
+            "Content-Type": "application/json",
+        }
+
+        params = {
+            "redirect_to": f"{FRONTEND_URL}/reset-password",
+        }
+
+        payload = {
+            "email": email,
+        }
+
+        async with httpx.AsyncClient(timeout=20) as client:
+            response = await client.post(
+                url,
+                headers=headers,
+                params=params,
+                json=payload,
+            )
+
+        if response.status_code >= 400:
+            raise AppException(
+                message=str(safe_response_detail(response)),
+                http_code=response.status_code,
+                error_code="PASSWORD_RESET_REQUEST_ERROR",
+            )
+
+        return success(
+            content=None,
+            message="Se o email estiver cadastrado, enviaremos instruções para redefinir a senha.",
+        )
+
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao solicitar redefinição de senha.",
+            http_code=500,
+            error_code="PASSWORD_RESET_ERROR",
+        )
+    try:
+        email = data.email.strip().lower()
+
+        usuario_response = (
+            supabase
+            .table("usuarios")
+            .select("id, has_password")
+            .eq("email", email)
+            .limit(1)
+            .execute()
+        )
+
+        if usuario_response.data:
+            usuario = usuario_response.data[0]
+
+            if not bool(usuario.get("has_password")):
+                raise AppException(
+                    message=(
+                        "Esta conta usa apenas login com Google. "
+                        "Entre usando o Google e crie uma senha no perfil para habilitar acesso por e-mail e senha."
+                    ),
+                    http_code=400,
+                    error_code="PASSWORD_RESET_UNAVAILABLE_FOR_GOOGLE_ONLY",
+                )
+
+        url = f"{SUPABASE_URL}/auth/v1/recover"
+
+        headers = {
+            "apikey": SUPABASE_ANON_KEY,
+            "Content-Type": "application/json",
+        }
+
+        params = {
+            "redirect_to": f"{FRONTEND_URL}/reset-password",
+        }
+
+        payload = {
+            "email": email,
+        }
+
+        async with httpx.AsyncClient(timeout=20) as client:
+            response = await client.post(
+                url,
+                headers=headers,
+                params=params,
+                json=payload,
+            )
+
+        if response.status_code >= 400:
+            raise AppException(
+                message=str(safe_response_detail(response)),
+                http_code=response.status_code,
+                error_code="PASSWORD_RESET_REQUEST_ERROR",
+            )
+
+        return success(
+            content=None,
+            message="Se o email estiver cadastrado, enviaremos instruções para redefinir a senha.",
+        )
+
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao solicitar redefinição de senha.",
+            http_code=500,
+            error_code="PASSWORD_RESET_ERROR",
+        )
     try:
         url = f"{SUPABASE_URL}/auth/v1/recover"
 
@@ -586,7 +752,7 @@ def get_usuario_by_id(
     response = (
         supabase
         .table("usuarios")
-        .select("id, name, email, created_at")
+        .select("id, name, email, created_at, has_password")
         .eq("id", user_id)
         .execute()
     )
@@ -762,11 +928,21 @@ async def get_user_auth_methods(access_token: str) -> dict:
     data = response.json()
 
     app_metadata = data.get("app_metadata") or {}
-    providers = app_metadata.get("providers") or []
+    metadata_providers = app_metadata.get("providers") or []
+
+    identities = data.get("identities") or []
+    identity_providers = [
+        identity.get("provider")
+        for identity in identities
+        if identity.get("provider")
+    ]
 
     providers = [
         str(provider).strip().lower()
-        for provider in providers
+        for provider in [
+            *metadata_providers,
+            *identity_providers,
+        ]
         if provider
     ]
 
@@ -777,22 +953,6 @@ async def get_user_auth_methods(access_token: str) -> dict:
         or "password" in providers
     )
 
-    if not providers:
-        identities = data.get("identities") or []
-
-        identity_providers = [
-            str(identity.get("provider")).strip().lower()
-            for identity in identities
-            if identity.get("provider")
-        ]
-
-        has_google_auth = "google" in identity_providers
-
-        has_password = (
-            "email" in identity_providers
-            or "password" in identity_providers
-        )
-
     return {
         "error": False,
         "http_code": 200,
@@ -800,3 +960,91 @@ async def get_user_auth_methods(access_token: str) -> dict:
         "has_google_auth": has_google_auth,
         "has_password": has_password,
     }
+
+@router.post(
+    "/me/password/create",
+    response_model=ApiResponse[None],
+)
+async def create_my_password(
+    data: CreateSenha,
+    current_user=Depends(get_current_user),
+    access_token: str = Depends(get_bearer_token),
+    supabase=Depends(get_db),
+):
+    try:
+        if data.new_password != data.confirm_new_password:
+            raise AppException(
+                message="A senha e a confirmação da senha não conferem.",
+                http_code=400,
+                error_code="PASSWORD_CONFIRMATION_MISMATCH",
+            )
+
+        usuario = get_usuario_by_id(
+            user_id=current_user.id,
+            supabase=supabase,
+        )
+
+        if not usuario:
+            raise AppException(
+                message="Usuário não encontrado.",
+                http_code=404,
+                error_code="USER_NOT_FOUND",
+            )
+
+        if usuario.get("has_password"):
+            raise AppException(
+                message="Este usuário já possui senha cadastrada.",
+                http_code=400,
+                error_code="USER_ALREADY_HAS_PASSWORD",
+            )
+
+        update_url = f"{SUPABASE_URL}/auth/v1/user"
+
+        update_headers = {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+        }
+
+        update_payload = {
+            "password": data.new_password,
+        }
+
+        async with httpx.AsyncClient(timeout=20) as client:
+            update_response = await client.put(
+                update_url,
+                headers=update_headers,
+                json=update_payload,
+            )
+
+        if update_response.status_code >= 400:
+            raise AppException(
+                message=str(safe_response_detail(update_response)),
+                http_code=update_response.status_code,
+                error_code="PASSWORD_CREATE_AUTH_ERROR",
+            )
+
+        (
+            supabase
+            .table("usuarios")
+            .update({
+                "has_password": True,
+            })
+            .eq("id", current_user.id)
+            .execute()
+        )
+
+        return success(
+            content=None,
+            message="Senha criada com sucesso.",
+        )
+
+    except AppException:
+        raise
+
+    except Exception:
+        raise AppException(
+            message="Erro ao criar senha.",
+            http_code=500,
+            error_code="PASSWORD_CREATE_ERROR",
+        )
